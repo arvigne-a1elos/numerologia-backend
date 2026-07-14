@@ -3,186 +3,679 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapa Numerológico</title>
+    <title>Mapa Numerológico | A1ELOS</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
+        :root { --gold: #C9A94E; --dark: #0a0a0a; --card-bg: #111111; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', sans-serif;
-            background: #0a0a0a;
+            background: var(--dark);
             color: #fff;
             overflow-x: hidden;
+            line-height: 1.6;
         }
+        [dir="rtl"] { direction: rtl; text-align: right; }
+
+        /* Language Selector */
+        .lang-wrapper {
+            position: fixed; top: 0; width: 100%; z-index: 1000;
+            background: rgba(10,10,10,0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid #222;
+            padding: 8px 0;
+        }
+        .lang-container {
+            max-width: 1200px; margin: 0 auto;
+            display: flex; justify-content: center; align-items: center;
+            gap: 6px; flex-wrap: wrap; padding: 0 16px;
+        }
+        .lang-btn {
+            background: transparent; border: 1px solid #333;
+            color: #aaa; padding: 5px 10px; border-radius: 6px;
+            cursor: pointer; font-size: 11px; font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .lang-btn:hover, .lang-btn.active {
+            border-color: var(--gold); color: var(--gold);
+            background: rgba(201,169,78,0.1);
+        }
+        .lang-btn .flag { font-size: 14px; }
+
+        /* Hero */
         .hero {
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 2rem;
-            position: relative;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; text-align: center;
+            padding: 100px 20px 60px;
             background: radial-gradient(ellipse at center, #1a1a1a 0%, #0a0a0a 70%);
         }
         .logo-img {
-            width: 180px;
-            height: 180px;
-            margin-bottom: 2rem;
-            border-radius: 50%;
-            object-fit: cover;
+            width: 160px; height: 160px; margin-bottom: 30px;
+            border-radius: 50%; object-fit: cover;
         }
-        @media (max-width: 600px) {
-            .logo-img { width: 140px; height: 140px; }
-        }
-        .hero h1 {
+        @media (max-width: 600px) { .logo-img { width: 120px; height: 120px; } }
+        h1 {
             font-family: 'Playfair Display', serif;
-            font-size: clamp(2.5rem, 6vw, 5rem);
-            font-weight: 900;
-            color: #C9A94E;
-            letter-spacing: 0.05em;
-            margin-bottom: 0.5rem;
-            line-height: 1.1;
+            font-size: clamp(2.2rem, 7vw, 4.5rem);
+            color: var(--gold); margin-bottom: 10px; letter-spacing: 0.05em;
         }
-        .hero h1 span {
-            display: block;
+        .subtitle {
             font-size: clamp(1rem, 2vw, 1.5rem);
-            font-weight: 300;
-            letter-spacing: 0.3em;
-            text-transform: uppercase;
-            color: #a0a0a0;
-            margin-top: 0.5rem;
+            color: #a0a0a0; margin-bottom: 25px; font-weight: 300;
         }
-        .hero p {
-            font-size: clamp(1rem, 1.5vw, 1.25rem);
-            color: #b0b0b0;
-            max-width: 560px;
-            margin: 1.5rem auto 2.5rem;
-            line-height: 1.7;
-            font-weight: 300;
+        .hero-desc {
+            max-width: 650px; margin: 0 auto 35px;
+            color: #888; font-size: 1.05rem; line-height: 1.7; font-weight: 300;
         }
         .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.75rem;
-            background: linear-gradient(135deg, #C9A94E, #b8942e);
-            color: #0a0a0a;
-            font-family: 'Inter', sans-serif;
-            font-size: 1.1rem;
-            font-weight: 600;
-            padding: 1rem 2.5rem;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
+            display: inline-block; padding: 16px 38px;
+            background: linear-gradient(135deg, var(--gold), #b8942e);
+            color: #0a0a0a; text-decoration: none; font-weight: 600;
+            border-radius: 50px; letter-spacing: 0.08em;
+            transition: all 0.3s ease; border: none;
+            font-family: 'Inter', sans-serif; font-size: 1rem;
+            text-transform: uppercase; cursor: pointer;
         }
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 30px rgba(201, 169, 78, 0.3);
-        }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(201,169,78,0.3); }
         .btn-outline {
-            background: transparent;
-            color: #C9A94E;
-            border: 2px solid #C9A94E;
+            background: transparent; color: var(--gold);
+            border: 2px solid var(--gold); margin-left: 12px;
         }
-        .btn-outline:hover {
-            background: rgba(201, 169, 78, 0.1);
+        .btn-outline:hover { background: rgba(201,169,78,0.1); box-shadow: none; }
+
+        /* Sections */
+        section { padding: 80px 20px; max-width: 1100px; margin: 0 auto; }
+        .section-header { text-align: center; margin-bottom: 50px; }
+        .section-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.8rem, 3vw, 2.5rem);
+            color: var(--gold); margin-bottom: 12px;
         }
-        section { padding: 5rem 2rem; max-width: 1100px; margin: 0 auto; }
-        .section-title { font-family: 'Playfair Display', serif; font-size: clamp(1.75rem, 3vw, 2.5rem); color: #C9A94E; text-align: center; margin-bottom: 1rem; }
-        .section-subtitle { text-align: center; color: #888; font-weight: 300; margin-bottom: 3rem; font-size: 1.05rem; }
-        .about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2rem; }
-        .about-card { background: #111; border: 1px solid #222; border-radius: 16px; padding: 2rem; text-align: center; transition: all 0.3s ease; }
-        .about-card:hover { border-color: #C9A94E; transform: translateY(-5px); }
-        .about-card .icon { font-size: 2.5rem; margin-bottom: 1rem; }
-        .about-card h3 { color: #C9A94E; font-size: 1.15rem; margin-bottom: 0.75rem; font-family: 'Playfair Display', serif; }
-        .about-card p { color: #999; font-size: 0.9rem; line-height: 1.6; font-weight: 300; }
-        .steps { display: flex; flex-direction: column; gap: 1.5rem; max-width: 700px; margin: 0 auto; }
-        .step { display: flex; align-items: flex-start; gap: 1.5rem; background: #111; border: 1px solid #222; border-radius: 16px; padding: 1.5rem 2rem; transition: all 0.3s ease; }
-        .step:hover { border-color: #C9A94E; }
-        .step-number { font-family: 'Playfair Display', serif; font-size: 1.75rem; font-weight: 700; color: #C9A94E; min-width: 40px; }
-        .step-content h3 { font-size: 1.05rem; color: #fff; margin-bottom: 0.3rem; }
-        .step-content p { color: #888; font-size: 0.9rem; font-weight: 300; }
-        .numbers-preview { display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; margin: 2rem 0; }
-        .number-circle { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #C9A94E; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #C9A94E; transition: all 0.3s ease; background: transparent; }
-        .number-circle:hover { background: #C9A94E; color: #0a0a0a; }
-        .cta-section { text-align: center; padding: 5rem 2rem; background: radial-gradient(ellipse at center, #1a1a1a 0%, #0a0a0a 70%); border-top: 1px solid #222; border-bottom: 1px solid #222; }
-        .cta-section h2 { font-family: 'Playfair Display', serif; font-size: clamp(1.75rem, 3vw, 2.5rem); color: #C9A94E; margin-bottom: 1rem; }
-        .cta-section p { color: #888; max-width: 500px; margin: 0 auto 2rem; font-weight: 300; }
-        .cta-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
-        footer { text-align: center; padding: 2rem; color: #444; font-size: 0.85rem; }
-        footer a { color: #C9A94E; text-decoration: none; }
+        .section-header p { color: #888; font-size: 1.05rem; font-weight: 300; }
+
+        /* Cards */
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 24px;
+        }
+        .card {
+            background: var(--card-bg); padding: 35px 25px;
+            border-radius: 16px; border: 1px solid #222;
+            transition: all 0.3s ease; text-align: center;
+        }
+        .card:hover { border-color: var(--gold); transform: translateY(-8px); }
+        .card .icon { font-size: 2.2rem; margin-bottom: 15px; }
+        .card h3 {
+            color: var(--gold); margin-bottom: 12px;
+            font-family: 'Playfair Display', serif; font-size: 1.1rem;
+        }
+        .card p { color: #999; font-size: 0.9rem; line-height: 1.6; font-weight: 300; }
+
+        /* Steps */
+        .steps-container { display: flex; flex-direction: column; gap: 20px; max-width: 700px; margin: 0 auto; }
+        .step {
+            display: flex; align-items: flex-start; gap: 20px;
+            background: #111; border: 1px solid #222;
+            border-radius: 14px; padding: 24px 28px;
+            transition: all 0.3s ease;
+        }
+        .step:hover { border-color: var(--gold); }
+        .step-num {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem; font-weight: 700; color: var(--gold);
+            min-width: 45px; line-height: 1;
+        }
+        .step-content h4 { font-size: 1rem; color: #fff; margin-bottom: 5px; }
+        .step-content p { color: #888; font-size: 0.9rem; font-weight: 300; line-height: 1.5; }
+
+        /* Numbers */
+        .numbers-grid { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin: 35px 0; }
+        .num-circle {
+            width: 56px; height: 56px; border-radius: 50%;
+            border: 2px solid var(--gold);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem; color: var(--gold);
+            transition: all 0.3s ease; background: transparent;
+        }
+        .num-circle:hover { background: var(--gold); color: #0a0a0a; }
+
+        /* CTA */
+        .cta-section {
+            text-align: center; padding: 80px 20px;
+            background: radial-gradient(ellipse at center, #1a1a1a 0%, #0a0a0a 70%);
+            border-top: 1px solid #222; border-bottom: 1px solid #222;
+        }
+        .cta-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.8rem, 3vw, 2.5rem);
+            color: var(--gold); margin-bottom: 15px;
+        }
+        .cta-section p { color: #888; max-width: 500px; margin: 0 auto 30px; font-weight: 300; }
+        .cta-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+        /* Footer */
+        footer { text-align: center; padding: 40px 20px; color: #555; font-size: 0.85rem; font-weight: 300; }
+        footer a { color: var(--gold); text-decoration: none; }
+
         @media (max-width: 600px) {
-            section { padding: 3rem 1.25rem; }
-            .step { padding: 1.25rem; }
+            section { padding: 50px 16px; }
+            .step { flex-direction: column; text-align: center; }
+            .btn-outline { margin-left: 0; margin-top: 10px; }
             .cta-buttons { flex-direction: column; align-items: center; }
         }
+
+        /* Animation */
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
+<nav class="lang-wrapper">
+    <div class="lang-container" id="langSelector"></div>
+</nav>
+
 <section class="hero">
     <img src="https://generated-images.adapta.one/arvigne%40gmail.com/019f56cb-b9e4-7644-9dd8-5d14c5261d46/2026-07-14T13-27-24-531Z_Original_user_intent_A_premium_minimalist_logo_s.png" alt="Mapa Numerológico" class="logo-img">
-
-    <h1>
-        MAPA NUMEROLÓGICO
-        <span>Descubra o que os números revelam sobre você</span>
-    </h1>
-
-    <p>
-        Uma jornada de autoconhecimento baseada na numerologia pitagórica.
-        Seu mapa pessoal revela talentos, desafios e caminhos através dos números que regem sua vida.
-    </p>
-
-    <a href="#" class="btn" onclick="alert('Em breve! O gerador do seu Mapa Numerológico estará disponível em instantes.')">✦ GERAR MEU MAPA</a>
+    <h1 data-i18n="hero_title">MAPA NUMEROLÓGICO</h1>
+    <p class="subtitle" data-i18n="hero_subtitle">Descubra o que os números revelam sobre você</p>
+    <p class="hero-desc" data-i18n="hero_desc">Uma jornada de autoconhecimento baseada na numerologia pitagórica. Seu mapa pessoal revela talentos, desafios e caminhos através dos números que regem sua vida.</p>
+    <button class="btn" data-i18n="hero_btn" onclick="alert('Em breve! O gerador estará disponível.')">✦ GERAR MEU MAPA</button>
 </section>
 
 <section>
-    <h2 class="section-title">O que é o Mapa Numerológico?</h2>
-    <p class="section-subtitle">Uma ferramenta de autoconhecimento baseada na numerologia pitagórica</p>
-    <div class="about-grid">
-        <div class="about-card"><div class="icon">🔢</div><h3>Números da Sua Vida</h3><p>Calculamos o Caminho da Vida, Destino, Alma, Realização e outros números essenciais a partir da sua data de nascimento e nome completo.</p></div>
-        <div class="about-card"><div class="icon">🧭</div><h3>Seu Mapa Pessoal</h3><p>Cada número revela uma dimensão única da sua personalidade, talentos inatos, desafios e oportunidades ao longo da vida.</p></div>
-        <div class="about-card"><div class="icon">📜</div><h3>Relatório Completo</h3><p>Você recebe um relatório detalhado em PDF com a interpretação profissional de cada número do seu mapa, pronto para download.</p></div>
-        <div class="about-card"><div class="icon">🔮</div><h3>Orientação Prática</h3><p>Mais que uma leitura, um guia para tomar decisões alinhadas com seus ciclos numerológicos e seu propósito de vida.</p></div>
+    <div class="section-header">
+        <h2 data-i18n="section_what_title">O que é o Mapa Numerológico?</h2>
+        <p data-i18n="section_what_subtitle">Uma ferramenta de autoconhecimento baseada na numerologia pitagórica</p>
+    </div>
+    <div class="grid-cards">
+        <div class="card"><div class="icon">🔢</div><h3 data-i18n="card1_title">Números da Sua Vida</h3><p data-i18n="card1_desc">Calculamos o Caminho da Vida, Destino, Alma, Realização e outros números essenciais a partir da sua data de nascimento e nome completo.</p></div>
+        <div class="card"><div class="icon">🧭</div><h3 data-i18n="card2_title">Seu Mapa Pessoal</h3><p data-i18n="card2_desc">Cada número revela uma dimensão única da sua personalidade, talentos inatos, desafios e oportunidades ao longo da vida.</p></div>
+        <div class="card"><div class="icon">📜</div><h3 data-i18n="card3_title">Relatório Completo</h3><p data-i18n="card3_desc">Você recebe um relatório detalhado em PDF com a interpretação profissional de cada número do seu mapa, pronto para download.</p></div>
+        <div class="card"><div class="icon">🔮</div><h3 data-i18n="card4_title">Orientação Prática</h3><p data-i18n="card4_desc">Mais que uma leitura, um guia para tomar decisões alinhadas com seus ciclos numerológicos e seu propósito de vida.</p></div>
     </div>
 </section>
 
 <section>
-    <h2 class="section-title">Como Funciona</h2>
-    <p class="section-subtitle">Em poucos passos, seu mapa está pronto</p>
-    <div class="steps">
-        <div class="step"><div class="step-number">01</div><div class="step-content"><h3>Insira seus dados</h3><p>Informe seu nome completo e data de nascimento — as duas chaves para o seu mapa numerológico.</p></div></div>
-        <div class="step"><div class="step-number">02</div><div class="step-content"><h3>Cálculo automatizado</h3><p>Nossa engine calcula todos os números fundamentais da numerologia pitagórica com precisão.</p></div></div>
-        <div class="step"><div class="step-number">03</div><div class="step-content"><h3>Relatório em PDF</h3><p>Receba um relatório profissional e elegante com a interpretação completa do seu mapa.</p></div></div>
+    <div class="section-header">
+        <h2 data-i18n="section_how_title">Como Funciona</h2>
+        <p data-i18n="section_how_subtitle">Em poucos passos, seu mapa está pronto</p>
+    </div>
+    <div class="steps-container">
+        <div class="step"><div class="step-num">01</div><div class="step-content"><h4 data-i18n="step1_title">Insira seus dados</h4><p data-i18n="step1_desc">Informe seu nome completo e data de nascimento — as duas chaves para o seu mapa numerológico.</p></div></div>
+        <div class="step"><div class="step-num">02</div><div class="step-content"><h4 data-i18n="step2_title">Cálculo automatizado</h4><p data-i18n="step2_desc">Nossa engine calcula todos os números fundamentais da numerologia pitagórica com precisão.</p></div></div>
+        <div class="step"><div class="step-num">03</div><div class="step-content"><h4 data-i18n="step3_title">Relatório em PDF</h4><p data-i18n="step3_desc">Receba um relatório profissional e elegante com a interpretação completa do seu mapa.</p></div></div>
     </div>
 </section>
 
 <section>
-    <h2 class="section-title">Os Números no Centro</h2>
-    <p class="section-subtitle">Cada número de 1 a 9 carrega uma energia única</p>
-    <div class="numbers-preview">
-        <div class="number-circle">1</div><div class="number-circle">2</div><div class="number-circle">3</div>
-        <div class="number-circle">4</div><div class="number-circle">5</div><div class="number-circle">6</div>
-        <div class="number-circle">7</div><div class="number-circle">8</div><div class="number-circle">9</div>
+    <div class="section-header">
+        <h2 data-i18n="section_numbers_title">Os Números no Centro</h2>
+        <p data-i18n="section_numbers_subtitle">Cada número de 1 a 9 carrega uma energia única</p>
     </div>
-    <p style="color:#666; font-size:0.9rem; text-align:center;">✦ Números Mestres 11, 22 e 33 também são considerados ✦</p>
+    <div class="numbers-grid">
+        <div class="num-circle">1</div><div class="num-circle">2</div><div class="num-circle">3</div>
+        <div class="num-circle">4</div><div class="num-circle">5</div><div class="num-circle">6</div>
+        <div class="num-circle">7</div><div class="num-circle">8</div><div class="num-circle">9</div>
+    </div>
+    <p style="text-align:center; color:var(--gold); font-size:0.9rem;" data-i18n="numbers_masters">✦ Números Mestres 11, 22 e 33 também são considerados ✦</p>
 </section>
 
 <section class="cta-section">
-    <h2>Pronto para descobrir seu caminho?</h2>
-    <p>Seu mapa numerológico pessoal está a poucos cliques de distância.</p>
+    <h2 data-i18n="cta_title">Pronto para descobrir seu caminho?</h2>
+    <p data-i18n="cta_desc">Seu mapa numerológico pessoal está a poucos cliques de distância.</p>
     <div class="cta-buttons">
-        <a href="#" class="btn" onclick="alert('Em breve! O gerador do seu Mapa Numerológico estará disponível em instantes.')">✦ GERAR MAPA GRÁTIS</a>
-        <a href="https://a1elos.com.br" class="btn btn-outline" target="_blank">CONHEÇA A A1ELOS</a>
+        <button class="btn" data-i18n="cta_btn1" onclick="alert('Em breve! O gerador estará disponível.')">✦ GERAR MAPA GRÁTIS</button>
+        <a href="https://a1elos.com.br" class="btn btn-outline" data-i18n="cta_btn2" target="_blank">CONHEÇA A A1ELOS</a>
     </div>
 </section>
 
 <footer>
-    <p>© 2026 <a href="https://a1elos.com.br" target="_blank">A1ELOS Assessoria e Consultoria</a>. Todos os direitos reservados.</p>
+    <p><a href="https://a1elos.com.br" target="_blank">A1ELOS Assessoria e Consultoria</a> — <span data-i18n="footer_text">© 2026. Todos os direitos reservados.</span></p>
 </footer>
+
+<script>
+const translations = {
+    pt: {
+        hero_title: "MAPA NUMEROLÓGICO",
+        hero_subtitle: "Descubra o que os números revelam sobre você",
+        hero_desc: "Uma jornada de autoconhecimento baseada na numerologia pitagórica. Seu mapa pessoal revela talentos, desafios e caminhos através dos números que regem sua vida.",
+        hero_btn: "✦ GERAR MEU MAPA",
+        section_what_title: "O que é o Mapa Numerológico?",
+        section_what_subtitle: "Uma ferramenta de autoconhecimento baseada na numerologia pitagórica",
+        card1_title: "Números da Sua Vida",
+        card1_desc: "Calculamos o Caminho da Vida, Destino, Alma, Realização e outros números essenciais a partir da sua data de nascimento e nome completo.",
+        card2_title: "Seu Mapa Pessoal",
+        card2_desc: "Cada número revela uma dimensão única da sua personalidade, talentos inatos, desafios e oportunidades ao longo da vida.",
+        card3_title: "Relatório Completo",
+        card3_desc: "Você recebe um relatório detalhado em PDF com a interpretação profissional de cada número do seu mapa, pronto para download.",
+        card4_title: "Orientação Prática",
+        card4_desc: "Mais que uma leitura, um guia para tomar decisões alinhadas com seus ciclos numerológicos e seu propósito de vida.",
+        section_how_title: "Como Funciona",
+        section_how_subtitle: "Em poucos passos, seu mapa está pronto",
+        step1_title: "Insira seus dados",
+        step1_desc: "Informe seu nome completo e data de nascimento — as duas chaves para o seu mapa numerológico.",
+        step2_title: "Cálculo automatizado",
+        step2_desc: "Nossa engine calcula todos os números fundamentais da numerologia pitagórica com precisão.",
+        step3_title: "Relatório em PDF",
+        step3_desc: "Receba um relatório profissional e elegante com a interpretação completa do seu mapa.",
+        section_numbers_title: "Os Números no Centro",
+        section_numbers_subtitle: "Cada número de 1 a 9 carrega uma energia única",
+        numbers_masters: "✦ Números Mestres 11, 22 e 33 também são considerados ✦",
+        cta_title: "Pronto para descobrir seu caminho?",
+        cta_desc: "Seu mapa numerológico pessoal está a poucos cliques de distância.",
+        cta_btn1: "✦ GERAR MAPA GRÁTIS",
+        cta_btn2: "CONHEÇA A A1ELOS",
+        footer_text: "© 2026. Todos os direitos reservados."
+    },
+    en: {
+        hero_title: "NUMEROLOGICAL MAP",
+        hero_subtitle: "Discover what numbers reveal about you",
+        hero_desc: "A self-discovery journey based on Pythagorean numerology. Your personal map reveals talents, challenges, and paths through the numbers that rule your life.",
+        hero_btn: "✦ GENERATE MY MAP",
+        section_what_title: "What is the Numerological Map?",
+        section_what_subtitle: "A self-discovery tool based on Pythagorean numerology",
+        card1_title: "Numbers of Your Life",
+        card1_desc: "We calculate Life Path, Destiny, Soul Urge, and other essential numbers from your birth date and full name.",
+        card2_title: "Your Personal Map",
+        card2_desc: "Each number reveals a unique dimension of your personality, innate talents, challenges and opportunities throughout life.",
+        card3_title: "Complete Report",
+        card3_desc: "Receive a detailed PDF report with professional interpretation of each number, ready for download.",
+        card4_title: "Practical Guidance",
+        card4_desc: "More than a reading — a guide to make decisions aligned with your numerological cycles and life purpose.",
+        section_how_title: "How It Works",
+        section_how_subtitle: "In a few steps, your map is ready",
+        step1_title: "Enter your data",
+        step1_desc: "Enter your full name and birth date — the two keys to your numerological map.",
+        step2_title: "Automated Calculation",
+        step2_desc: "Our engine calculates all fundamental Pythagorean numerology numbers with precision.",
+        step3_title: "PDF Report",
+        step3_desc: "Receive a professional report with the complete interpretation of your map.",
+        section_numbers_title: "The Numbers at the Core",
+        section_numbers_subtitle: "Each number from 1 to 9 carries a unique energy",
+        numbers_masters: "✦ Master Numbers 11, 22 and 33 are also considered ✦",
+        cta_title: "Ready to discover your path?",
+        cta_desc: "Your personal numerological map is just a few clicks away.",
+        cta_btn1: "✦ GENERATE FREE MAP",
+        cta_btn2: "DISCOVER A1ELOS",
+        footer_text: "© 2026. All rights reserved."
+    },
+    es: {
+        hero_title: "MAPA NUMEROLÓGICO",
+        hero_subtitle: "Descubre lo que los números revelan sobre ti",
+        hero_desc: "Un viaje de autoconocimiento basado en la numerología pitagórica. Tu mapa personal revela talentos, desafíos y caminos a través de los números que rigen tu vida.",
+        hero_btn: "✦ GENERAR MI MAPA",
+        section_what_title: "¿Qué es el Mapa Numerológico?",
+        section_what_subtitle: "Una herramienta de autoconocimiento basada en la numerología pitagórica",
+        card1_title: "Números de tu Vida",
+        card1_desc: "Calculamos el Camino de la Vida, Destino, Alma, Realización y otros números esenciales desde tu fecha de nacimiento.",
+        card2_title: "Tu Mapa Personal",
+        card2_desc: "Cada número revela una dimensión única de tu personalidad, talentos innatos, desafíos y oportunidades.",
+        card3_title: "Informe Completo",
+        card3_desc: "Recibes un informe detallado en PDF con la interpretación profesional de cada número.",
+        card4_title: "Orientación Práctica",
+        card4_desc: "Más que una lectura, una guía para tomar decisiones alineadas con tu propósito de vida.",
+        section_how_title: "Cómo Funciona",
+        section_how_subtitle: "En pocos pasos, tu mapa está listo",
+        step1_title: "Ingresa tus datos",
+        step1_desc: "Ingresa tu nombre completo y fecha de nacimiento.",
+        step2_title: "Cálculo automatizado",
+        step2_desc: "Nuestro motor calcula todos los números fundamentales con precisión.",
+        step3_title: "Informe en PDF",
+        step3_desc: "Recibe un informe profesional con la interpretación completa.",
+        section_numbers_title: "Los Números en el Centro",
+        section_numbers_subtitle: "Cada número del 1 al 9 lleva una energía única",
+        numbers_masters: "✦ Los Números Maestros 11, 22 y 33 también se consideran ✦",
+        cta_title: "¿Listo para descubrir tu camino?",
+        cta_desc: "Tu mapa numerológico personal está a solo unos clics.",
+        cta_btn1: "✦ GENERAR MAPA GRATIS",
+        cta_btn2: "CONOCE A1ELOS",
+        footer_text: "© 2026. Todos los derechos reservados."
+    },
+    it: {
+        hero_title: "MAPPA NUMEROLOGICA",
+        hero_subtitle: "Scopri cosa rivelano i numeri su di te",
+        hero_desc: "Un viaggio di conoscenza di sé basato sulla numerologia pitagorica. La tua mappa personale rivela talenti, sfide e percorsi attraverso i numeri che governano la tua vita.",
+        hero_btn: "✦ GENERA LA MIA MAPPA",
+        section_what_title: "Cos'è la Mappa Numerologica?",
+        section_what_subtitle: "Uno strumento di scoperta di sé basato sulla numerologia pitagorica",
+        card1_title: "Numeri della tua Vita",
+        card1_desc: "Calcoliamo il Sentiero della Vita, Destino, Anima, Realizzazione e altri numeri essenziali.",
+        card2_title: "La tua Mappa Personale",
+        card2_desc: "Ogni numero rivela una dimensione unica della tua personalità, talenti innati e sfide.",
+        card3_title: "Rapporto Completo",
+        card3_desc: "Ricevi un rapporto PDF dettagliato con l'interpretazione professionale di ogni numero.",
+        card4_title: "Guida Pratica",
+        card4_desc: "Più di una lettura, una guida per decisioni allineate con il tuo scopo di vita.",
+        section_how_title: "Come Funziona",
+        section_how_subtitle: "In pochi passi, la tua mappa è pronta",
+        step1_title: "Inserisci i tuoi dati",
+        step1_desc: "Inserisci nome completo e data di nascita.",
+        step2_title: "Calcolo automatizzato",
+        step2_desc: "Il nostro motore calcola tutti i numeri con precisione.",
+        step3_title: "Rapporto PDF",
+        step3_desc: "Ricevi un rapporto professionale con l'interpretazione completa.",
+        section_numbers_title: "I Numeri al Centro",
+        section_numbers_subtitle: "Ogni numero da 1 a 9 porta un'energia unica",
+        numbers_masters: "✦ Anche i Numeri Maestri 11, 22 e 33 sono considerati ✦",
+        cta_title: "Pronto a scoprire il tuo percorso?",
+        cta_desc: "La tua mappa numerologica personale è a pochi clic.",
+        cta_btn1: "✦ GENERA MAPPA GRATUITA",
+        cta_btn2: "SCOPRI A1ELOS",
+        footer_text: "© 2026. Tutti i diritti riservati."
+    },
+    fr: {
+        hero_title: "CARTE NUMÉROLOGIQUE",
+        hero_subtitle: "Découvrez ce que les nombres révèlent sur vous",
+        hero_desc: "Un voyage de découverte de soi basé sur la numérologie pythagoricienne. Votre carte personnelle révèle talents, défis et chemins à travers les nombres qui régissent votre vie.",
+        hero_btn: "✦ GÉNÉRER MA CARTE",
+        section_what_title: "Qu'est-ce que la Carte Numérologique ?",
+        section_what_subtitle: "Un outil de découverte de soi basé sur la numérologie pythagoricienne",
+        card1_title: "Nombres de votre Vie",
+        card1_desc: "Nous calculons le Chemin de Vie, le Destin, l'Âme et d'autres nombres essentiels.",
+        card2_title: "Votre Carte Personnelle",
+        card2_desc: "Chaque nombre révèle une dimension unique de votre personnalité et de vos talents.",
+        card3_title: "Rapport Complet",
+        card3_desc: "Recevez un rapport PDF détaillé avec une interpretation professionnelle.",
+        card4_title: "Conseils Pratiques",
+        card4_desc: "Plus qu'une lecture, un guide pour des décisions alignées avec votre mission de vie.",
+        section_how_title: "Comment ça Marche",
+        section_how_subtitle: "En quelques étapes, votre carte est prête",
+        step1_title: "Entrez vos données",
+        step1_desc: "Entrez votre nom complet et votre date de naissance.",
+        step2_title: "Calcul automatisé",
+        step2_desc: "Notre moteur calcule tous les nombres avec précision.",
+        step3_title: "Rapport PDF",
+        step3_desc: "Recevez un rapport professionnel avec l'interprétation complète.",
+        section_numbers_title: "Les Nombres au Cœur",
+        section_numbers_subtitle: "Chaque nombre de 1 à 9 porte une énergie unique",
+        numbers_masters: "✦ Les Nombres Maîtres 11, 22 et 33 sont aussi considérés ✦",
+        cta_title: "Prêt à découvrir votre chemin ?",
+        cta_desc: "Votre carte numérologique personnelle est à portée de clic.",
+        cta_btn1: "✦ GÉNÉRER CARTE GRATUITE",
+        cta_btn2: "DÉCOUVRIR A1ELOS",
+        footer_text: "© 2026. Tous droits réservés."
+    },
+    hi: {
+        hero_title: "अंक ज्योतिष मानचित्र",
+        hero_subtitle: "जानें कि संख्याएं आपके बारे में क्या बताती हैं",
+        hero_desc: "पाइथागोरियन अंक ज्योतिष पर आधारित आत्म-खोज की यात्रा। आपका व्यक्तिगत मानचित्र उन संख्याओं के माध्यम से प्रतिभा, चुनौतियों और मार्गों को प्रकट करता है।",
+        hero_btn: "✦ मेरा मानचित्र बनाएं",
+        section_what_title: "अंक ज्योतिष मानचित्र क्या है?",
+        section_what_subtitle: "पाइथागोरियन अंक ज्योतिष पर आधारित आत्म-खोज उपकरण",
+        card1_title: "आपके जीवन की संख्याएँ",
+        card1_desc: "जन्म तिथि और पूरे नाम से जीवन पथ, भाग्य, आत्मा और अन्य आवश्यक संख्याओं की गणना।",
+        card2_title: "आपका व्यक्तिगत मानचित्र",
+        card2_desc: "प्रत्येक संख्या आपके व्यक्तित्व, जन्मजात प्रतिभाओं और चुनौतियों का एक अनूठा आयाम दिखाती है।",
+        card3_title: "पूर्ण रिपोर्ट",
+        card3_desc: "प्रत्येक संख्या की पेशेवर व्याख्या के साथ विस्तृत PDF रिपोर्ट प्राप्त करें।",
+        card4_title: "व्यावहारिक मार्गदर्शन",
+        card4_desc: "आपके जीवन उद्देश्य के अनुरूप निर्णय लेने के लिए एक मार्गदर्शिका।",
+        section_how_title: "यह कैसे काम करता है",
+        section_how_subtitle: "कुछ ही चरणों में, आपका मानचित्र तैयार है",
+        step1_title: "अपना डेटा दर्ज करें",
+        step1_desc: "अपना पूरा नाम और जन्म तिथि दर्ज करें।",
+        step2_title: "स्वचालित गणना",
+        step2_desc: "हमारा इंजन सभी संख्याओं की सटीक गणना करता है।",
+        step3_title: "PDF रिपोर्ट",
+        step3_desc: "पूर्ण व्याख्या के साथ एक पेशेवर रिपोर्ट प्राप्त करें।",
+        section_numbers_title: "केंद्र में संख्याएँ",
+        section_numbers_subtitle: "1 से 9 तक की प्रत्येक संख्या एक अद्वितीय ऊर्जा वहन करती है",
+        numbers_masters: "✦ मास्टर नंबर 11, 22 और 33 पर भी विचार किया जाता है ✦",
+        cta_title: "अपना रास्ता खोजने के लिए तैयार हैं?",
+        cta_desc: "आपका व्यक्तिगत अंक ज्योतिष मानचित्र बस कुछ क्लिक दूर है।",
+        cta_btn1: "✦ मुफ्त मानचित्र बनाएं",
+        cta_btn2: "A1ELOS जानें",
+        footer_text: "© 2026. सर्वाधिकार सुरक्षित।"
+    },
+    de: {
+        hero_title: "NUMEROLOGISCHE KARTE",
+        hero_subtitle: "Entdecken Sie, was Zahlen über Sie verraten",
+        hero_desc: "Eine Selbstfindungsreise basierend auf der pythagoreischen Numerologie. Ihre persönliche Karte offenbart Talente, Herausforderungen und Wege durch die Zahlen, die Ihr Leben bestimmen.",
+        hero_btn: "✦ MEINE KARTE ERSTELLEN",
+        section_what_title: "Was ist die numerologische Karte?",
+        section_what_subtitle: "Ein Werkzeug zur Selbsterkenntnis basierend auf pythagoreischer Numerologie",
+        card1_title: "Zahlen Ihres Lebens",
+        card1_desc: "Wir berechnen Lebensweg, Schicksal, Seele und andere wesentliche Zahlen aus Ihrem Geburtsdatum.",
+        card2_title: "Ihre persönliche Karte",
+        card2_desc: "Jede Zahl offenbart eine einzigartige Dimension Ihrer Persönlichkeit und Talente.",
+        card3_title: "Vollständiger Bericht",
+        card3_desc: "Sie erhalten einen detaillierten PDF-Bericht mit professioneller Interpretation jeder Zahl.",
+        card4_title: "Praktische Anleitung",
+        card4_desc: "Mehr als eine Lesung — ein Leitfaden für Entscheidungen im Einklang mit Ihrem Lebenszweck.",
+        section_how_title: "Wie es funktioniert",
+        section_how_subtitle: "In wenigen Schritten ist Ihre Karte fertig",
+        step1_title: "Daten eingeben",
+        step1_desc: "Geben Sie Ihren vollständigen Namen und Ihr Geburtsdatum ein.",
+        step2_title: "Automatisierte Berechnung",
+        step2_desc: "Unsere Engine berechnet alle Zahlen mit höchster Präzision.",
+        step3_title: "PDF-Bericht",
+        step3_desc: "Erhalten Sie einen professionellen Bericht mit der vollständigen Interpretation.",
+        section_numbers_title: "Die Zahlen im Zentrum",
+        section_numbers_subtitle: "Jede Zahl von 1 bis 9 trägt eine einzigartige Energie",
+        numbers_masters: "✦ Meisterzahlen 11, 22 und 33 werden ebenfalls berücksichtigt ✦",
+        cta_title: "Bereit, Ihren Weg zu entdecken?",
+        cta_desc: "Ihre persönliche numerologische Karte ist nur wenige Klicks entfernt.",
+        cta_btn1: "✦ GRATIS KARTE ERSTELLEN",
+        cta_btn2: "A1ELOS ENTDECKEN",
+        footer_text: "© 2026. Alle Rechte vorbehalten."
+    },
+    ja: {
+        hero_title: "数秘術マップ",
+        hero_subtitle: "数字があなたについて明らかにすることを発見しましょう",
+        hero_desc: "ピタゴラス数秘術に基づく自己発見の旅。あなたのパーソナルマップは、人生を支配する数字を通じて、才能、課題、道筋を明らかにします。",
+        hero_btn: "✦ マップを生成",
+        section_what_title: "数秘術マップとは？",
+        section_what_subtitle: "ピタゴラス数秘術に基づく自己発見ツール",
+        card1_title: "あなたの人生の数字",
+        card1_desc: "生年月日と氏名からライフパス、運命、魂などの重要な数字を計算します。",
+        card2_title: "パーソナルマップ",
+        card2_desc: "それぞれの数字があなたの個性や才能のユニークな側面を明らかにします。",
+        card3_title: "完全なレポート",
+        card3_desc: "各数字の専門的な解釈を含む詳細なPDFレポートを受け取れます。",
+        card4_title: "実践的なガイダンス",
+        card4_desc: "人生の目的に沿った決断を下すためのガイドブックです。",
+        section_how_title: "仕組み",
+        section_how_subtitle: "わずか数ステップでマップが完成します",
+        step1_title: "データを入力",
+        step1_desc: "氏名と生年月日を入力してください。",
+        step2_title: "自動計算",
+        step2_desc: "エンジンがすべての数秘術の数字を正確に計算します。",
+        step3_title: "PDFレポート",
+        step3_desc: "完全な解釈が含まれたプロフェッショナルなレポートを受け取ります。",
+        section_numbers_title: "中心にある数字",
+        section_numbers_subtitle: "1から9までの各数字は独自のエネルギーを持っています",
+        numbers_masters: "✦ マスターナンバー11、22、33も考慮されます ✦",
+        cta_title: "あなたの道を見つける準備はできましたか？",
+        cta_desc: "数クリックであなただけの数秘術マップが手に入ります。",
+        cta_btn1: "✦ 無料マップを生成",
+        cta_btn2: "A1ELOSについて",
+        footer_text: "© 2026. 全著作権所有。"
+    },
+    ar: {
+        hero_title: "خريطة الأرقام",
+        hero_subtitle: "اكتشف ما تكشفه الأرقام عنك",
+        hero_desc: "رحلة اكتشاف الذات بناءً على علم الأعداد الفيثاغوري. خريطتك الشخصية تكشف المواهب والتحديات والمسارات من خلال الأرقام التي تحكم حياتك.",
+        hero_btn: "✦ إنشاء خريطتي",
+        section_what_title: "ما هي خريطة الأرقام؟",
+        section_what_subtitle: "أداة لاكتشاف الذات تعتمد على علم الأعداد الفيثاغوري",
+        card1_title: "أرقام حياتك",
+        card1_desc: "نحسب مسار الحياة والقدر والروح والأرقام الأساسية الأخرى من تاريخ ميلادك.",
+        card2_title: "خريطتك الشخصية",
+        card2_desc: "يكشف كل رقم عن بُعد فريد لشخصيتك ومواهبك الفطرية.",
+        card3_title: "تقرير كامل",
+        card3_desc: "تتلقى تقريراً مفصلاً بصيغة PDF مع تفسير احترافي لكل رقم.",
+        card4_title: "توجيه عملي",
+        card4_desc: "دليل لاتخاذ قرارات تتماشى مع دوراتك العددية وهدف حياتك.",
+        section_how_title: "كيف يعمل",
+        section_how_subtitle: "في خطوات قليلة، خريطتك جاهزة",
+        step1_title: "أدخل بياناتك",
+        step1_desc: "أدخل اسمك الكامل وتاريخ ميلادك.",
+        step2_title: "حساب آلي",
+        step2_desc: "يقوم محركنا بحساب جميع الأرقام بدقة.",
+        step3_title: "تقرير PDF",
+        step3_desc: "احصل على تقرير احترافي مع التفسير الكامل.",
+        section_numbers_title: "الأرقام في المركز",
+        section_numbers_subtitle: "كل رقم من 1 إلى 9 يحمل طاقة فريدة",
+        numbers_masters: "✦ يتم أيضاً أخذ الأرقام الرئيسية 11 و 22 و 33 في الاعتبار ✦",
+        cta_title: "هل أنت مستعد لاكتشاف مسارك؟",
+        cta_desc: "خريطة الأرقام الشخصية الخاصة بك على بعد نقرات قليلة.",
+        cta_btn1: "✦ إنشاء خريطة مجانية",
+        cta_btn2: "تعرف على A1ELOS",
+        footer_text: "© 2026. جميع الحقوق محفوظة."
+    },
+    zh: {
+        hero_title: "数字命理图",
+        hero_subtitle: "发现数字揭示关于你的一切",
+        hero_desc: "一段基于毕达哥拉斯数字命理的自我发现之旅。你的个人命理图通过主宰你生命的数字揭示天赋、挑战和道路。",
+        hero_btn: "✦ 生成我的命理图",
+        section_what_title: "什么是数字命理图？",
+        section_what_subtitle: "基于毕达哥拉斯数字命理的自我发现工具",
+        card1_title: "你的生命数字",
+        card1_desc: "我们根据出生日期和全名计算生命路径、命运、灵魂等核心数字。",
+        card2_title: "个人命理图",
+        card2_desc: "每个数字揭示你性格、天赋和挑战的独特维度。",
+        card3_title: "完整报告",
+        card3_desc: "您将收到详细的PDF报告，包含对每个数字的专业解读。",
+        card4_title: "实践指导",
+        card4_desc: "一本指导手册，帮助您做出符合生命目标的决策。",
+        section_how_title: "运作方式",
+        section_how_subtitle: "只需几个步骤，您的图表即可完成",
+        step1_title: "输入数据",
+        step1_desc: "输入您的全名和出生日期。",
+        step2_title: "自动计算",
+        step2_desc: "我们的引擎精确计算所有基础数字。",
+        step3_title: "PDF报告",
+        step3_desc: "收到一份包含完整解读的专业报告。",
+        section_numbers_title: "核心数字",
+        section_numbers_subtitle: "1到9的每个数字都带有独特的能量",
+        numbers_masters: "✦ 卓越数 11、22 和 33 也在考虑范围内 ✦",
+        cta_title: "准备好发现你的道路了吗？",
+        cta_desc: "只需点击几下即可获得您的个人数字命理图。",
+        cta_btn1: "✦ 生成免费命理图",
+        cta_btn2: "了解 A1ELOS",
+        footer_text: "© 2026. 保留所有权利。"
+    },
+    ru: {
+        hero_title: "НУМЕРОЛОГИЧЕСКАЯ КАРТА",
+        hero_subtitle: "Узнайте, что числа говорят о вас",
+        hero_desc: "Путешествие самопознания, основанное на пифагорейской нумерологии. Ваша личная карта раскрывает таланты, вызовы и пути через числа, управляющие вашей жизнью.",
+        hero_btn: "✦ СОЗДАТЬ МОЮ КАРТУ",
+        section_what_title: "Что такое нумерологическая карта?",
+        section_what_subtitle: "Инструмент самопознания на основе пифагорейской нумерологии",
+        card1_title: "Числа вашей жизни",
+        card1_desc: "Мы рассчитываем Путь Жизни, Судьбу, Душу и другие важные числа из вашей даты рождения.",
+        card2_title: "Ваша личная карта",
+        card2_desc: "Каждое число раскрывает уникальное измерение вашей личности и талантов.",
+        card3_title: "Полный отчёт",
+        card3_desc: "Вы получите подробный PDF-отчёт с профессиональной интерпретацией каждого числа.",
+        card4_title: "Практическое руководство",
+        card4_desc: "Руководство для принятия решений в соответствии с вашим жизненным предназначением.",
+        section_how_title: "Как это работает",
+        section_how_subtitle: "Ваша карта будет готова в несколько шагов",
+        step1_title: "Введите данные",
+        step1_desc: "Введите ваше полное имя и дату рождения.",
+        step2_title: "Автоматический расчёт",
+        step2_desc: "Наш движок точно рассчитывает все нумерологические числа.",
+        step3_title: "PDF-отчёт",
+        step3_desc: "Получите профессиональный отчёт с полной интерпретацией.",
+        section_numbers_title: "Числа в центре",
+        section_numbers_subtitle: "Каждое число от 1 до 9 несёт уникальную энергию",
+        numbers_masters: "✦ Управляющие числа 11, 22 и 33 также учитываются ✦",
+        cta_title: "Готовы открыть свой путь?",
+        cta_desc: "Ваша личная нумерологическая карта в нескольких кликах.",
+        cta_btn1: "✦ СОЗДАТЬ БЕСПЛАТНУЮ КАРТУ",
+        cta_btn2: "УЗНАТЬ О A1ELOS",
+        footer_text: "© 2026. Все права защищены."
+    },
+    he: {
+        hero_title: "מפה נומרולוגית",
+        hero_subtitle: "גלו מה המספרים מגלים עליכם",
+        hero_desc: "מסע של גילוי עצמי המבוסס על נומרולוגיה פיתגורית. המפה האישית שלך חושפת כישרונות, אתגרים ונתיבים דרך המספרים השולטים בחייך.",
+        hero_btn: "✦ צור את המפה שלי",
+        section_what_title: "מהי מפה נומרולוגית?",
+        section_what_subtitle: "כלי לגילוי עצמי המבוסס על נומרולוגיה פיתגורית",
+        card1_title: "מספרי החיים שלך",
+        card1_desc: "אנו מחשבים את נתיב החיים, הייעוד, הנשמה ומספרים חיוניים אחרים מתאריך הלידה שלך.",
+        card2_title: "המפה האישית שלך",
+        card2_desc: "כל מספר חושף מימד ייחודי של האישיות, הכישרונות והאתגרים שלך.",
+        card3_title: "דו\"ח מלא",
+        card3_desc: "תקבל דו\"ח PDF מפורט עם פרשנות מקצועית לכל מספר.",
+        card4_title: "הכוונה מעשית",
+        card4_desc: "יותר מקריאה — מדריך לקבלת החלטות בהתאם לייעוד חייך.",
+        section_how_title: "איך זה עובד",
+        section_how_subtitle: "בכמה צעדים פשוטים, המפה שלך מוכנה",
+        step1_title: "הזן את הנתונים",
+        step1_desc: "הזן שם מלא ותאריך לידה.",
+        step2_title: "חישוב אוטומטי",
+        step2_desc: "המנוע שלנו מחשב את כל המספרים בדיוק מירבי.",
+        step3_title: "דו\"ח PDF",
+        step3_desc: "קבל דו\"ח מקצועי עם הפרשנות המלאה של המפה שלך.",
+        section_numbers_title: "המספרים במרכז",
+        section_numbers_subtitle: "כל מספר מ-1 עד 9 נושא אנרגיה ייחודית",
+        numbers_masters: "✦ מספרי מאסטר 11, 22 ו-33 נלקחים גם הם בחשבון ✦",
+        cta_title: "מוכן לגלות את הנתיב שלך?",
+        cta_desc: "המפה הנומרולוגית האישית שלך נמצאת במרחק כמה קליקים.",
+        cta_btn1: "✦ צור מפה בחינם",
+        cta_btn2: "גלה את A1ELOS",
+        footer_text: "© 2026. כל הזכויות שמורות."
+    }
+};
+
+const languages = [
+    { code: 'pt', flag: '🇧🇷', name: 'PT' },
+    { code: 'en', flag: '🇺🇸', name: 'EN' },
+    { code: 'es', flag: '🇪🇸', name: 'ES' },
+    { code: 'it', flag: '🇮🇹', name: 'IT' },
+    { code: 'fr', flag: '🇫🇷', name: 'FR' },
+    { code: 'hi', flag: '🇮🇳', name: 'HI' },
+    { code: 'de', flag: '🇩🇪', name: 'DE' },
+    { code: 'ja', flag: '🇯🇵', name: 'JA' },
+    { code: 'ar', flag: '🇸🇦', name: 'AR' },
+    { code: 'zh', flag: '🇨🇳', name: 'ZH' },
+    { code: 'ru', flag: '🇷🇺', name: 'RU' },
+    { code: 'he', flag: '🇮🇱', name: 'HE' }
+];
+
+function setLanguage(lang) {
+    localStorage.setItem('selectedLang', lang);
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+    const isRTL = ['ar','he'].includes(lang);
+    document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang] && translations[lang][key]) {
+            el.style.opacity = '0.5';
+            setTimeout(() => {
+                el.innerText = translations[lang][key];
+                el.style.opacity = '1';
+            }, 100);
+        }
+    });
+}
+
+function init() {
+    const container = document.getElementById('langSelector');
+    languages.forEach(l => {
+        const btn = document.createElement('button');
+        btn.className = 'lang-btn';
+        btn.dataset.lang = l.code;
+        btn.innerHTML = `<span class="flag">${l.flag}</span> ${l.name}`;
+        btn.onclick = () => setLanguage(l.code);
+        container.appendChild(btn);
+    });
+    const saved = localStorage.getItem('selectedLang');
+    const browser = navigator.language.split('-')[0];
+    setLanguage(saved || (translations[browser] ? browser : 'pt'));
+}
+
+window.onload = init;
+</script>
 
 </body>
 </html>
