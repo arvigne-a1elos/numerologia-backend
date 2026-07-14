@@ -6,51 +6,69 @@
 <title>Mapa Numerológico | A1ELOS</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root { --gold: #C9A94E; --dark: #0a0a0a; --card-bg: #111; }
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Inter', sans-serif; background: var(--dark); color: #fff; overflow-x: hidden; line-height: 1.6; }
-[dir="rtl"] { direction: rtl; text-align: right; }
-.lang-wrapper { position: fixed; top: 0; width: 100%; z-index: 1000; background: rgba(10,10,10,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #222; padding: 8px 0; }
-.lang-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: center; align-items: center; gap: 5px; flex-wrap: wrap; padding: 0 10px; }
-.lang-btn { background: transparent; border: 1px solid #333; color: #aaa; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 11px; transition: all 0.3s ease; display: flex; align-items: center; gap: 4px; }
-.lang-btn .flag { font-size: 14px; }
-.lang-btn:hover, .lang-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(201,169,78,0.1); }
-.hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 120px 20px 60px; background: radial-gradient(ellipse at center, #1a1a1a 0%, #0a0a0a 70%); }
-.logo-img { width: 160px; height: 160px; margin-bottom: 30px; border-radius: 50%; object-fit: cover; }
-h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.2rem, 7vw, 4.5rem); color: var(--gold); margin-bottom: 8px; letter-spacing: 0.05em; }
-.subtitle { font-size: clamp(1rem, 2vw, 1.5rem); color: #a0a0a0; margin-bottom: 25px; font-weight: 300; }
-.hero-desc { max-width: 650px; margin: 0 auto 35px; color: #888; font-size: 1.05rem; font-weight: 300; }
-.btn { display: inline-block; padding: 16px 38px; background: linear-gradient(135deg, var(--gold), #b8942e); color: #0a0a0a; text-decoration: none; font-weight: 600; border-radius: 50px; letter-spacing: 0.08em; transition: all 0.3s ease; border: none; font-family: 'Inter', sans-serif; font-size: 1rem; text-transform: uppercase; cursor: pointer; }
-.btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(201,169,78,0.3); }
-.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
-section { padding: 80px 20px; max-width: 1100px; margin: 0 auto; }
-.section-header { text-align: center; margin-bottom: 50px; }
-.section-header h2 { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem, 3vw, 2.5rem); color: var(--gold); margin-bottom: 12px; }
-.section-header p { color: #888; font-size: 1.05rem; font-weight: 300; }
-.form-section { max-width: 600px; margin: 0 auto; background: #111; padding: 40px; border-radius: 20px; border: 1px solid #222; }
-.form-group { margin-bottom: 20px; text-align: left; }
-.form-group label { display: block; color: #a0a0a0; font-size: 0.85rem; margin-bottom: 8px; }
-.form-group input { width: 100%; padding: 14px; background: #1a1a1a; border: 1px solid #333; border-radius: 10px; color: #fff; font-size: 1rem; outline: none; transition: border 0.3s; }
-.form-group input:focus { border-color: var(--gold); }
-.form-row { display: flex; gap: 15px; }
-.form-row .form-group { flex: 1; }
-@media (max-width: 500px) { .form-row { flex-direction: column; gap: 0; } }
-.result-card { margin-top: 30px; display: none; animation: fadeIn 0.6s ease; }
-.result-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-top: 20px; }
-.num-box { background: #1a1a1a; padding: 25px; border-radius: 15px; border: 1px solid #222; text-align: center; transition: all 0.3s ease; }
-.num-box:hover { border-color: var(--gold); }
-.num-box .val { font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--gold); font-weight: 700; }
-.num-box .label { font-size: 0.7rem; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; }
-.cta-section { text-align: center; padding: 80px 20px; background: radial-gradient(ellipse at center, #1a1a1a 0%, #0a0a0a 70%); border-top: 1px solid #222; border-bottom: 1px solid #222; }
-.cta-section h2 { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem, 3vw, 2.5rem); color: var(--gold); margin-bottom: 15px; }
-.cta-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 25px; }
-footer { text-align: center; padding: 40px 20px; color: #555; font-size: 0.85rem; }
-footer a { color: var(--gold); text-decoration: none; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-@media (max-width: 600px) { .btn-outline { margin-left: 0; margin-top: 10px; } }
+:root{--gold:#C9A94E;--dark:#0a0a0a;--card-bg:#111;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:var(--dark);color:#fff;overflow-x:hidden;line-height:1.6;}
+[dir="rtl"]{direction:rtl;text-align:right;}
+.lang-wrapper{position:fixed;top:0;width:100%;z-index:1000;background:rgba(10,10,10,0.85);backdrop-filter:blur(12px);border-bottom:1px solid #222;padding:8px 0;}
+.lang-container{max-width:1200px;margin:0 auto;display:flex;justify-content:center;align-items:center;gap:5px;flex-wrap:wrap;padding:0 10px;}
+.lang-btn{background:transparent;border:1px solid #333;color:#aaa;padding:4px 8px;border-radius:6px;cursor:pointer;font-size:11px;transition:all .3s ease;display:flex;align-items:center;gap:4px;font-family:'Inter',sans-serif;}
+.lang-btn .flag{font-size:14px;}
+.lang-btn:hover,.lang-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(201,169,78,0.1);}
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 20px 60px;background:radial-gradient(ellipse at center,#1a1a1a 0%,#0a0a0a 70%);}
+.logo-img{width:160px;height:160px;margin-bottom:30px;border-radius:50%;object-fit:cover;}
+h1{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,7vw,4.5rem);color:var(--gold);margin-bottom:8px;letter-spacing:.05em;}
+.subtitle{font-size:clamp(1rem,2vw,1.5rem);color:#a0a0a0;margin-bottom:25px;font-weight:300;}
+.hero-desc{max-width:650px;margin:0 auto 35px;color:#888;font-size:1.05rem;font-weight:300;}
+.btn{display:inline-block;padding:14px 32px;background:linear-gradient(135deg,var(--gold),#b8942e);color:#0a0a0a;text-decoration:none;font-weight:600;border-radius:50px;letter-spacing:.08em;transition:all .3s ease;border:none;font-family:'Inter',sans-serif;font-size:.9rem;text-transform:uppercase;cursor:pointer;}
+.btn:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(201,169,78,0.3);}
+.btn-sm{padding:10px 20px;font-size:.8rem;}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;}
+.btn-outline{background:transparent;color:var(--gold);border:2px solid var(--gold);}
+.btn-outline:hover{background:rgba(201,169,78,0.1);box-shadow:none;}
+section{padding:80px 20px;max-width:1100px;margin:0 auto;}
+.section-header{text-align:center;margin-bottom:50px;}
+.section-header h2{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,3vw,2.5rem);color:var(--gold);margin-bottom:12px;}
+.section-header p{color:#888;font-size:1.05rem;font-weight:300;}
+.form-section{max-width:600px;margin:0 auto;background:#111;padding:40px;border-radius:20px;border:1px solid #222;}
+.form-group{margin-bottom:20px;text-align:left;}
+.form-group label{display:block;color:#a0a0a0;font-size:.85rem;margin-bottom:8px;}
+.form-group input{width:100%;padding:14px;background:#1a1a1a;border:1px solid #333;border-radius:10px;color:#fff;font-size:1rem;outline:none;transition:border .3s;}
+.form-group input:focus{border-color:var(--gold);}
+.form-row{display:flex;gap:15px;}
+.form-row .form-group{flex:1;}
+@media(max-width:500px){.form-row{flex-direction:column;gap:0;}}
+.result-card{margin-top:30px;display:none;animation:fadeIn .6s ease;}
+.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:20px;}
+.num-box{background:#1a1a1a;padding:20px 15px;border-radius:12px;border:1px solid #222;text-align:center;transition:all .3s;}
+.num-box:hover{border-color:var(--gold);}
+.num-box .val{font-family:'Playfair Display',serif;font-size:2.2rem;color:var(--gold);font-weight:700;}
+.num-box .label{font-size:.65rem;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-top:5px;}
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-top:30px;}
+.pricing-card{background:#111;border:1px solid #333;border-radius:16px;padding:30px 20px;text-align:center;transition:all .3s ease;position:relative;}
+.pricing-card:hover{border-color:var(--gold);transform:translateY(-5px);}
+.pricing-card.featured{border-color:var(--gold);background:linear-gradient(180deg,#1a1a1a 0%,#111 100%);}
+.pricing-card.featured::before{content:'';position:absolute;top:-1px;left:-1px;right:-1px;height:3px;background:var(--gold);border-radius:16px 16px 0 0;}
+.pricing-card .plan-name{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.1rem;margin-bottom:8px;}
+.pricing-card .plan-price{font-size:2rem;font-weight:700;color:#fff;margin:10px 0;}
+.pricing-card .plan-price span{font-size:1rem;color:#888;font-weight:400;}
+.pricing-card .plan-desc{color:#888;font-size:.85rem;margin-bottom:18px;line-height:1.5;}
+.pricing-card .currency-selector{margin-top:15px;padding-top:15px;border-top:1px solid #222;}
+.pricing-card .currency-selector select{background:#1a1a1a;border:1px solid #333;color:#fff;padding:8px 12px;border-radius:8px;font-size:.8rem;outline:none;cursor:pointer;}
+.pricing-card .currency-selector select:focus{border-color:var(--gold);}
+.order-msg{display:none;padding:15px;background:#1a2a1a;border:1px solid var(--gold);border-radius:12px;margin-top:20px;text-align:center;animation:fadeIn .5s ease;}
+.order-msg h4{color:var(--gold);margin-bottom:5px;}
+.order-msg p{color:#888;font-size:.9rem;}
+.cta-section{text-align:center;padding:80px 20px;background:radial-gradient(ellipse at center,#1a1a1a 0%,#0a0a0a 70%);border-top:1px solid #222;border-bottom:1px solid #222;}
+.cta-section h2{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,3vw,2.5rem);color:var(--gold);margin-bottom:15px;}
+footer{text-align:center;padding:40px 20px;color:#555;font-size:.85rem;}
+footer a{color:var(--gold);text-decoration:none;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:600px){section{padding:50px 16px;}.pricing-grid{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
+
 <nav class="lang-wrapper"><div class="lang-container" id="langSelector"></div></nav>
 
 <section class="hero">
@@ -58,38 +76,39 @@ footer a { color: var(--gold); text-decoration: none; }
 <h1 data-i18n="h_title">MAPA NUMEROLÓGICO</h1>
 <p class="subtitle" data-i18n="h_sub">Descubra o que os números revelam sobre você</p>
 <p class="hero-desc" data-i18n="h_desc">Uma jornada de autoconhecimento baseada na numerologia pitagórica. Seu mapa pessoal revela talentos, desafios e caminhos através dos números que regem sua vida.</p>
-<button class="btn" onclick="document.getElementById('calc').scrollIntoView({behavior:'smooth'})" data-i18n="h_btn">✦ GERAR MEU MAPA</button>
+<button class="btn" onclick="document.getElementById('calc').scrollIntoView({behavior:'smooth'})" data-i18n="h_btn">✦ GERAR MEU MAPA GRÁTIS</button>
 </section>
 
 <section id="calc">
 <div class="section-header">
 <h2 data-i18n="c_title">Calcule seu Mapa Numerológico</h2>
-<p data-i18n="c_sub">Preencha os dados abaixo para calcular seus números</p>
+<p data-i18n="c_sub">Preencha seus dados para um cálculo preciso</p>
 </div>
 <div class="form-section">
-<form id="nForm" onsubmit="event.preventDefault(); handleCalc();">
+<form id="nForm" onsubmit="event.preventDefault();handleCalc();">
 <div class="form-group"><label data-i18n="f_name">Nome Completo</label><input type="text" id="name" required placeholder="Ex: Maria Silva"></div>
 <div class="form-row">
 <div class="form-group"><label data-i18n="f_date">Data de Nascimento</label><input type="date" id="date" required></div>
-<div class="form-group"><label data-i18n="f_email">E-mail (opcional)</label><input type="email" id="email" placeholder="seu@email.com"></div>
+<div class="form-group"><label data-i18n="f_email">E-mail</label><input type="email" id="email" required placeholder="seu@email.com"></div>
 </div>
-<button type="submit" class="btn" id="sBtn" style="width:100%; margin-top:5px" data-i18n="f_btn">✦ CALCULAR MEU MAPA</button>
+<button type="submit" class="btn" id="sBtn" style="width:100%;margin-top:5px" data-i18n="f_btn">✦ CALCULAR MEU MAPA</button>
 </form>
-<div class="result-card" id="res">
-<div class="result-grid" id="rGrid"></div>
-<div style="margin-top:25px; text-align:center;">
-<p style="color:#888; font-size:0.9rem; margin-bottom:15px;" data-i18n="pdf_msg">📄 Deseja receber o relatório completo em PDF?</p>
-<button class="btn" onclick="handlePDF()" id="pBtn" data-i18n="pdf_btn">RECEBER PDF POR E-MAIL</button>
-</div>
-</div>
-</div>
-</section>
 
-<section class="cta-section">
-<h2 data-i18n="cta_title">Pronto para descobrir seu caminho?</h2>
-<p data-i18n="cta_desc">Seu mapa numerológico pessoal está a poucos cliques de distância.</p>
-<div class="cta-buttons">
-<button class="btn" onclick="document.getElementById('calc').scrollIntoView({behavior:'smooth'})" data-i18n="cta_btn">✦ GERAR MEU MAPA</button>
+<div class="result-card" id="res">
+<h3 style="color:var(--gold);text-align:center;font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:5px;" data-i18n="r_title">✨ Seus Números</h3>
+<div class="result-grid" id="rGrid"></div>
+
+<div style="margin-top:40px;padding-top:30px;border-top:1px solid #222;">
+<h3 style="color:var(--gold);text-align:center;font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:20px;" data-i18n="p_title">📄 Relatório Completo em PDF</h3>
+<p style="text-align:center;color:#888;font-size:.9rem;margin-bottom:10px;" data-i18n="p_desc">Adquira o relatório completo com interpretação profissional detalhada de cada número.</p>
+<div class="pricing-grid" id="pricingGrid"></div>
+<div id="orderMsg" class="order-msg"></div>
+</div>
+
+<div style="text-align:center;margin-top:20px;">
+<button class="btn btn-outline btn-sm" onclick="document.getElementById('calc').scrollIntoView({behavior:'smooth'});resetForm();" data-i18n="r_new">⟳ NOVO CÁLCULO</button>
+</div>
+</div>
 </div>
 </section>
 
@@ -98,112 +117,54 @@ footer a { color: var(--gold); text-decoration: none; }
 </footer>
 
 <script>
-const API = 'https://numerologia-api-wd2q.onrender.com';
-let currentId = null;
+const API='https://numerologia-api-wd2q.onrender.com';
+let currentId=null;let lastEmail='';
 
-const i18n = {
-pt: { h_title: "MAPA NUMEROLÓGICO", h_sub: "Descubra o que os números revelam sobre você", h_desc: "Uma jornada de autoconhecimento baseada na numerologia pitagórica. Seu mapa pessoal revela talentos, desafios e caminhos através dos números que regem sua vida.", h_btn: "✦ GERAR MEU MAPA", c_title: "Calcule seu Mapa Numerológico", c_sub: "Preencha os dados abaixo para calcular seus números", f_name: "Nome Completo", f_date: "Data de Nascimento", f_email: "E-mail (opcional)", f_btn: "✦ CALCULAR MEU MAPA", pdf_msg: "📄 Deseja receber o relatório completo em PDF?", pdf_btn: "RECEBER PDF POR E-MAIL", cta_title: "Pronto para descobrir seu caminho?", cta_desc: "Seu mapa numerológico pessoal está a poucos cliques de distância.", cta_btn: "✦ GERAR MEU MAPA", rights: "© 2026. Todos os direitos reservados.", l_lp: "CAMINHO DE VIDA", l_ex: "EXPRESSÃO", l_su: "MOTIVAÇÃO DA ALMA", l_pe: "PERSONALIDADE", l_de: "DESTINO" },
-en: { h_title: "NUMEROLOGICAL MAP", h_sub: "Discover what numbers reveal about you", h_desc: "A self-discovery journey based on Pythagorean numerology. Your personal map reveals talents, challenges, and paths through the numbers that rule your life.", h_btn: "✦ GENERATE MY MAP", c_title: "Calculate Your Numerological Map", c_sub: "Fill in your details to calculate your numbers", f_name: "Full Name", f_date: "Birth Date", f_email: "Email (optional)", f_btn: "✦ CALCULATE MY MAP", pdf_msg: "📄 Want the complete PDF report?", pdf_btn: "RECEIVE PDF BY EMAIL", cta_title: "Ready to discover your path?", cta_desc: "Your personal numerological map is just a few clicks away.", cta_btn: "✦ GENERATE MY MAP", rights: "© 2026. All rights reserved.", l_lp: "LIFE PATH", l_ex: "EXPRESSION", l_su: "SOUL URGE", l_pe: "PERSONALITY", l_de: "DESTINY" },
-es: { h_title: "MAPA NUMEROLÓGICO", h_sub: "Descubre lo que los números revelan sobre ti", h_desc: "Un viaje de autoconocimiento basado en la numerología pitagórica. Tu mapa personal revela talentos, desafíos y caminos.", h_btn: "✦ GENERAR MI MAPA", c_title: "Calcula tu Mapa Numerológico", c_sub: "Completa tus datos para calcular tus números", f_name: "Nombre Completo", f_date: "Fecha de Nacimiento", f_email: "Email (opcional)", f_btn: "✦ CALCULAR MI MAPA", pdf_msg: "📄 ¿Quieres el informe completo en PDF?", pdf_btn: "RECIBIR PDF POR EMAIL", cta_title: "¿Listo para descubrir tu camino?", cta_desc: "Tu mapa numerológico personal está a solo unos clics.", cta_btn: "✦ GENERAR MI MAPA", rights: "© 2026. Todos los derechos reservados.", l_lp: "CAMINO DE VIDA", l_ex: "EXPRESIÓN", l_su: "MOTIVACIÓN DEL ALMA", l_pe: "PERSONALIDAD", l_de: "DESTINO" },
-it: { h_title: "MAPPA NUMEROLOGICA", h_sub: "Scopri cosa rivelano i numeri su di te", h_desc: "Un viaggio di conoscenza di sé basato sulla numerologia pitagorica. La tua mappa rivela talenti, sfide e percorsi.", h_btn: "✦ GENERA LA MIA MAPPA", c_title: "Calcola la tua Mappa Numerologica", c_sub: "Inserisci i tuoi dati per calcolare i numeri", f_name: "Nome Completo", f_date: "Data di Nascita", f_email: "Email (opzionale)", f_btn: "✦ CALCOLA LA MIA MAPPA", pdf_msg: "📄 Vuoi il rapporto completo in PDF?", pdf_btn: "RICEVI PDF VIA EMAIL", cta_title: "Pronto a scoprire il tuo percorso?", cta_desc: "La tua mappa numerologica personale è a pochi clic.", cta_btn: "✦ GENERA LA MIA MAPPA", rights: "© 2026. Tutti i diritti riservati.", l_lp: "SENTIERO DI VITA", l_ex: "ESPRESSIONE", l_su: "ANIMA", l_pe: "PERSONALITÀ", l_de: "DESTINO" },
-fr: { h_title: "CARTE NUMÉROLOGIQUE", h_sub: "Découvrez ce que les nombres révèlent sur vous", h_desc: "Un voyage de découverte de soi basé sur la numérologie pythagoricienne. Votre carte révèle talents, défis et chemins.", h_btn: "✦ GÉNÉRER MA CARTE", c_title: "Calculez votre Carte Numérologique", c_sub: "Entrez vos données pour calculer vos nombres", f_name: "Nom Complet", f_date: "Date de Naissance", f_email: "Email (optionnel)", f_btn: "✦ CALCULER MA CARTE", pdf_msg: "📄 Vous voulez le rapport complet en PDF ?", pdf_btn: "RECEVOIR LE PDF PAR EMAIL", cta_title: "Prêt à découvrir votre chemin ?", cta_desc: "Votre carte numérologique est à portée de clic.", cta_btn: "✦ GÉNÉRER MA CARTE", rights: "© 2026. Tous droits réservés.", l_lp: "CHEMIN DE VIE", l_ex: "EXPRESSION", l_su: "ÉLAN DE L'ÂME", l_pe: "PERSONNALITÉ", l_de: "DESTIN" },
-de: { h_title: "NUMEROLOGISCHE KARTE", h_sub: "Entdecken Sie, was Zahlen über Sie verraten", h_desc: "Eine Selbstfindungsreise basierend auf der pythagoreischen Numerologie. Ihre Karte offenbart Talente und Wege.", h_btn: "✦ KARTE ERSTELLEN", c_title: "Berechnen Sie Ihre Karte", c_sub: "Geben Sie Ihre Daten ein", f_name: "Vollständiger Name", f_date: "Geburtsdatum", f_email: "E-Mail (optional)", f_btn: "✦ KARTE BERECHNEN", pdf_msg: "📄 Möchten Sie den vollständigen PDF-Bericht?", pdf_btn: "PDF PER E-MAIL ERHALTEN", cta_title: "Bereit, Ihren Weg zu entdecken?", cta_desc: "Ihre persönliche Karte ist nur wenige Klicks entfernt.", cta_btn: "✦ KARTE ERSTELLEN", rights: "© 2026. Alle Rechte vorbehalten.", l_lp: "LEBENSWEG", l_ex: "AUSDRUCK", l_su: "SEELENDRANG", l_pe: "PERSÖNLICHKEIT", l_de: "SCHICKSAL" },
-ja: { h_title: "数秘術マップ", h_sub: "数字があなたについて明らかにすること", h_desc: "ピタゴラス数秘術に基づく自己発見の旅。あなたのマップが才能と道筋を明らかにします。", h_btn: "✦ マップを生成", c_title: "数秘術マップを計算", c_sub: "データを入力してください", f_name: "氏名", f_date: "生年月日", f_email: "メールアドレス（任意）", f_btn: "✦ マップを計算", pdf_msg: "📄 PDFレポートをご希望ですか？", pdf_btn: "メールでPDFを受け取る", cta_title: "あなたの道を見つける準備は？", cta_desc: "あなただけの数秘術マップが数クリックで。", cta_btn: "✦ マップを生成", rights: "© 2026. 全著作権所有。", l_lp: "ライフパス", l_ex: "表現", l_su: "魂の衝動", l_pe: "人格", l_de: "運命" },
-zh: { h_title: "数字命理图", h_sub: "发现数字揭示关于你的一切", h_desc: "基于毕达哥拉斯数字命理的自我发现之旅。你的命理图揭示天赋、挑战和道路。", h_btn: "✦ 生成命理图", c_title: "计算数字命理图", c_sub: "输入您的数据", f_name: "全名", f_date: "出生日期", f_email: "电子邮件（可选）", f_btn: "✦ 计算命理图", pdf_msg: "📄 想要完整的PDF报告吗？", pdf_btn: "通过电子邮件接收PDF", cta_title: "准备好发现你的道路了吗？", cta_desc: "您的个人命理图只需点击几下。", cta_btn: "✦ 生成命理图", rights: "© 2026. 保留所有权利。", l_lp: "生命路径", l_ex: "表现", l_su: "灵魂渴望", l_pe: "人格", l_de: "命运" },
-ru: { h_title: "НУМЕРОЛОГИЧЕСКАЯ КАРТА", h_sub: "Узнайте, что числа говорят о вас", h_desc: "Путешествие самопознания на основе пифагорейской нумерологии. Ваша карта раскрывает таланты и пути.", h_btn: "✦ СОЗДАТЬ КАРТУ", c_title: "Рассчитать нумерологическую карту", c_sub: "Введите ваши данные", f_name: "Полное имя", f_date: "Дата рождения", f_email: "Email (опционально)", f_btn: "✦ РАССЧИТАТЬ КАРТУ", pdf_msg: "📄 Хотите полный PDF-отчёт?", pdf_btn: "ПОЛУЧИТЬ PDF ПО ПОЧТЕ", cta_title: "Готовы открыть свой путь?", cta_desc: "Ваша карта в нескольких кликах.", cta_btn: "✦ СОЗДАТЬ КАРТУ", rights: "© 2026. Все права защищены.", l_lp: "ПУТЬ ЖИЗНИ", l_ex: "ВЫРАЖЕНИЕ", l_su: "ЖЕЛАНИЕ ДУШИ", l_pe: "ЛИЧНОСТЬ", l_de: "СУДЬБА" },
-hi: { h_title: "अंक ज्योतिष मानचित्र", h_sub: "जानें संख्याएं आपके बारे में क्या कहती हैं", h_desc: "पाइथागोरियन अंक ज्योतिष पर आधारित आत्म-खोज यात्रा। आपका मानचित्र प्रतिभा और मार्ग दिखाता है।", h_btn: "✦ मानचित्र बनाएं", c_title: "अपना मानचित्र गणना करें", c_sub: "अपना डेटा दर्ज करें", f_name: "पूरा नाम", f_date: "जन्म तिथि", f_email: "ईमेल (वैकल्पिक)", f_btn: "✦ मानचित्र गणना करें", pdf_msg: "📄 क्या आप पूर्ण PDF रिपोर्ट चाहते हैं?", pdf_btn: "ईमेल द्वारा PDF प्राप्त करें", cta_title: "अपना रास्ता खोजने के लिए तैयार?", cta_desc: "आपका मानचित्र कुछ क्लिक दूर है।", cta_btn: "✦ मानचित्र बनाएं", rights: "© 2026. सर्वाधिकार सुरक्षित।", l_lp: "जीवन पथ", l_ex: "अभिव्यक्ति", l_su: "आत्मा की इच्छा", l_pe: "व्यक्तित्व", l_de: "भाग्य" },
-ar: { h_title: "خريطة الأرقام", h_sub: "اكتشف ما تكشفه الأرقام عنك", h_desc: "رحلة اكتشاف الذات بعلم الأعداد الفيثاغوري. خريطتك تكشف المواهب والمسارات.", h_btn: "✦ إنشاء خريطتي", c_title: "احسب خريطة الأرقام", c_sub: "أدخل بياناتك", f_name: "الاسم الكامل", f_date: "تاريخ الميلاد", f_email: "البريد الإلكتروني (اختياري)", f_btn: "✦ حساب الخريطة", pdf_msg: "📄 هل تريد تقرير PDF الكامل؟", pdf_btn: "استلام PDF عبر البريد", cta_title: "هل أنت مستعد لاكتشاف مسارك؟", cta_desc: "خريطتك على بعد نقرات قليلة.", cta_btn: "✦ إنشاء خريطتي", rights: "© 2026. جميع الحقوق محفوظة.", l_lp: "مسار الحياة", l_ex: "التعبير", l_su: "رغبة الروح", l_pe: "الشخصية", l_de: "القدر" },
-he: { h_title: "מפה נומרולוגית", h_sub: "גלו מה המספרים מגלים עליכם", h_desc: "מסע גילוי עצמי בנומרולוגיה פיתגורית. המפה שלך חושפת כישרונות ונתיבים.", h_btn: "✦ צור את המפה", c_title: "חשב את המפה הנומרולוגית", c_sub: "הזן את הנתונים שלך", f_name: "שם מלא", f_date: "תאריך לידה", f_email: "אימייל (אופציונלי)", f_btn: "✦ חשב מפה", pdf_msg: "📄 רוצה את דוח PDF המלא?", pdf_btn: "קבל PDF באימייל", cta_title: "מוכן לגלות את הנתיב שלך?", cta_desc: "המפה שלך במרחק כמה קליקים.", cta_btn: "✦ צור את המפה", rights: "© 2026. כל הזכויות שמורות.", l_lp: "נתיב חיים", l_ex: "ביטוי", l_su: "דחף הנשמה", l_pe: "אישיות", l_de: "גורל" }
-};
+const prices={pt:{name:'Plano Básico',desc:'Números na tela + PDF completo por e-mail',value:'R$ 49,90',amount:49.90,cur:'BRL'},
+en:{name:'Standard Plan',desc:'Numbers on screen + full PDF report by email',value:'US$ 19.90',amount:19.90,cur:'USD'},
+es:{name:'Plan Básico',desc:'Números en pantalla + PDF completo por email',value:'€ 17.90',amount:17.90,cur:'EUR'},
+it:{name:'Piano Base',desc:'Numeri a schermo + PDF completo via email',value:'€ 17.90',amount:17.90,cur:'EUR'},
+fr:{name:'Plan de Base',desc:'Nombres à l\'écran + rapport PDF complet par email',value:'€ 17.90',amount:17.90,cur:'EUR'},
+de:{name:'Basisplan',desc:'Zahlen auf dem Bildschirm + vollständiger PDF-Bericht per E-Mail',value:'€ 17.90',amount:17.90,cur:'EUR'},
+ja:{name:'基本プラン',desc:'画面上の数字＋PDFレポートをメールで受信',value:'¥2,500',amount:2500,cur:'JPY'},
+zh:{name:'基础计划',desc:'屏幕显示数字 + 完整PDF报告邮件发送',value:'¥129',amount:129,cur:'CNY'},
+ru:{name:'Базовый план',desc:'Числа на экране + полный PDF-отчёт на email',value:'₽1,490',amount:1490,cur:'RUB'},
+hi:{name:'मूल योजना',desc:'स्क्रीन पर अंक + पूर्ण PDF रिपोर्ट ईमेल द्वारा',value:'₹1,490',amount:1490,cur:'INR'},
+ar:{name:'الخطة الأساسية',desc:'الأرقام على الشاشة + تقرير PDF الكامل عبر البريد',value:'SAR 74',amount:74,cur:'SAR'},
+he:{name:'תוכנית בסיסית',desc:'מספרים על המסך + דוח PDF מלא במייל',value:'₪69',amount:69,cur:'ILS'}};
 
-const langs = [
-{c:'pt',f:'🇧🇷'},{c:'en',f:'🇺🇸'},{c:'es',f:'🇪🇸'},{c:'it',f:'🇮🇹'},
-{c:'fr',f:'🇫🇷'},{c:'de',f:'🇩🇪'},{c:'ja',f:'🇯🇵'},{c:'zh',f:'🇨🇳'},
-{c:'ru',f:'🇷🇺'},{c:'hi',f:'🇮🇳'},{c:'ar',f:'🇸🇦'},{c:'he',f:'🇮🇱'}
-];
+const i18n={pt:{h_title:'MAPA NUMEROLÓGICO',h_sub:'Descubra o que os números revelam sobre você',h_desc:'Uma jornada de autoconhecimento baseada na numerologia pitagórica. Seu mapa pessoal revela talentos, desafios e caminhos através dos números que regem sua vida.',h_btn:'✦ GERAR MEU MAPA GRÁTIS',c_title:'Calcule seu Mapa Numerológico',c_sub:'Preencha seus dados para um cálculo preciso',f_name:'Nome Completo',f_date:'Data de Nascimento',f_email:'E-mail',f_btn:'✦ CALCULAR MEU MAPA',r_title:'✨ Seus Números',r_new:'⟳ NOVO CÁLCULO',p_title:'📄 Relatório Completo em PDF',p_desc:'Adquira o relatório completo com interpretação profissional detalhada de cada número.',p_buy:'COMPRAR AGORA',p_loading:'PROCESSANDO...',order_ok:'Pedido #{id} criado! Pagamento pendente. Você receberá instruções no e-mail.',order_err:'Erro ao processar. Tente novamente.',rights:'© 2026. Todos os direitos reservados.',l_lp:'CAMINHO DE VIDA',l_ex:'EXPRESSÃO',l_su:'MOTIVAÇÃO DA ALMA',l_pe:'PERSONALIDADE',l_de:'DESTINO'},
+en:{h_title:'NUMEROLOGICAL MAP',h_sub:'Discover what numbers reveal about you',h_desc:'A self-discovery journey based on Pythagorean numerology. Your personal map reveals talents, challenges, and paths.',h_btn:'✦ GENERATE MY MAP FREE',c_title:'Calculate Your Numerological Map',c_sub:'Fill in your details for an accurate calculation',f_name:'Full Name',f_date:'Birth Date',f_email:'Email',f_btn:'✦ CALCULATE MY MAP',r_title:'✨ Your Numbers',r_new:'⟳ NEW CALCULATION',p_title:'📄 Complete PDF Report',p_desc:'Get the full report with professional interpretation of each number.',p_buy:'BUY NOW',p_loading:'PROCESSING...',order_ok:'Order #{id} created! Payment pending. You will receive instructions by email.',order_err:'Error processing. Try again.',rights:'© 2026. All rights reserved.',l_lp:'LIFE PATH',l_ex:'EXPRESSION',l_su:'SOUL URGE',l_pe:'PERSONALITY',l_de:'DESTINY'},
+es:{h_title:'MAPA NUMEROLÓGICO',h_sub:'Descubre lo que los números revelan sobre ti',h_desc:'Un viaje de autoconocimiento basado en la numerología pitagórica. Tu mapa personal revela talentos, desafíos y caminos.',h_btn:'✦ GENERAR MI MAPA GRATIS',c_title:'Calcula tu Mapa Numerológico',c_sub:'Completa tus datos para un cálculo preciso',f_name:'Nombre Completo',f_date:'Fecha de Nacimiento',f_email:'Email',f_btn:'✦ CALCULAR MI MAPA',r_title:'✨ Tus Números',r_new:'⟳ NUEVO CÁLCULO',p_title:'📄 Informe Completo en PDF',p_desc:'Obtén el informe completo con interpretación profesional de cada número.',p_buy:'COMPRAR AHORA',p_loading:'PROCESANDO...',order_ok:'Pedido #{id} creado! Pago pendiente. Recibirás instrucciones por email.',order_err:'Error al procesar. Intenta de nuevo.',rights:'© 2026. Todos los derechos reservados.',l_lp:'CAMINO DE VIDA',l_ex:'EXPRESIÓN',l_su:'MOTIVACIÓN DEL ALMA',l_pe:'PERSONALIDAD',l_de:'DESTINO'},
+it:{h_title:'MAPPA NUMEROLOGICA',h_sub:'Scopri cosa rivelano i numeri su di te',h_desc:'Un viaggio di conoscenza di sé basato sulla numerologia pitagorica. La tua mappa rivela talenti, sfide e percorsi.',h_btn:'✦ GENERA LA MIA MAPPA GRATIS',c_title:'Calcola la tua Mappa Numerologica',c_sub:'Inserisci i tuoi dati per un calcolo preciso',f_name:'Nome Completo',f_date:'Data di Nascita',f_email:'Email',f_btn:'✦ CALCOLA LA MIA MAPPA',r_title:'✨ I Tuoi Numeri',r_new:'⟳ NUOVO CALCOLO',p_title:'📄 Rapporto PDF Completo',p_desc:'Ottieni il rapporto completo con interpretazione professionale.',p_buy:'ACQUISTA ORA',p_loading:'ELABORAZIONE...',order_ok:'Ordine #{id} creato! Pagamento in sospeso. Riceverai istruzioni via email.',order_err:'Errore. Riprova.',rights:'© 2026. Tutti i diritti riservati.',l_lp:'SENTIERO DI VITA',l_ex:'ESPRESSIONE',l_su:'ANIMA',l_pe:'PERSONALITÀ',l_de:'DESTINO'},
+fr:{h_title:'CARTE NUMÉROLOGIQUE',h_sub:'Découvrez ce que les nombres révèlent sur vous',h_desc:'Un voyage de découverte de soi basé sur la numérologie pythagoricienne. Votre carte révèle talents, défis et chemins.',h_btn:'✦ GÉNÉRER MA CARTE GRATUITE',c_title:'Calculez votre Carte Numérologique',c_sub:'Entrez vos données pour un calcul précis',f_name:'Nom Complet',f_date:'Date de Naissance',f_email:'Email',f_btn:'✦ CALCULER MA CARTE',r_title:'✨ Vos Nombres',r_new:'⟳ NOUVEAU CALCUL',p_title:'📄 Rapport PDF Complet',p_desc:'Obtenez le rapport complet avec interprétation professionnelle.',p_buy:'ACHETER MAINTENANT',p_loading:'TRAITEMENT...',order_ok:'Commande #{id} créée ! Paiement en attente. Instructions par email.',order_err:'Erreur. Réessayez.',rights:'© 2026. Tous droits réservés.',l_lp:'CHEMIN DE VIE',l_ex:'EXPRESSION',l_su:'ÉLAN DE L\'ÂME',l_pe:'PERSONNALITÉ',l_de:'DESTIN'},
+de:{h_title:'NUMEROLOGISCHE KARTE',h_sub:'Entdecken Sie, was Zahlen über Sie verraten',h_desc:'Eine Selbstfindungsreise basierend auf der pythagoreischen Numerologie. Ihre Karte offenbart Talente und Wege.',h_btn:'✦ KARTE KOSTENLOS ERSTELLEN',c_title:'Berechnen Sie Ihre Karte',c_sub:'Geben Sie Ihre Daten für eine genaue Berechnung ein',f_name:'Vollständiger Name',f_date:'Geburtsdatum',f_email:'E-Mail',f_btn:'✦ KARTE BERECHNEN',r_title:'✨ Ihre Zahlen',r_new:'⟳ NEUE BERECHNUNG',p_title:'📄 Vollständiger PDF-Bericht',p_desc:'Erhalten Sie den vollständigen Bericht mit professioneller Interpretation.',p_buy:'JETZT KAUFEN',p_loading:'VERARBEITUNG...',order_ok:'Bestellung #{id} erstellt! Zahlung ausstehend. Sie erhalten Anweisungen per E-Mail.',order_err:'Fehler. Versuchen Sie es erneut.',rights:'© 2026. Alle Rechte vorbehalten.',l_lp:'LEBENSWEG',l_ex:'AUSDRUCK',l_su:'SEELENDRANG',l_pe:'PERSÖNLICHKEIT',l_de:'SCHICKSAL'},
+ja:{h_title:'数秘術マップ',h_sub:'数字があなたについて明らかにすること',h_desc:'ピタゴラス数秘術に基づく自己発見の旅。あなたのマップが才能と道筋を明らかにします。',h_btn:'✦ マップを無料生成',c_title:'数秘術マップを計算',c_sub:'正確な計算のためにデータを入力',f_name:'氏名',f_date:'生年月日',f_email:'メールアドレス',f_btn:'✦ マップを計算',r_title:'✨ あなたの数字',r_new:'⟳ 新しい計算',p_title:'📄 完全なPDFレポート',p_desc:'各数字の専門的な解釈を含む完全なレポートを入手。',p_buy:'今すぐ購入',p_loading:'処理中...',order_ok:'注文 #{id} 作成完了！支払い待ち。メールで案内をお送りします。',order_err:'エラー。再試行してください。',rights:'© 2026. 全著作権所有。',l_lp:'ライフパス',l_ex:'表現',l_su:'魂の衝動',l_pe:'人格',l_de:'運命'},
+zh:{h_title:'数字命理图',h_sub:'发现数字揭示关于你的一切',h_desc:'基于毕达哥拉斯数字命理的自我发现之旅。你的命理图揭示天赋、挑战和道路。',h_btn:'✦ 免费生成命理图',c_title:'计算数字命理图',c_sub:'输入数据以获得精确计算',f_name:'全名',f_date:'出生日期',f_email:'电子邮件',f_btn:'✦ 计算命理图',r_title:'✨ 你的数字',r_new:'⟳ 重新计算',p_title:'📄 完整PDF报告',p_desc:'获取包含每个数字专业解读的完整报告。',p_buy:'立即购买',p_loading:'处理中...',order_ok:'订单 #{id} 已创建！付款待处理。您将收到电子邮件通知。',order_err:'错误。请重试。',rights:'© 2026. 保留所有权利。',l_lp:'生命路径',l_ex:'表现',l_su:'灵魂渴望',l_pe:'人格',l_de:'命运'},
+ru:{h_title:'НУМЕРОЛОГИЧЕСКАЯ КАРТА',h_sub:'Узнайте, что числа говорят о вас',h_desc:'Путешествие самопознания на основе пифагорейской нумерологии. Ваша карта раскрывает таланты и пути.',h_btn:'✦ СОЗДАТЬ КАРТУ БЕСПЛАТНО',c_title:'Рассчитать нумерологическую карту',c_sub:'Введите данные для точного расчёта',f_name:'Полное имя',f_date:'Дата рождения',f_email:'Email',f_btn:'✦ РАССЧИТАТЬ КАРТУ',r_title:'✨ Ваши числа',r_new:'⟳ НОВЫЙ РАСЧЁТ',p_title:'📄 Полный PDF-отчёт',p_desc:'Получите полный отчёт с профессиональной интерпретацией.',p_buy:'КУПИТЬ СЕЙЧАС',p_loading:'ОБРАБОТКА...',order_ok:'Заказ #{id} создан! Ожидание оплаты. Инструкции на email.',order_err:'Ошибка. Попробуйте снова.',rights:'© 2026. Все права защищены.',l_lp:'ПУТЬ ЖИЗНИ',l_ex:'ВЫРАЖЕНИЕ',l_su:'ЖЕЛАНИЕ ДУШИ',l_pe:'ЛИЧНОСТЬ',l_de:'СУДЬБА'},
+hi:{h_title:'अंक ज्योतिष मानचित्र',h_sub:'जानें संख्याएं आपके बारे में क्या कहती हैं',h_desc:'पाइथागोरियन अंक ज्योतिष पर आधारित आत्म-खोज यात्रा। आपका मानचित्र प्रतिभा और मार्ग दिखाता है।',h_btn:'✦ मुफ्त मानचित्र बनाएं',c_title:'अपना मानचित्र गणना करें',c_sub:'सटीक गणना के लिए डेटा दर्ज करें',f_name:'पूरा नाम',f_date:'जन्म तिथि',f_email:'ईमेल',f_btn:'✦ मानचित्र गणना करें',r_title:'✨ आपकी संख्याएं',r_new:'⟳ नई गणना',p_title:'📄 पूर्ण PDF रिपोर्ट',p_desc:'प्रत्येक अंक की पेशेवर व्याख्या के साथ पूर्ण रिपोर्ट प्राप्त करें।',p_buy:'अभी खरीदें',p_loading:'प्रक्रिया...',order_ok:'ऑर्डर #{id} बनाया गया! भुगतान लंबित। ईमेल पर निर्देश प्राप्त होंगे।',order_err:'त्रुटि। पुनः प्रयास करें।',rights:'© 2026. सर्वाधिकार सुरक्षित।',l_lp:'जीवन पथ',l_ex:'अभिव्यक्ति',l_su:'आत्मा की इच्छा',l_pe:'व्यक्तित्व',l_de:'भाग्य'},
+ar:{h_title:'خريطة الأرقام',h_sub:'اكتشف ما تكشفه الأرقام عنك',h_desc:'رحلة اكتشاف الذات بعلم الأعداد الفيثاغوري. خريطتك تكشف المواهب والمسارات.',h_btn:'✦ إنشاء خريطتي مجاناً',c_title:'احسب خريطة الأرقام',c_sub:'أدخل بياناتك لحساب دقيق',f_name:'الاسم الكامل',f_date:'تاريخ الميلاد',f_email:'البريد الإلكتروني',f_btn:'✦ حساب الخريطة',r_title:'✨ أرقامك',r_new:'⟳ حساب جديد',p_title:'📄 تقرير PDF كامل',p_desc:'احصل على التقرير الكامل مع تفسير مهني لكل رقم.',p_buy:'اشتر الآن',p_loading:'معالجة...',order_ok:'تم إنشاء الطلب #{id}! الدفع معلق. ستتلقى تعليمات عبر البريد.',order_err:'خطأ. حاول مرة أخرى.',rights:'© 2026. جميع الحقوق محفوظة.',l_lp:'مسار الحياة',l_ex:'التعبير',l_su:'رغبة الروح',l_pe:'الشخصية',l_de:'القدر'},
+he:{h_title:'מפה נומרולוגית',h_sub:'גלו מה המספרים מגלים עליכם',h_desc:'מסע גילוי עצמי בנומרולוגיה פיתגורית. המפה שלך חושפת כישרונות ונתיבים.',h_btn:'✦ צור את המפה בחינם',c_title:'חשב את המפה הנומרולוגית',c_sub:'הזן נתונים לחישוב מדויק',f_name:'שם מלא',f_date:'תאריך לידה',f_email:'אימייל',f_btn:'✦ חשב מפה',r_title:'✨ המספרים שלך',r_new:'⟳ חישוב חדש',p_title:'📄 דוח PDF מלא',p_desc:'קבל את הדוח המלא עם פרשנות מקצועית לכל מספר.',p_buy:'קנה עכשיו',p_loading:'מעבד...',order_ok:'ההזמנה #{id} נוצרה! תשלום ממתין. תקבל הוראות במייל.',order_err:'שגיאה. נסה שוב.',rights:'© 2026. כל הזכויות שמורות.',l_lp:'נתיב חיים',l_ex:'ביטוי',l_su:'דחף הנשמה',l_pe:'אישיות',l_de:'גורל'}};
 
-function setLang(c) {
-localStorage.setItem('lang', c);
-document.documentElement.lang = c;
-document.documentElement.dir = ['ar','he'].includes(c) ? 'rtl' : 'ltr';
-document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.c === c));
-document.querySelectorAll('[data-i18n]').forEach(el => {
-const k = el.dataset.i18n;
-if (i18n[c] && i18n[c][k]) el.innerText = i18n[c][k];
-});
-if (currentId && window.lastData) renderResults(window.lastData);
-}
+const langs=[{c:'pt',f:'🇧🇷'},{c:'en',f:'🇺🇸'},{c:'es',f:'🇪🇸'},{c:'it',f:'🇮🇹'},{c:'fr',f:'🇫🇷'},{c:'de',f:'🇩🇪'},{c:'ja',f:'🇯🇵'},{c:'zh',f:'🇨🇳'},{c:'ru',f:'🇷🇺'},{c:'hi',f:'🇮🇳'},{c:'ar',f:'🇸🇦'},{c:'he',f:'🇮🇱'}];
 
-async function handleCalc() {
-const btn = document.getElementById('sBtn');
-btn.disabled = true;
-const origText = btn.innerText;
-btn.innerText = '...';
-try {
-const res = await fetch(API + '/calculate', {
-method: 'POST',
-headers: {'Content-Type': 'application/json'},
-body: JSON.stringify({
-name: document.getElementById('name').value,
-birth_date: document.getElementById('date').value,
-email: document.getElementById('email').value || null
-})
-});
-if (!res.ok) throw new Error();
-const data = await res.json();
-window.lastData = data;
-currentId = data.id;
-renderResults(data);
-document.getElementById('res').style.display = 'block';
-document.getElementById('res').scrollIntoView({behavior:'smooth'});
-} catch(e) {
-alert('Erro ao conectar. Tente novamente.');
-}
-btn.disabled = false;
-btn.innerText = origText;
-}
+function setLang(c){localStorage.setItem('lang',c);document.documentElement.lang=c;document.documentElement.dir=['ar','he'].includes(c)?'rtl':'ltr';document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.c===c));document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(i18n[c]&&i18n[c][k])el.innerText=i18n[c][k];});renderPricing();if(currentId&&window.lastData)renderResults(window.lastData);}
 
-function renderResults(d) {
-const c = localStorage.getItem('lang') || 'pt';
-const g = document.getElementById('rGrid');
-const labels = ['l_lp','l_ex','l_su','l_pe','l_de'];
-const values = [d.life_path, d.expression, d.soul_urge, d.personality, d.destiny];
-g.innerHTML = labels.map((k, i) =>
-'<div class="num-box"><div class="val">' + values[i] + '</div><div class="label">' + (i18n[c][k] || k) + '</div></div>'
-).join('');
-}
+function formatPrice(p){return p.cur==='BRL'?'R$ '+p.amount.toFixed(2).replace('.',','):p.cur==='USD'?'US$ '+p.amount.toFixed(2):p.cur==='EUR'?'€ '+p.amount.toFixed(2):p.cur==='JPY'?'¥'+p.amount.toLocaleString():p.cur==='CNY'?'¥'+p.amount:p.cur==='RUB'?'₽'+p.amount.toLocaleString():p.cur==='INR'?'₹'+p.amount.toLocaleString():p.cur==='SAR'?'SAR '+p.amount:p.cur==='ILS'?'₪'+p.amount:p.value;}
 
-async function handlePDF() {
-let email = document.getElementById('email').value;
-if (!email) email = prompt('Digite seu e-mail:');
-if (!email || !email.includes('@')) { alert('E-mail inválido.'); return; }
-const btn = document.getElementById('pBtn');
-btn.disabled = true;
-btn.innerText = '...';
-try {
-await fetch(API + '/send-email?email=' + encodeURIComponent(email) + '&calculation_id=' + currentId, {method: 'POST'});
-alert('PDF enviado para seu e-mail!');
-} catch(e) {
-alert('Erro ao enviar. Verifique se o SMTP está configurado no Render.');
-}
-btn.disabled = false;
-const lang = localStorage.getItem('lang') || 'pt';
-btn.innerText = i18n[lang].pdf_btn;
-}
+function getPriceForLang(c){if(c==='pt')return prices.pt;if(c==='en')return prices.en;if(c==='es')return prices.es;if(c==='it')return prices.it;if(c==='fr')return prices.fr;if(c==='de')return prices.de;if(c==='ja')return prices.ja;if(c==='zh')return prices.zh;if(c==='ru')return prices.ru;if(c==='hi')return prices.hi;if(c==='ar')return prices.ar;if(c==='he')return prices.he;return prices.en;}
 
-window.onload = function() {
-const container = document.getElementById('langSelector');
-langs.forEach(function(l) {
-var b = document.createElement('button');
-b.className = 'lang-btn';
-b.dataset.c = l.c;
-b.innerHTML = '<span class="flag">' + l.f + '</span> ' + l.c.toUpperCase();
-b.onclick = function() { setLang(l.c); };
-container.appendChild(b);
-});
-var saved = localStorage.getItem('lang');
-setLang(saved || 'pt');
-};
+function renderPricing(){const lang=localStorage.getItem('lang')||'pt';const g=document.getElementById('pricingGrid');if(!g)return;const t=i18n[lang];const p=getPriceForLang(lang);g.innerHTML='<div class="pricing-card featured"><div class="plan-name">★ '+p.name+'</div><div class="plan-price">'+formatPrice(p)+' <span>/ via PDF</span></div><div class="plan-desc">'+p.desc+'</div><button class="btn btn-sm" onclick="buyPDF()" id="buyBtn">'+t.p_buy+'</button></div>';}
+
+async function handleCalc(){const btn=document.getElementById('sBtn');btn.disabled=true;const orig=btn.innerText;btn.innerText='...';try{const name=document.getElementById('name').value;const date=document.getElementById('date').value;lastEmail=document.getElementById('email').value;const res=await fetch(API+'/calculate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,birth_date:date,email:lastEmail||null})});if(!res.ok)throw new Error();const data=await res.json();window.lastData=data;currentId=data.id;renderResults(data);document.getElementById('res').style.display='block';renderPricing();document.getElementById('res').scrollIntoView({behavior:'smooth'});}catch(e){alert('Erro ao conectar. Tente novamente.');}btn.disabled=false;btn.innerText=orig;}
+
+function renderResults(d){const c=localStorage.getItem('lang')||'pt';const g=document.getElementById('rGrid');const keys=['l_lp','l_ex','l_su','l_pe','l_de'];const vals=[d.life_path,d.expression,d.soul_urge,d.personality,d.destiny];g.innerHTML='';keys.forEach((k,i)=>{g.innerHTML+='<div class="num-box"><div class="val">'+vals[i]+'</div><div class="label">'+(i18n[c][k]||k)+'</div></div>';});}
+
+async function buyPDF(){const btn=document.getElementById('buyBtn');if(!btn)return;const lang=localStorage.getItem('lang')||'pt';const t=i18n[lang];btn.disabled=true;btn.innerText=t.p_loading;try{const p=getPriceForLang(lang);const email=lastEmail||document.getElementById('email').value||prompt('Digite seu e-mail:');if(!email||!email.includes('@')){alert('E-mail inválido.');btn.disabled=false;btn.innerText=t.p_buy;return;}const res=await fetch(API+'/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,product:'mapa_numerologico',price:p.amount,calculation_id:currentId})});if(!res.ok)throw new Error();const data=await res.json();const msg=document.getElementById('orderMsg');msg.style.display='block';msg.innerHTML='<h4>✅ '+t.p_buy+'</h4><p>'+(t.order_ok||'').replace('{id}',data.order_id)+'</p><p style="color:#666;font-size:.8rem;margin-top:8px;">'+(lang==='pt'?'Em breve: integração com Mercado Pago e PayPal.' : lang==='es'?'Próximamente: integración con Mercado Pago y PayPal.' : 'Coming soon: Mercado Pago and PayPal integration.')+'</p>';}catch(e){const msg=document.getElementById('orderMsg');msg.style.display='block';msg.innerHTML='<p style="color:#e74c3c;">'+t.order_err+'</p>';}btn.disabled=false;btn.innerText=t.p_buy;}
+
+function resetForm(){document.getElementById('nForm').reset();document.getElementById('res').style.display='none';document.getElementById('orderMsg').style.display='none';currentId=null;window.lastData=null;}
+
+window.onload=function(){const c=document.getElementById('langSelector');langs.forEach(function(l){var b=document.createElement('button');b.className='lang-btn';b.dataset.c=l.c;b.innerHTML='<span class="flag">'+l.f+'</span> '+l.c.toUpperCase();b.onclick=function(){setLang(l.c);};c.appendChild(b);});const s=localStorage.getItem('lang');setLang(s||(navigator.language.split('-')[0]==='pt'?'pt':'en'));};
 </script>
 </body>
 </html>
