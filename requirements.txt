@@ -6,7 +6,7 @@ reportlab==4.2.0
 fpdf2==2.8.1
 sendgrid==6.11.0
 stripe==10.0.0
-mercadopago==2.5.0
+mercadopago==3.3.0
 sqlalchemy==2.0.35
 aiosqlite==0.20.0
 psycopg2-binary==2.9.9
