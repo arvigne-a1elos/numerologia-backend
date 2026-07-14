@@ -17,9 +17,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.units import cm
 import uvicorn
 
-# ---------------------------------------------------------------------------
 # Configurações via variáveis de ambiente
-# ---------------------------------------------------------------------------
 DB_PATH = os.getenv("NUMEROLOGY_DB", "numerology.db")
 SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
@@ -39,9 +37,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ---------------------------------------------------------------------------
 # Banco de dados SQLite
-# ---------------------------------------------------------------------------
 def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -81,9 +77,7 @@ def init_db():
 def on_startup():
     init_db()
 
-# ---------------------------------------------------------------------------
 # Modelos Pydantic
-# ---------------------------------------------------------------------------
 class NumerologyRequest(BaseModel):
     name: str = Field(..., min_length=2)
     birth_date: dt.date
@@ -109,9 +103,7 @@ class CheckoutWebhook(BaseModel):
     status: str
     secret: str
 
-# ---------------------------------------------------------------------------
 # Lógica de numerologia
-# ---------------------------------------------------------------------------
 PYTHAGOREAN = {
     'a': 1, 'j': 1, 's': 1,
     'b': 2, 'k': 2, 't': 2,
@@ -171,30 +163,26 @@ def compute_numerology(name: str, birth_date: dt.date) -> NumerologyResult:
         destiny=destiny,
     )
 
-# ---------------------------------------------------------------------------
 # Geração de PDF
-# ---------------------------------------------------------------------------
 def generate_pdf(result: NumerologyResult, path: str):
-    doc = SimpleDocTemplate(path, pagesize=A4, topMargin=2 * cm, bottomMargin=2 * cm)
+    doc = SimpleDocTemplate(path, pagesize=A4, topMargin=2*cm, bottomMargin=2*cm)
     styles = getSampleStyleSheet()
     story = []
     story.append(Paragraph("Mapa Numerológico", styles["Title"]))
-    story.append(Spacer(1, 0.5 * cm))
+    story.append(Spacer(1, 0.5*cm))
     story.append(Paragraph(f"Nome: {result.name}", styles["Normal"]))
     story.append(Paragraph(f"Data de Nascimento: {result.birth_date}", styles["Normal"]))
-    story.append(Spacer(1, 0.5 * cm))
+    story.append(Spacer(1, 0.5*cm))
     story.append(Paragraph(f"Caminho de Vida: {result.life_path}", styles["Heading2"]))
     story.append(Paragraph(f"Expressão: {result.expression}", styles["Heading2"]))
     story.append(Paragraph(f"Motivação (Alma): {result.soul_urge}", styles["Heading2"]))
     story.append(Paragraph(f"Personalidade: {result.personality}", styles["Heading2"]))
     story.append(Paragraph(f"Destino: {result.destiny}", styles["Heading2"]))
-    story.append(Spacer(1, 1 * cm))
+    story.append(Spacer(1, 1*cm))
     story.append(Paragraph("Obrigado por confiar na nossa numerologia!", styles["Normal"]))
     doc.build(story)
 
-# ---------------------------------------------------------------------------
 # E-mail
-# ---------------------------------------------------------------------------
 def send_email(to: str, subject: str, body: str, attachment_path: Optional[str] = None):
     if not SMTP_USER or not SMTP_PASS:
         print(f"[SMTP] Credenciais ausentes. E-mail para {to} não enviado.")
@@ -214,9 +202,7 @@ def send_email(to: str, subject: str, body: str, attachment_path: Optional[str] 
         server.login(SMTP_USER, SMTP_PASS)
         server.sendmail(SMTP_FROM, [to], msg.as_string())
 
-# ---------------------------------------------------------------------------
-# Endpoints
-# ---------------------------------------------------------------------------
+# ENDPOINTS
 @app.get("/", include_in_schema=False)
 async def root():
     with open("index.html", "r", encoding="utf-8") as f:
@@ -344,9 +330,6 @@ def send_email_endpoint(
         attachment_path=pdf_path,
     )
     return {"message": "E-mail agendado para envio.", "email": email}
-@app.get("/", include_in_schema=False)
-async def root():
-    with open("index.html", "r", encoding="utf-8") as f:
-        return HTMLResponse(content=f.read(), status_code=200)
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
