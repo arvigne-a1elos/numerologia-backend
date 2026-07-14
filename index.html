@@ -14,7 +14,6 @@
             overflow-x: hidden;
         }
 
-        /* HERO */
         .hero {
             min-height: 100vh;
             display: flex;
@@ -36,8 +35,8 @@
         }
 
         .logo-symbol {
-            width: 120px;
-            height: 120px;
+            width: 180px;
+            height: 180px;
             margin-bottom: 2rem;
             position: relative;
         }
@@ -138,7 +137,6 @@
             50% { transform: translateX(-50%) translateY(-8px); }
         }
 
-        /* SECTIONS */
         section {
             padding: 5rem 2rem;
             max-width: 1100px;
@@ -161,7 +159,6 @@
             font-size: 1.05rem;
         }
 
-        /* ABOUT */
         .about-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -201,7 +198,6 @@
             font-weight: 300;
         }
 
-        /* HOW IT WORKS */
         .steps {
             display: flex;
             flex-direction: column;
@@ -247,7 +243,6 @@
             line-height: 1.5;
         }
 
-        /* NUMBERS PREVIEW */
         .numbers-preview {
             display: flex;
             justify-content: center;
@@ -276,7 +271,6 @@
             color: #0a0a0a;
         }
 
-        /* CTA FINAL */
         .cta-section {
             text-align: center;
             padding: 5rem 2rem;
@@ -307,7 +301,6 @@
             flex-wrap: wrap;
         }
 
-        /* FOOTER */
         footer {
             text-align: center;
             padding: 2rem;
@@ -325,11 +318,11 @@
             text-decoration: underline;
         }
 
-        /* RESPONSIVE */
         @media (max-width: 600px) {
             section { padding: 3rem 1.25rem; }
             .step { padding: 1.25rem; }
             .cta-buttons { flex-direction: column; align-items: center; }
+            .logo-symbol { width: 140px; height: 140px; }
         }
     </style>
 </head>
@@ -337,33 +330,137 @@
 
 <section class="hero">
     <div class="logo-symbol">
-        <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Círculo externo -->
-            <circle cx="60" cy="60" r="55" stroke="#C9A94E" stroke-width="0.8" fill="none"/>
-            <!-- Quadrado interno -->
-            <rect x="30" y="30" width="60" height="60" stroke="#C9A94E" stroke-width="0.8" fill="none"/>
-            <!-- Números orbitando -->
-            <text x="60" y="10" text-anchor="middle" fill="#C9A94E" font-size="7" font-family="serif">1</text>
-            <text x="90" y="25" text-anchor="middle" fill="#C9A94E" font-size="7" font-family="serif">2</text>
-            <text x="108" y="60" text-anchor="middle" fill="#C9A94E" font-size="7" font-family="serif">3</text>
-            <text x="90" y="95" text-anchor="middle" fill="#C9A94E" font-size="7" font-family="serif">4</text>
-            <text x="60" y="112" text-anchor="middle" fill="#C9A94E" font-size="7" font-family="serif">5</text>
-            <text x="30" y="95" text-anchor="middle" fill="#C9A94E" font-size="7" font-family="serif">6</text>
-            <text x="12" y="60" text-anchor="middle" fill="#C9A94E" font-size="7" font-family="serif">7</text>
-            <text x="30" y="25" text-anchor="middle" fill="#C9A94E" font-size="7" font-family="serif">8</text>
-            <text x="60" y="60" text-anchor="middle" fill="#C9A94E" font-size="10" font-family="serif">9</text>
-            <!-- Linhas do homem vitruviano simplificado -->
-            <line x1="60" y1="30" x2="60" y2="42" stroke="#C9A94E" stroke-width="0.6"/>
-            <line x1="60" y1="42" x2="50" y2="50" stroke="#C9A94E" stroke-width="0.6"/>
-            <line x1="60" y1="42" x2="70" y2="50" stroke="#C9A94E" stroke-width="0.6"/>
-            <circle cx="60" cy="38" r="6" stroke="#C9A94E" stroke-width="0.6" fill="none"/>
-            <line x1="60" y1="48" x2="60" y2="70" stroke="#C9A94E" stroke-width="0.6"/>
-            <line x1="60" y1="70" x2="48" y2="85" stroke="#C9A94E" stroke-width="0.6"/>
-            <line x1="60" y1="70" x2="72" y2="85" stroke="#C9A94E" stroke-width="0.6"/>
-            <line x1="50" y1="50" x2="40" y2="58" stroke="#C9A94E" stroke-width="0.6"/>
-            <line x1="70" y1="50" x2="80" y2="58" stroke="#C9A94E" stroke-width="0.6"/>
-            <!-- Círculo central (ponto focal) -->
-            <circle cx="60" cy="60" r="2" fill="#C9A94E"/>
+        <!-- SVG do Homem Vitruviano detalhado -->
+        <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Círculo externo (cosmos) -->
+            <circle cx="100" cy="100" r="90" stroke="#C9A94E" stroke-width="0.6" fill="none" opacity="0.8"/>
+
+            <!-- Quadrado (matéria/terra) -->
+            <rect x="25" y="25" width="150" height="150" stroke="#C9A94E" stroke-width="0.5" fill="none" opacity="0.5"/>
+
+            <!-- Linhas diagonais (sacred geometry) -->
+            <line x1="25" y1="25" x2="175" y2="175" stroke="#C9A94E" stroke-width="0.2" opacity="0.2"/>
+            <line x1="175" y1="25" x2="25" y2="175" stroke="#C9A94E" stroke-width="0.2" opacity="0.2"/>
+            <line x1="100" y1="10" x2="100" y2="190" stroke="#C9A94E" stroke-width="0.15" opacity="0.15"/>
+            <line x1="10" y1="100" x2="190" y2="100" stroke="#C9A94E" stroke-width="0.15" opacity="0.15"/>
+
+            <!-- Círculo interno (umbigo) -->
+            <circle cx="100" cy="100" r="2" fill="#C9A94E" opacity="0.6"/>
+
+            <!-- HOMEM VITRUVIANO - Corpo Principal -->
+
+            <!-- CABEÇA -->
+            <circle cx="100" cy="52" r="13" stroke="#C9A94E" stroke-width="1" fill="none"/>
+            <!-- Perfil facial -->
+            <path d="M95 47 Q93 47 92 49 Q91 51 93 52 L94 53" stroke="#C9A94E" stroke-width="0.7" fill="none"/>
+            <path d="M105 47 Q107 47 108 49 Q109 51 107 52" stroke="#C9A94E" stroke-width="0.7" fill="none"/>
+            <!-- Olhos -->
+            <circle cx="95" cy="50" r="1" fill="#C9A94E" opacity="0.5"/>
+            <circle cx="105" cy="50" r="1" fill="#C9A94E" opacity="0.5"/>
+            <!-- Nariz -->
+            <path d="M100 51 L100 55 L98 55" stroke="#C9A94E" stroke-width="0.5" fill="none"/>
+            <!-- Boca -->
+            <path d="M97 58 Q100 60 103 58" stroke="#C9A94E" stroke-width="0.4" fill="none"/>
+
+            <!-- PESCOÇO -->
+            <line x1="100" y1="65" x2="100" y2="72" stroke="#C9A94E" stroke-width="0.8"/>
+
+            <!-- OMBROS -->
+            <path d="M88 74 Q100 70 112 74" stroke="#C9A94E" stroke-width="0.8" fill="none"/>
+
+            <!-- BRAÇO DIREITO (esticado horizontal) -->
+            <path d="M112 74 Q125 78 138 80 L148 82" stroke="#C9A94E" stroke-width="0.7" fill="none"/>
+            <!-- Antebraço direito -->
+            <path d="M148 82 L155 87" stroke="#C9A94E" stroke-width="0.7" fill="none"/>
+            <!-- Mão direita -->
+            <path d="M155 87 L158 89" stroke="#C9A94E" stroke-width="0.5" fill="none"/>
+
+            <!-- BRAÇO ESQUERDO (esticado horizontal) -->
+            <path d="M88 74 Q75 78 62 80 L52 82" stroke="#C9A94E" stroke-width="0.7" fill="none"/>
+            <!-- Antebraço esquerdo -->
+            <path d="M52 82 L45 87" stroke="#C9A94E" stroke-width="0.7" fill="none"/>
+            <!-- Mão esquerda -->
+            <path d="M45 87 L42 89" stroke="#C9A94E" stroke-width="0.5" fill="none"/>
+
+            <!-- BRAÇO DIREITO (levantado, segunda posição) -->
+            <path d="M112 74 Q125 65 Q135 52 140 42 L142 38" stroke="#C9A94E" stroke-width="0.5" fill="none" opacity="0.5"/>
+            <path d="M142 38 L144 35" stroke="#C9A94E" stroke-width="0.4" fill="none" opacity="0.5"/>
+
+            <!-- BRAÇO ESQUERDO (levantado, segunda posição) -->
+            <path d="M88 74 Q75 65 Q65 52 60 42 L58 38" stroke="#C9A94E" stroke-width="0.5" fill="none" opacity="0.5"/>
+            <path d="M58 38 L56 35" stroke="#C9A94E" stroke-width="0.4" fill="none" opacity="0.5"/>
+
+            <!-- TÓRAX (caixa torácica) -->
+            <path d="M90 74 Q92 78 94 84 L94 95" stroke="#C9A94E" stroke-width="0.7" fill="none"/>
+            <path d="M110 74 Q108 78 106 84 L106 95" stroke="#C9A94E" stroke-width="0.7" fill="none"/>
+            <!-- Arco costal -->
+            <path d="M94 84 Q100 88 106 84" stroke="#C9A94E" stroke-width="0.5" fill="none"/>
+            <!-- Linha do peitoral -->
+            <path d="M90 78 Q100 82 110 78" stroke="#C9A94E" stroke-width="0.5" fill="none"/>
+            <!-- Mamilos -->
+            <circle cx="95" cy="78" r="1" fill="#C9A94E" opacity="0.4"/>
+            <circle cx="105" cy="78" r="1" fill="#C9A94E" opacity="0.4"/>
+
+            <!-- ABDÔMEN -->
+            <path d="M94 95 L94 112" stroke="#C9A94E" stroke-width="0.7" fill="none"/>
+            <path d="M106 95 L106 112" stroke="#C9A94E" stroke-width="0.7" fill="none"/>
+            <!-- Linhas abdominais -->
+            <path d="M94 100 Q100 103 106 100" stroke="#C9A94E" stroke-width="0.4" fill="none"/>
+            <path d="M94 106 Q100 109 106 106" stroke="#C9A94E" stroke-width="0.4" fill="none"/>
+            <!-- Cicatriz umbilical -->
+            <circle cx="100" cy="100" r="0.8" fill="none" stroke="#C9A94E" stroke-width="0.4"/>
+
+            <!-- CINTURA / QUADRIL -->
+            <path d="M90 112 Q88 113 87 114" stroke="#C9A94E" stroke-width="0.7" fill="none"/>
+            <path d="M110 112 Q112 113 113 114" stroke="#C9A94E" stroke-width="0.7" fill="none"/>
+
+            <!-- PERNA DIREITA (fechada, primeira posição) -->
+            <path d="M106 114 Q112 130 114 145 L114 155" stroke="#C9A94E" stroke-width="0.8" fill="none"/>
+            <!-- Perna direita baixo -->
+            <path d="M114 155 L112 165" stroke="#C9A94E" stroke-width="0.7" fill="none"/>
+            <!-- Pé direito -->
+            <path d="M109 165 L112 165 L115 165" stroke="#C9A94E" stroke-width="0.6" fill="none"/>
+
+            <!-- PERNA ESQUERDA (fechada, primeira posição) -->
+            <path d="M94 114 Q88 130 86 145 L86 155" stroke="#C9A94E" stroke-width="0.8" fill="none"/>
+            <!-- Perna esquerda baixo -->
+            <path d="M86 155 L88 165" stroke="#C9A94E" stroke-width="0.7" fill="none"/>
+            <!-- Pé esquerdo -->
+            <path d="M85 165 L88 165 L91 165" stroke="#C9A94E" stroke-width="0.6" fill="none"/>
+
+            <!-- PERNA DIREITA (aberta, segunda posição) -->
+            <path d="M106 114 Q118 125 128 140 L138 152" stroke="#C9A94E" stroke-width="0.5" fill="none" opacity="0.5"/>
+            <path d="M138 152 L145 158" stroke="#C9A94E" stroke-width="0.4" fill="none" opacity="0.5"/>
+
+            <!-- PERNA ESQUERDA (aberta, segunda posição) -->
+            <path d="M94 114 Q82 125 72 140 L62 152" stroke="#C9A94E" stroke-width="0.5" fill="none" opacity="0.5"/>
+            <path d="M62 152 L55 158" stroke="#C9A94E" stroke-width="0.4" fill="none" opacity="0.5"/>
+
+            <!-- NÚMEROS 1-9 ORBITANDO -->
+            <text x="100" y="12" text-anchor="middle" fill="#C9A94E" font-size="8" font-family="'Playfair Display', serif" opacity="0.9">1</text>
+            <text x="148" y="30" text-anchor="middle" fill="#C9A94E" font-size="8" font-family="'Playfair Display', serif" opacity="0.9">2</text>
+            <text x="178" y="65" text-anchor="middle" fill="#C9A94E" font-size="8" font-family="'Playfair Display', serif" opacity="0.9">3</text>
+            <text x="185" y="103" text-anchor="middle" fill="#C9A94E" font-size="8" font-family="'Playfair Display', serif" opacity="0.9">4</text>
+            <text x="175" y="140" text-anchor="middle" fill="#C9A94E" font-size="8" font-family="'Playfair Display', serif" opacity="0.9">5</text>
+            <text x="148" y="172" text-anchor="middle" fill="#C9A94E" font-size="8" font-family="'Playfair Display', serif" opacity="0.9">6</text>
+            <text x="100" y="190" text-anchor="middle" fill="#C9A94E" font-size="8" font-family="'Playfair Display', serif" opacity="0.9">7</text>
+            <text x="52" y="172" text-anchor="middle" fill="#C9A94E" font-size="8" font-family="'Playfair Display', serif" opacity="0.9">8</text>
+            <text x="22" y="140" text-anchor="middle" fill="#C9A94E" font-size="8" font-family="'Playfair Display', serif" opacity="0.9">9</text>
+            <text x="12" y="65" text-anchor="middle" fill="#C9A94E" font-size="8" font-family="'Playfair Display', serif" opacity="0.9">10</text>
+            <text x="35" y="30" text-anchor="middle" fill="#C9A94E" font-size="8" font-family="'Playfair Display', serif" opacity="0.9">11</text>
+
+            <!-- CÍRCULO INTERNO (orbita dos números mestres) -->
+            <circle cx="100" cy="100" r="75" stroke="#C9A94E" stroke-width="0.2" opacity="0.2" stroke-dasharray="2,4"/>
+
+            <!-- ORNAMENTOS GEOMÉTRICOS - Flores da Vida parciais -->
+            <circle cx="100" cy="60" r="8" stroke="#C9A94E" stroke-width="0.15" opacity="0.15" fill="none"/>
+            <circle cx="100" cy="140" r="8" stroke="#C9A94E" stroke-width="0.15" opacity="0.15" fill="none"/>
+            <circle cx="60" cy="100" r="8" stroke="#C9A94E" stroke-width="0.15" opacity="0.15" fill="none"/>
+            <circle cx="140" cy="100" r="8" stroke="#C9A94E" stroke-width="0.15" opacity="0.15" fill="none"/>
+            <circle cx="72" cy="72" r="8" stroke="#C9A94E" stroke-width="0.15" opacity="0.15" fill="none"/>
+            <circle cx="128" cy="72" r="8" stroke="#C9A94E" stroke-width="0.15" opacity="0.15" fill="none"/>
+            <circle cx="72" cy="128" r="8" stroke="#C9A94E" stroke-width="0.15" opacity="0.15" fill="none"/>
+            <circle cx="128" cy="128" r="8" stroke="#C9A94E" stroke-width="0.15" opacity="0.15" fill="none"/>
         </svg>
     </div>
 
