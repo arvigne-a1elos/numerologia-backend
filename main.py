@@ -6,7 +6,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 from typing import List, Optional
-
+from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
