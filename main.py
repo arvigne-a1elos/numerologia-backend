@@ -5,11 +5,10 @@ import datetime as dt
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
-app.mount("/", StaticFiles(directory=".", html=True), name="static")
 from typing import List, Optional
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr, Field
 from reportlab.lib.pagesizes import A4
@@ -32,6 +31,7 @@ PDF_DIR = os.getenv("PDF_DIR", "pdfs")
 os.makedirs(PDF_DIR, exist_ok=True)
 
 app = FastAPI(title="Numerologia API", version="1.0.0")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -49,7 +49,6 @@ def get_db():
         yield conn
     finally:
         conn.close()
-
 
 def init_db():
     with sqlite3.connect(DB_PATH) as conn:
@@ -78,11 +77,9 @@ def init_db():
         );
         """)
 
-
 @app.on_event("startup")
 def on_startup():
     init_db()
-
 
 # ---------------------------------------------------------------------------
 # Modelos Pydantic
@@ -91,7 +88,6 @@ class NumerologyRequest(BaseModel):
     name: str = Field(..., min_length=2)
     birth_date: dt.date
     email: Optional[EmailStr] = None
-
 
 class NumerologyResult(BaseModel):
     name: str
@@ -102,19 +98,16 @@ class NumerologyResult(BaseModel):
     personality: int
     destiny: int
 
-
 class CheckoutRequest(BaseModel):
     email: EmailStr
     product: str = "mapa_numerologico"
     price: float = 49.90
     calculation_id: Optional[int] = None
 
-
 class CheckoutWebhook(BaseModel):
     order_id: int
     status: str
     secret: str
-
 
 # ---------------------------------------------------------------------------
 # Lógica de numerologia
@@ -132,7 +125,6 @@ PYTHAGOREAN = {
 }
 VOWELS = set("aeiou")
 
-
 def reduce_number(n: int, master: bool = True) -> int:
     while n > 9:
         if master and n in (11, 22, 33):
@@ -140,11 +132,9 @@ def reduce_number(n: int, master: bool = True) -> int:
         n = sum(int(d) for d in str(n))
     return n
 
-
 def calc_life_path(birth_date: dt.date) -> int:
     total = sum(int(d) for d in birth_date.strftime("%Y%m%d"))
     return reduce_number(total)
-
 
 def calc_name_numbers(name: str):
     name = name.lower().replace(" ", "")
@@ -164,10 +154,8 @@ def calc_name_numbers(name: str):
         "personality": reduce_number(consonants),
     }
 
-
 def calc_destiny(life_path: int, expression: int) -> int:
     return reduce_number(life_path + expression)
-
 
 def compute_numerology(name: str, birth_date: dt.date) -> NumerologyResult:
     life_path = calc_life_path(birth_date)
@@ -182,7 +170,6 @@ def compute_numerology(name: str, birth_date: dt.date) -> NumerologyResult:
         personality=name_nums["personality"],
         destiny=destiny,
     )
-
 
 # ---------------------------------------------------------------------------
 # Geração de PDF
@@ -204,7 +191,6 @@ def generate_pdf(result: NumerologyResult, path: str):
     story.append(Spacer(1, 1 * cm))
     story.append(Paragraph("Obrigado por confiar na nossa numerologia!", styles["Normal"]))
     doc.build(story)
-
 
 # ---------------------------------------------------------------------------
 # E-mail
@@ -228,14 +214,13 @@ def send_email(to: str, subject: str, body: str, attachment_path: Optional[str] 
         server.login(SMTP_USER, SMTP_PASS)
         server.sendmail(SMTP_FROM, [to], msg.as_string())
 
-
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
-@app.get("/")
-def root():
-    return {"status": "ok", "service": "numerologia-api"}
-
+@app.get("/", include_in_schema=False)
+async def root():
+    with open("index.html", "r", encoding="utf-8") as f:
+        return HTMLResponse(content=f.read(), status_code=200)
 
 @app.post("/calculate", response_model=NumerologyResult)
 def calculate(req: NumerologyRequest, db: sqlite3.Connection = Depends(get_db)):
@@ -251,7 +236,6 @@ def calculate(req: NumerologyRequest, db: sqlite3.Connection = Depends(get_db)):
     result_id = cur.lastrowid
     return JSONResponse(status_code=200, content={**result.dict(), "id": result_id})
 
-
 @app.get("/calculations", response_model=List[NumerologyResult])
 def list_calculations(db: sqlite3.Connection = Depends(get_db)):
     rows = db.execute("SELECT * FROM calculations ORDER BY id DESC").fetchall()
@@ -263,7 +247,6 @@ def list_calculations(db: sqlite3.Connection = Depends(get_db)):
             destiny=r["destiny"],
         ) for r in rows
     ]
-
 
 @app.post("/checkout")
 def checkout(req: CheckoutRequest, db: sqlite3.Connection = Depends(get_db)):
@@ -280,7 +263,6 @@ def checkout(req: CheckoutRequest, db: sqlite3.Connection = Depends(get_db)):
         "checkout_url": f"https://exemplo.com/pay/{order_id}",
     }
 
-
 @app.post("/checkout/webhook")
 def checkout_webhook(
     payload: CheckoutWebhook,
@@ -294,7 +276,6 @@ def checkout_webhook(
         raise HTTPException(status_code=404, detail="Pedido não encontrado")
     db.execute("UPDATE orders SET status = ? WHERE id = ?", (payload.status, payload.order_id))
     db.commit()
-
     if payload.status == "paid" and order["calculation_id"]:
         calc = db.execute(
             "SELECT * FROM calculations WHERE id = ?", (order["calculation_id"],)
@@ -317,7 +298,6 @@ def checkout_webhook(
             )
     return {"order_id": payload.order_id, "status": payload.status}
 
-
 @app.post("/generate-pdf/{calculation_id}")
 def generate_pdf_endpoint(calculation_id: int, db: sqlite3.Connection = Depends(get_db)):
     calc = db.execute(
@@ -334,7 +314,6 @@ def generate_pdf_endpoint(calculation_id: int, db: sqlite3.Connection = Depends(
     pdf_path = os.path.join(PDF_DIR, f"mapa_{calculation_id}.pdf")
     generate_pdf(result, pdf_path)
     return {"pdf_path": pdf_path, "message": "PDF gerado com sucesso."}
-
 
 @app.post("/send-email")
 def send_email_endpoint(
@@ -365,10 +344,6 @@ def send_email_endpoint(
         attachment_path=pdf_path,
     )
     return {"message": "E-mail agendado para envio.", "email": email}
-
-@app.get("/")
-async def serve_index():
-    return FileResponse("index.html")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
