@@ -5,6 +5,7 @@ import datetime as dt
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
+app.mount("/", StaticFiles(directory=".", html=True), name="static")
 from typing import List, Optional
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
@@ -365,7 +366,9 @@ def send_email_endpoint(
     )
     return {"message": "E-mail agendado para envio.", "email": email}
 
-app.mount("/", StaticFiles(directory=".", html=True), name="static")
+@app.get("/")
+async def serve_index():
+    return FileResponse("index.html")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
