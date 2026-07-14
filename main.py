@@ -17,7 +17,6 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.units import cm
 import uvicorn
 
-# Configurações via variáveis de ambiente
 DB_PATH = os.getenv("NUMEROLOGY_DB", "numerology.db")
 SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
@@ -37,7 +36,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Banco de dados SQLite
 def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -77,7 +75,6 @@ def init_db():
 def on_startup():
     init_db()
 
-# Modelos Pydantic
 class NumerologyRequest(BaseModel):
     name: str = Field(..., min_length=2)
     birth_date: dt.date
@@ -103,7 +100,6 @@ class CheckoutWebhook(BaseModel):
     status: str
     secret: str
 
-# Lógica de numerologia
 PYTHAGOREAN = {
     'a': 1, 'j': 1, 's': 1,
     'b': 2, 'k': 2, 't': 2,
@@ -163,7 +159,6 @@ def compute_numerology(name: str, birth_date: dt.date) -> NumerologyResult:
         destiny=destiny,
     )
 
-# Geração de PDF
 def generate_pdf(result: NumerologyResult, path: str):
     doc = SimpleDocTemplate(path, pagesize=A4, topMargin=2*cm, bottomMargin=2*cm)
     styles = getSampleStyleSheet()
@@ -182,7 +177,6 @@ def generate_pdf(result: NumerologyResult, path: str):
     story.append(Paragraph("Obrigado por confiar na nossa numerologia!", styles["Normal"]))
     doc.build(story)
 
-# E-mail
 def send_email(to: str, subject: str, body: str, attachment_path: Optional[str] = None):
     if not SMTP_USER or not SMTP_PASS:
         print(f"[SMTP] Credenciais ausentes. E-mail para {to} não enviado.")
@@ -202,7 +196,6 @@ def send_email(to: str, subject: str, body: str, attachment_path: Optional[str] 
         server.login(SMTP_USER, SMTP_PASS)
         server.sendmail(SMTP_FROM, [to], msg.as_string())
 
-# ENDPOINTS
 @app.get("/", include_in_schema=False)
 async def root():
     with open("index.html", "r", encoding="utf-8") as f:
