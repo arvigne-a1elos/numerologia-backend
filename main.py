@@ -344,6 +344,9 @@ def send_email_endpoint(
         attachment_path=pdf_path,
     )
     return {"message": "E-mail agendado para envio.", "email": email}
-
+@app.get("/", include_in_schema=False)
+async def root():
+    with open("index.html", "r", encoding="utf-8") as f:
+        return HTMLResponse(content=f.read(), status_code=200)
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
