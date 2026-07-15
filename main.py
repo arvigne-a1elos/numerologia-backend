@@ -1,429 +1,441 @@
-import os
-import smtplib
-import sqlite3
-import datetime as dt
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.mime.application import MIMEApplication
-from typing import List, Optional
-from fastapi.staticfiles import StaticFiles
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends, Request
-from fastapi.responses import JSONResponse, HTMLResponse
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, EmailStr, Field
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.units import cm
-import mercadopago
+import os, sys, json, hashlib, hmac, logging, uuid, asyncio
+from datetime import datetime, date, timedelta
+from typing import Optional
+from decimal import Decimal
+
 import stripe
+import mercadopago
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Request
+from fastapi.responses import HTMLResponse, JSONResponse
+from pydantic import BaseModel, Field
+from sqlalchemy import create_engine, Column, String, Integer, Float, DateTime, Text
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail, Email, To, Content
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib import colors
+from reportlab.lib.units import mm
+import python_dateutil.parser as dp
+import aiofiles
 
-# ===== CONFIGURACOES VIA VARIAVEIS DE AMBIENTE =====
-DB_PATH = os.getenv("NUMEROLOGY_DB", "numerology.db")
-SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USER = os.getenv("SMTP_USER", "")
-SMTP_PASS = os.getenv("SMTP_PASS", "")
-SMTP_FROM = os.getenv("SMTP_FROM", SMTP_USER)
-CHECKOUT_WEBHOOK_SECRET = os.getenv("CHECKOUT_SECRET", "dev-secret")
-PDF_DIR = os.getenv("PDF_DIR", "pdfs")
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-# ===== PAYMENT GATEWAYS =====
-# Use variaveis de ambiente no Render para producao
+# ===== CONFIG =====
 MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN", "")
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "")
+FROM_EMAIL = os.getenv("FROM_EMAIL", "noreply@a1elos.com.br")
+BASE_URL = os.getenv("BASE_URL", "https://numerologia-api-wd2q.onrender.com")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./numerologia.db")
 
-os.makedirs(PDF_DIR, exist_ok=True)
+# Stripe
+if STRIPE_SECRET_KEY:
+    stripe.api_key = STRIPE_SECRET_KEY
 
-# ===== STATIC FILES - SERVE O HTML =====
-STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
-os.makedirs(STATIC_DIR, exist_ok=True)
+# Mercado Pago
+sdk = None
+if MP_ACCESS_TOKEN:
+    try:
+        sdk = mercadopago.SDK(MP_ACCESS_TOKEN)
+    except Exception as e:
+        logger.warning(f"Mercado Pago SDK init failed: {e}")
 
+# ===== DATABASE =====
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+Base = declarative_base()
+SessionLocal = sessionmaker(bind=engine)
+
+class Calculation(Base):
+    __tablename__ = "calculations"
+    id = Column(String, primary_key=True)
+    name = Column(String)
+    birth_date = Column(String)
+    email = Column(String, nullable=True)
+    life_path = Column(Integer)
+    expression = Column(Integer)
+    soul_urge = Column(Integer)
+    personality = Column(Integer)
+    destiny = Column(Integer)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Order(Base):
+    __tablename__ = "orders"
+    id = Column(String, primary_key=True)
+    email = Column(String)
+    product = Column(String)
+    price = Column(Float)
+    calculation_id = Column(String, nullable=True)
+    status = Column(String, default="pending")
+    payment_method = Column(String, nullable=True)
+    payment_id = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(title="Numerologia API")
+
+# ===== INDEX HTML =====
 HTML_PATH = os.path.join(os.path.dirname(__file__), "index.html")
+INDEX_HTML = """<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Mapa Numerológico</title><style>body{background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;text-align:center;padding:20px}h1{color:#C9A94E;font-size:2.5rem;margin-bottom:10px}p{color:#888;margin-bottom:20px}.btn{background:#C9A94E;color:#0a0a0a;padding:12px 30px;border:none;border-radius:50px;cursor:pointer;font-weight:600;text-transform:uppercase;text-decoration:none;display:inline-block}</style></head><body><h1>🔮 Mapa Numerológico</h1><p>Calcule seu mapa numerológico gratuitamente.</p><p style="color:#666;font-size:0.9rem">API ativa. Aguarde o HTML completo no deploy com o index.html do repositório.</p></body></html>"""
 if os.path.exists(HTML_PATH):
     with open(HTML_PATH, "r", encoding="utf-8") as f:
         INDEX_HTML = f.read()
-else:
-    INDEX_HTML = """<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Numerologia API</title>
-<style>body{font-family:sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;background:#0a0a0a;color:#fff;text-align:center;}
-h1{color:#C9A94E;}p{color:#888;}</style></head><body><div><h1>Mapa Numerológico</h1>
-<p>API ativa. Frontend em deploy separado.</p></div></body></html>"""
 
-app = FastAPI(title="Numerologia API", version="1.2.0")
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
-
-# ===== BANCO DE DADOS =====
-def get_db():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    try:
-        yield conn
-    finally:
-        conn.close()
-
-def init_db():
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.executescript("""
-            CREATE TABLE IF NOT EXISTS calculations (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL, birth_date TEXT NOT NULL, email TEXT,
-                life_path INTEGER, expression INTEGER,
-                soul_urge INTEGER, personality INTEGER, destiny INTEGER,
-                created_at TEXT DEFAULT CURRENT_TIMESTAMP
-            );
-            CREATE TABLE IF NOT EXISTS orders (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                email TEXT NOT NULL, product TEXT NOT NULL,
-                price REAL NOT NULL, status TEXT DEFAULT 'pending',
-                calculation_id INTEGER, created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (calculation_id) REFERENCES calculations(id)
-            );
-        """)
-
-@app.on_event("startup")
-def on_startup():
-    init_db()
-
-# ===== MODELOS =====
-class NumerologyRequest(BaseModel):
-    name: str = Field(..., min_length=2)
-    birth_date: dt.date
-    email: Optional[EmailStr] = None
-
-class NumerologyResult(BaseModel):
+# ===== MODELS =====
+class CalculateRequest(BaseModel):
     name: str
     birth_date: str
-    life_path: int
-    expression: int
-    soul_urge: int
-    personality: int
-    destiny: int
+    email: Optional[str] = None
 
 class CheckoutRequest(BaseModel):
-    email: EmailStr
-    product: str = "mapa_numerologico"
-    price: float = 49.90
-    calculation_id: Optional[int] = None
+    email: str
+    product: str
+    price: float
+    calculation_id: Optional[str] = None
 
-# ===== LOGICA DE NUMEROLOGIA =====
-PYTHAGOREAN = {
-    'a': 1, 'j': 1, 's': 1, 'b': 2, 'k': 2, 't': 2,
-    'c': 3, 'l': 3, 'u': 3, 'd': 4, 'm': 4, 'v': 4,
-    'e': 5, 'n': 5, 'w': 5, 'f': 6, 'o': 6, 'x': 6,
-    'g': 7, 'p': 7, 'y': 7, 'h': 8, 'q': 8, 'z': 8,
-    'i': 9, 'r': 9,
-}
-VOWELS = set("aeiou")
+class MercadoPagoRequest(BaseModel):
+    email: str
+    product: str
+    price: float
+    calculation_id: Optional[str] = None
 
-def reduce_number(n: int, master: bool = True) -> int:
-    while n > 9:
-        if master and n in (11, 22, 33):
-            return n
+# ===== HELPERS =====
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+def reduce_to_single(n):
+    while n > 9 and n not in (11, 22, 33):
         n = sum(int(d) for d in str(n))
     return n
 
-def calc_life_path(birth_date: dt.date) -> int:
-    total = sum(int(d) for d in birth_date.strftime("%Y%m%d"))
-    return reduce_number(total)
+def calc_numerology(name, birth_date):
+    bd = dp.parse(birth_date).date()
+    nums = [bd.day, bd.month, bd.year]
+    life_path = reduce_to_single(sum(nums))
+    
+    name_upper = name.upper().replace(" ", "")
+    table = {c: (i % 9 or 9) for i, c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)}
+    
+    expression = 0
+    vowel_sum = 0
+    consonant_sum = 0
+    vowels = "AEIOU"
+    
+    for ch in name_upper:
+        v = table.get(ch, 0)
+        expression += v
+        if ch in vowels:
+            vowel_sum += v
+        else:
+            consonant_sum += v
+    
+    expression = reduce_to_single(expression)
+    soul_urge = reduce_to_single(vowel_sum)
+    personality = reduce_to_single(consonant_sum)
+    
+    # Destiny = expression + life_path
+    destiny = reduce_to_single(expression + life_path)
+    
+    return {
+        "life_path": life_path,
+        "expression": expression,
+        "soul_urge": soul_urge,
+        "personality": personality,
+        "destiny": destiny
+    }
 
-def calc_expression(name: str) -> int:
-    total = sum(PYTHAGOREAN.get(c, 0) for c in name.lower() if c.isalpha())
-    return reduce_number(total)
-
-def calc_soul_urge(name: str) -> int:
-    total = sum(PYTHAGOREAN.get(c, 0) for c in name.lower() if c.isalpha() and c in VOWELS)
-    return reduce_number(total)
-
-def calc_personality(name: str) -> int:
-    total = sum(PYTHAGOREAN.get(c, 0) for c in name.lower() if c.isalpha() and c not in VOWELS)
-    return reduce_number(total)
-
-def calc_destiny(life_path: int, expression: int) -> int:
-    return reduce_number(life_path + expression)
-
-def compute_numerology(name: str, birth_date: dt.date) -> NumerologyResult:
-    lp = calc_life_path(birth_date)
-    ex = calc_expression(name)
-    su = calc_soul_urge(name)
-    pe = calc_personality(name)
-    de = calc_destiny(lp, ex)
-    return NumerologyResult(
-        name=name, birth_date=birth_date.isoformat(),
-        life_path=lp, expression=ex, soul_urge=su,
-        personality=pe, destiny=de,
-    )
-
-# ===== GERADOR DE PDF =====
-def generate_pdf(result: NumerologyResult, output_path: str):
-    doc = SimpleDocTemplate(output_path, pagesize=A4,
-                            topMargin=1.5*cm, bottomMargin=1.5*cm)
+def generate_pdf(calc, name):
+    pdf_path = f"/tmp/mapa_{calc.id}.pdf"
+    doc = SimpleDocTemplate(pdf_path, pagesize=A4)
     styles = getSampleStyleSheet()
     elements = []
-    elements.append(Paragraph("Mapa Numerologico", styles['Title']))
-    elements.append(Spacer(1, 0.5*cm))
-    elements.append(Paragraph(f"<b>Nome:</b> {result.name}", styles['Normal']))
-    elements.append(Paragraph(f"<b>Data:</b> {result.birth_date}", styles['Normal']))
-    elements.append(Spacer(1, 0.3*cm))
-    elements.append(Paragraph(f"<b>Caminho de Vida:</b> {result.life_path}", styles['Normal']))
-    elements.append(Paragraph(f"<b>Expressao:</b> {result.expression}", styles['Normal']))
-    elements.append(Paragraph(f"<b>Desejo da Alma:</b> {result.soul_urge}", styles['Normal']))
-    elements.append(Paragraph(f"<b>Personalidade:</b> {result.personality}", styles['Normal']))
-    elements.append(Paragraph(f"<b>Destino:</b> {result.destiny}", styles['Normal']))
-    elements.append(Spacer(1, 1*cm))
-    elements.append(Paragraph("(c) A1ELOS Assessoria e Consultoria", styles['Normal']))
+    
+    title_style = ParagraphStyle("Title", parent=styles["Title"], fontSize=22, spaceAfter=20, textColor=colors.HexColor("#C9A94E"))
+    normal_style = ParagraphStyle("Normal", parent=styles["Normal"], fontSize=12, spaceAfter=8)
+    
+    elements.append(Paragraph("Mapa Numerológico", title_style))
+    elements.append(Paragraph(f"<b>Nome:</b> {name}", normal_style))
+    elements.append(Paragraph(f"<b>Data:</b> {calc.birth_date}", normal_style))
+    elements.append(Spacer(1, 20))
+    
+    data = [
+        ["Número", "Valor"],
+        ["Caminho de Vida", str(calc.life_path)],
+        ["Expressão", str(calc.expression)],
+        ["Desejo da Alma", str(calc.soul_urge)],
+        ["Personalidade", str(calc.personality)],
+        ["Destino", str(calc.destiny)]
+    ]
+    t = Table(data, colWidths=[200, 100])
+    t.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#C9A94E")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTSIZE", (0, 0), (-1, -1), 12),
+        ("GRID", (0, 0), (-1, -1), 1, colors.grey),
+        ("ALIGN", (1, 0), (-1, -1), "CENTER")
+    ]))
+    elements.append(t)
     doc.build(elements)
+    return pdf_path
 
-# ===== E-MAIL =====
-def send_email(to: str, subject: str, body: str, attachment_path: Optional[str] = None):
-    if not SMTP_USER or not SMTP_PASS:
-        print(f"[SMTP] Credenciais ausentes. E-mail para {to} nao enviado.")
-        return
-    msg = MIMEMultipart()
-    msg["From"] = SMTP_FROM
-    msg["To"] = to
-    msg["Subject"] = subject
-    msg.attach(MIMEText(body, "plain", "utf-8"))
-    if attachment_path and os.path.exists(attachment_path):
-        with open(attachment_path, "rb") as f:
-            part = MIMEApplication(f.read(), Name=os.path.basename(attachment_path))
-            part["Content-Disposition"] = f'attachment; filename="{os.path.basename(attachment_path)}"'
-            msg.attach(part)
-    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-        server.starttls()
-        server.login(SMTP_USER, SMTP_PASS)
-        server.send_message(msg)
-
-# ===== FUNCAO AUXILIAR: DISPARA PDF + E-MAIL APOS PAGAMENTO =====
-async def process_paid_order(order_id: int, db):
-    order = db.execute("SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone()
-    if not order or not order["calculation_id"]:
-        return
-    calc = db.execute("SELECT * FROM calculations WHERE id = ?", (order["calculation_id"],)).fetchone()
-    if not calc:
-        return
-    result = NumerologyResult(
-        name=calc["name"], birth_date=calc["birth_date"],
-        life_path=calc["life_path"], expression=calc["expression"],
-        soul_urge=calc["soul_urge"], personality=calc["personality"],
-        destiny=calc["destiny"],
-    )
-    pdf_path = os.path.join(PDF_DIR, f"mapa_{order_id}.pdf")
-    generate_pdf(result, pdf_path)
-    bt = BackgroundTasks()
-    bt.add_task(
-        send_email,
-        to=order["email"],
-        subject="Seu Mapa Numerologico - Pagamento Confirmado",
-        body=f"Ola {result.name},\n\nSeu pagamento foi confirmado!\nSegue em anexo seu mapa numerologico completo em PDF.\n\nObrigado pela confianca!\nA1ELOS Assessoria e Consultoria",
-        attachment_path=pdf_path,
-    )
+def send_email(to_email, subject, content, attachment_path=None):
+    if not SENDGRID_API_KEY:
+        logger.warning("SendGrid not configured")
+        return False
+    try:
+        sg = SendGridAPIClient(SENDGRID_API_KEY)
+        mail = Mail(
+            from_email=Email(FROM_EMAIL, "Mapa Numerológico"),
+            to_emails=To(to_email),
+            subject=subject,
+            plain_text_content=Content("text/plain", content)
+        )
+        if attachment_path and os.path.exists(attachment_path):
+            with open(attachment_path, "rb") as f:
+                data = f.read()
+            import base64
+            encoded = base64.b64encode(data).decode()
+            from sendgrid.helpers.mail import Attachment, FileContent, FileName, FileType, Disposition
+            attachment = Attachment(
+                FileContent(encoded),
+                FileName("Mapa_Numerologico.pdf"),
+                FileType("application/pdf"),
+                Disposition("attachment")
+            )
+            mail.attachment = attachment
+        sg.send(mail)
+        return True
+    except Exception as e:
+        logger.error(f"SendGrid error: {e}")
+        return False
 
 # ===== ENDPOINTS =====
 @app.get("/", response_class=HTMLResponse)
 def root():
     return INDEX_HTML
 
-@app.post("/calculate", response_model=NumerologyResult)
-def calculate(req: NumerologyRequest, db: sqlite3.Connection = Depends(get_db)):
-    result = compute_numerology(req.name, req.birth_date)
-    cur = db.execute(
-        "INSERT INTO calculations (name, birth_date, email, life_path, expression, soul_urge, personality, destiny) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        (result.name, result.birth_date, req.email, result.life_path,
-         result.expression, result.soul_urge, result.personality, result.destiny),
-    )
-    db.commit()
-    return JSONResponse(status_code=200, content={**result.dict(), "id": cur.lastrowid})
+@app.get("/api/health")
+def health():
+    return {"status": "ok", "service": "numerologia-api", "version": "1.2.0"}
 
-@app.get("/calculations", response_model=List[NumerologyResult])
-def list_calculations(db: sqlite3.Connection = Depends(get_db)):
-    rows = db.execute("SELECT * FROM calculations ORDER BY id DESC").fetchall()
-    return [NumerologyResult(name=r["name"], birth_date=r["birth_date"],
-            life_path=r["life_path"], expression=r["expression"],
-            soul_urge=r["soul_urge"], personality=r["personality"],
-            destiny=r["destiny"]) for r in rows]
+@app.post("/calculate")
+def calculate(req: CalculateRequest):
+    db = SessionLocal()
+    try:
+        result = calc_numerology(req.name, req.birth_date)
+        calc_id = str(uuid.uuid4())[:8]
+        calc = Calculation(
+            id=calc_id,
+            name=req.name,
+            birth_date=req.birth_date,
+            email=req.email,
+            **result
+        )
+        db.add(calc)
+        db.commit()
+        return {"id": calc_id, **result}
+    except Exception as e:
+        raise HTTPException(400, str(e))
+    finally:
+        db.close()
 
 @app.post("/checkout")
-def checkout(req: CheckoutRequest, db: sqlite3.Connection = Depends(get_db)):
-    cur = db.execute(
-        "INSERT INTO orders (email, product, price, calculation_id) VALUES (?, ?, ?, ?)",
-        (req.email, req.product, req.price, req.calculation_id),
-    )
-    db.commit()
-    return {"order_id": cur.lastrowid, "status": "pending", "message": "Pedido registrado."}
-
-@app.post("/checkout/webhook")
-def checkout_webhook(payload: dict, background: BackgroundTasks, db: sqlite3.Connection = Depends(get_db)):
-    if payload.get("secret") != CHECKOUT_WEBHOOK_SECRET:
-        raise HTTPException(status_code=403, detail="Secret invalido")
-    order = db.execute("SELECT * FROM orders WHERE id = ?", (payload["order_id"],)).fetchone()
-    if not order:
-        raise HTTPException(status_code=404, detail="Pedido nao encontrado")
-    db.execute("UPDATE orders SET status = ? WHERE id = ?", (payload["status"], payload["order_id"]))
-    db.commit()
-    if payload["status"] == "paid" and order["calculation_id"]:
-        calc = db.execute("SELECT * FROM calculations WHERE id = ?", (order["calculation_id"],)).fetchone()
-        if calc:
-            result = NumerologyResult(name=calc["name"], birth_date=calc["birth_date"],
-                life_path=calc["life_path"], expression=calc["expression"],
-                soul_urge=calc["soul_urge"], personality=calc["personality"],
-                destiny=calc["destiny"])
-            pdf_path = os.path.join(PDF_DIR, f"mapa_{order['id']}.pdf")
-            generate_pdf(result, pdf_path)
-            background.add_task(send_email, to=order["email"],
-                subject="Seu Mapa Numerologico",
-                body=f"Ola {result.name},\n\nSegue em anexo o seu mapa numerologico.\n\nObrigado!",
-                attachment_path=pdf_path)
-    return {"order_id": payload["order_id"], "status": payload["status"]}
-
-# =====================================================================
-# PAYMENT GATEWAYS - MERCADO PAGO + STRIPE
-# =====================================================================
+def checkout(req: CheckoutRequest, bg: BackgroundTasks):
+    db = SessionLocal()
+    try:
+        order_id = str(uuid.uuid4())[:12]
+        order = Order(
+            id=order_id,
+            email=req.email,
+            product=req.product,
+            price=req.price,
+            calculation_id=req.calculation_id
+        )
+        db.add(order)
+        db.commit()
+        return {"order_id": order_id, "status": "created"}
+    except Exception as e:
+        raise HTTPException(400, str(e))
+    finally:
+        db.close()
 
 @app.post("/api/pay/mercadopago")
-async def mp_create_payment(req: CheckoutRequest, db: sqlite3.Connection = Depends(get_db)):
-    """Mercado Pago: PIX, boleto, cartao credito/debito (parcelado)"""
-    if not MP_ACCESS_TOKEN:
-        return {"error": "Mercado Pago nao configurado"}
-
-    cur = db.execute(
-        "INSERT INTO orders (email, product, price, status) VALUES (?, ?, ?, 'pending')",
-        (req.email, req.product, req.price),
-    )
-    db.commit()
-    order_id = cur.lastrowid
-    if req.calculation_id:
-        db.execute("UPDATE orders SET calculation_id = ? WHERE id = ?", (req.calculation_id, order_id))
-        db.commit()
-
-    sdk = mercadopago.SDK(MP_ACCESS_TOKEN)
-    pref_data = {
-        "items": [{
-            "title": req.product, "quantity": 1,
-            "unit_price": float(req.price), "currency_id": "BRL",
-        }],
-        "payer": {"email": req.email},
-        "external_reference": str(order_id),
-        "notification_url": "https://numerologia-api-wd2q.onrender.com/api/webhook/mercadopago",
-        "payment_methods": {"excluded_payment_types": [], "installments": 12},
-        "back_urls": {
-            "success": "https://numerologia-api-wd2q.onrender.com/success",
-            "failure": "https://numerologia-api-wd2q.onrender.com/",
-            "pending": "https://numerologia-api-wd2q.onrender.com/pending",
-        },
-        "auto_return": "approved",
-    }
-    result = sdk.preference().create(pref_data)
-    if result["status"] == 201:
-        p = result["response"]
-        return {"order_id": order_id, "payment_url": p["init_point"], "preference_id": p["id"], "status": "pending"}
-    return {"error": "Erro ao criar pagamento"}
-
-@app.post("/api/pay/pix")
-async def mp_pix_payment(req: CheckoutRequest):
-    """PIX direto com QR Code via Mercado Pago"""
-    if not MP_ACCESS_TOKEN:
-        return {"error": "Mercado Pago nao configurado"}
-
-    sdk = mercadopago.SDK(MP_ACCESS_TOKEN)
-    payment_data = {
-        "transaction_amount": float(req.price),
-        "description": req.product,
-        "payment_method_id": "pix",
-        "payer": {"email": req.email},
-    }
-    result = sdk.payment().create(payment_data)
-    if result["status"] in (200, 201):
-        p = result["response"]
-        td = p.get("point_of_interaction", {}).get("transaction_data", {})
-        return {
-            "qr_code": td.get("qr_code", ""),
-            "qr_code_base64": td.get("qr_code_base64", ""),
-            "payment_id": p["id"],
-            "status": p["status"],
+def create_mp_payment(req: MercadoPagoRequest):
+    if not sdk:
+        raise HTTPException(503, "Mercado Pago não configurado")
+    try:
+        db = SessionLocal()
+        order_id = str(uuid.uuid4())[:12]
+        
+        preference_data = {
+            "items": [{
+                "title": req.product,
+                "quantity": 1,
+                "currency_id": "BRL",
+                "unit_price": float(req.price)
+            }],
+            "payer": {"email": req.email},
+            "back_urls": {
+                "success": f"{BASE_URL}/api/pay/success",
+                "failure": f"{BASE_URL}/api/pay/failure",
+                "pending": f"{BASE_URL}/api/pay/pending"
+            },
+            "auto_return": "approved",
+            "external_reference": order_id,
+            "notification_url": f"{BASE_URL}/api/webhook/mercadopago"
         }
-    return {"error": "Erro ao gerar PIX"}
+        
+        result = sdk.preference().create(preference_data)
+        if result.get("status") in (200, 201):
+            response = result.get("response", {})
+            payment_url = response.get("init_point")
+            mp_id = response.get("id")
+            
+            order = Order(
+                id=order_id,
+                email=req.email,
+                product=req.product,
+                price=req.price,
+                calculation_id=req.calculation_id,
+                payment_method="mercadopago",
+                payment_id=mp_id
+            )
+            db.add(order)
+            db.commit()
+            db.close()
+            
+            return {
+                "payment_url": payment_url,
+                "order_id": order_id,
+                "mp_id": mp_id
+            }
+        db.close()
+        raise HTTPException(500, "Erro Mercado Pago")
+    except Exception as e:
+        raise HTTPException(500, str(e))
 
 @app.post("/api/webhook/mercadopago")
-async def mp_webhook(request: Request, db: sqlite3.Connection = Depends(get_db)):
-    """Recebe notificacao do Mercado Pago (IPN)"""
-    data = await request.json()
-    action = data.get("action") or data.get("type", "")
-    if "payment" not in action:
-        return {"ok": True}
-
-    payment_id = None
-    if "data" in data and "id" in data["data"]:
-        payment_id = data["data"]["id"]
-    elif "resource" in data and "/payments/" in data["resource"]:
-        try:
-            payment_id = data["resource"].split("/payments/")[-1]
-        except:
-            pass
-    if not payment_id:
-        return {"ok": False}
-
-    sdk = mercadopago.SDK(MP_ACCESS_TOKEN)
-    info = sdk.payment().get(payment_id)
-    if info["status"] == 200:
-        pay = info["response"]
-        oid = int(pay.get("external_reference", 0))
-        st = pay.get("status")
-        if oid:
-            db.execute("UPDATE orders SET status = ? WHERE id = ?", (st, oid))
-            db.commit()
-            if st == "approved":
-                await process_paid_order(oid, db)
-    return {"ok": True}
+async def mp_webhook(request: Request):
+    try:
+        body = await request.json()
+        logger.info(f"MP Webhook: {json.dumps(body)}")
+        
+        if body.get("type") == "payment":
+            payment_id = body.get("data", {}).get("id")
+            if payment_id and sdk:
+                payment = sdk.payment().get(payment_id)
+                if payment.get("status") == 200:
+                    data = payment.get("response", {})
+                    status = data.get("status")
+                    external_ref = data.get("external_reference")
+                    
+                    if status == "approved" and external_ref:
+                        db = SessionLocal()
+                        order = db.query(Order).filter(Order.id == external_ref).first()
+                        if order and order.status == "pending":
+                            order.status = "paid"
+                            order.payment_id = str(payment_id)
+                            db.commit()
+                            
+                            if order.calculation_id:
+                                calc = db.query(Calculation).filter(Calculation.id == order.calculation_id).first()
+                                if calc:
+                                    pdf_path = generate_pdf(calc, calc.name)
+                                    if calc.email:
+                                        send_email(
+                                            calc.email,
+                                            "Seu Mapa Numerológico está pronto!",
+                                            f"Olá! Seu mapa numerológico foi gerado com sucesso.\n\nNúmeros:\n- Caminho de Vida: {calc.life_path}\n- Expressão: {calc.expression}\n- Desejo da Alma: {calc.soul_urge}\n- Personalidade: {calc.personality}\n- Destino: {calc.destiny}\n\nAtenciosamente,\nA1ELOS Assessoria",
+                                            pdf_path
+                                        )
+                                    if os.path.exists(pdf_path):
+                                        os.remove(pdf_path)
+                            db.close()
+        return {"status": "ok"}
+    except Exception as e:
+        logger.error(f"Webhook error: {e}")
+        return {"status": "ok"}
 
 @app.post("/api/pay/stripe")
-async def stripe_create_session(req: CheckoutRequest):
-    """Stripe: cartao internacional em USD"""
+def create_stripe_payment(req: MercadoPagoRequest):
     if not STRIPE_SECRET_KEY:
-        return {"error": "Stripe nao configurado"}
-
-    stripe.api_key = STRIPE_SECRET_KEY
-    cents = int(float(req.price) * 100)
-    session = stripe.checkout.Session.create(
-        payment_method_types=["card"],
-        line_items=[{
-            "price_data": {
-                "currency": "usd",
-                "product_data": {"name": req.product},
-                "unit_amount": cents,
-            },
-            "quantity": 1,
-        }],
-        mode="payment",
-        customer_email=req.email,
-        success_url="https://numerologia-api-wd2q.onrender.com/success",
-        cancel_url="https://numerologia-api-wd2q.onrender.com/",
-    )
-    return {"payment_url": session.url, "session_id": session.id}
+        raise HTTPException(503, "Stripe não configurado")
+    try:
+        intent = stripe.PaymentIntent.create(
+            amount=int(req.price * 100),
+            currency="brl",
+            receipt_email=req.email,
+            metadata={"product": req.product, "calculation_id": req.calculation_id or ""}
+        )
+        return {"client_secret": intent.client_secret, "id": intent.id}
+    except Exception as e:
+        raise HTTPException(500, str(e))
 
 @app.post("/api/webhook/stripe")
-async def stripe_webhook(request: Request, db: sqlite3.Connection = Depends(get_db)):
-    """Recebe confirmacao do Stripe"""
-    payload = await request.body()
-    sig_header = request.headers.get("stripe-signature")
-    if not sig_header:
-        return {"ok": False}
-
-    stripe.api_key = STRIPE_SECRET_KEY
+async def stripe_webhook(request: Request):
+    if not STRIPE_WEBHOOK_SECRET:
+        return {"status": "ok"}
     try:
-        event = stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
-    except (ValueError, stripe.error.SignatureVerificationError):
-        return {"ok": False}
+        payload = await request.body()
+        sig = request.headers.get("stripe-signature", "")
+        event = stripe.Webhook.construct_event(payload, sig, STRIPE_WEBHOOK_SECRET)
+        
+        if event.get("type") == "payment_intent.succeeded":
+            intent = event.get("data", {}).get("object", {})
+            email = intent.get("receipt_email")
+            product = intent.get("metadata", {}).get("product", "")
+            calc_id = intent.get("metadata", {}).get("calculation_id", "")
+            
+            db = SessionLocal()
+            order_id = str(uuid.uuid4())[:12]
+            order = Order(
+                id=order_id,
+                email=email or "unknown",
+                product=product,
+                price=float(intent.get("amount", 0)) / 100,
+                calculation_id=calc_id or None,
+                status="paid",
+                payment_method="stripe",
+                payment_id=intent.get("id")
+            )
+            db.add(order)
+            
+            if calc_id:
+                calc = db.query(Calculation).filter(Calculation.id == calc_id).first()
+                if calc and email:
+                    pdf_path = generate_pdf(calc, calc.name)
+                    send_email(email, "Seu Mapa Numerológico!", "Segue em anexo.", pdf_path)
+                    if os.path.exists(pdf_path):
+                        os.remove(pdf_path)
+            db.commit()
+            db.close()
+        
+        return {"status": "ok"}
+    except Exception as e:
+        logger.error(f"Stripe webhook error: {e}")
+        return {"status": "ok"}
 
-    if event["type"] == "checkout.session.completed":
-        session = event["data"]["object"]
-        email = session.get("customer_email", "")
-        amount = float(session.get("amount_total", 0)) / 100
-        cur = db.execute(
-            "INSERT INTO orders (email, product, price, status) VALUES (?, ?, ?, 'paid')",
-            (email, "Mapa Numerologico", amount),
-        )
-        db.commit()
-        await process_paid_order(cur.lastrowid, db)
+@app.get("/api/pay/success")
+def pay_success():
+    return HTMLResponse("<html><body style='background:#0a0a0a;color:#C9A94E;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>✅ Pagamento Confirmado!</h1><p style='color:#aaa'>Seu PDF será enviado por e-mail em instantes.</p><a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>")
 
-    return {"ok": True}
+@app.get("/api/pay/failure")
+def pay_failure():
+    return HTMLResponse("<html><body style='background:#0a0a0a;color:#e74c3c;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>❌ Pagamento não concluído</h1><p style='color:#aaa'>Tente novamente.</p><a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>")
+
+@app.get("/api/pay/pending")
+def pay_pending():
+    return HTMLResponse("<html><body style='background:#0a0a0a;color:#f39c12;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>⏳ Pagamento Pendente</h1><p style='color:#aaa'>Aguardando confirmação.</p><a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", "10000")))
