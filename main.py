@@ -18,7 +18,7 @@ from reportlab.lib.units import cm
 import mercadopago
 import stripe
 
-# ===== CONFIGURAÇÕES VIA VARIÁVEIS DE AMBIENTE =====
+# ===== CONFIGURACOES VIA VARIAVEIS DE AMBIENTE =====
 DB_PATH = os.getenv("NUMEROLOGY_DB", "numerology.db")
 SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
@@ -29,9 +29,10 @@ CHECKOUT_WEBHOOK_SECRET = os.getenv("CHECKOUT_SECRET", "dev-secret")
 PDF_DIR = os.getenv("PDF_DIR", "pdfs")
 
 # ===== PAYMENT GATEWAYS =====
-MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN", "TEST-1346951855250893-071314-6e8ec3d7f3140d0d172e548a2c97851a-50142977")
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "sk_test_51TtTwDBbAB1qhSWOmstc9WyoDcVarLLyvPuxsY9FyJgrrlGhJhqf8J76ytK5XDpmWljkBRMSFkx5LwstjrOMKjq8009v5dvQ4f")
-STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "whsec_78YHqk7CYTufddxRlxKljQ6R8UijZj5I")
+# Use variaveis de ambiente no Render para producao
+MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN", "")
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
 
 os.makedirs(PDF_DIR, exist_ok=True)
 
@@ -91,7 +92,7 @@ class CheckoutRequest(BaseModel):
     price: float = 49.90
     calculation_id: Optional[int] = None
 
-# ===== LÓGICA DE NUMEROLOGIA =====
+# ===== LOGICA DE NUMEROLOGIA =====
 PYTHAGOREAN = {
     'a': 1, 'j': 1, 's': 1, 'b': 2, 'k': 2, 't': 2,
     'c': 3, 'l': 3, 'u': 3, 'd': 4, 'm': 4, 'v': 4,
@@ -145,24 +146,24 @@ def generate_pdf(result: NumerologyResult, output_path: str):
                             topMargin=1.5*cm, bottomMargin=1.5*cm)
     styles = getSampleStyleSheet()
     elements = []
-    elements.append(Paragraph("Mapa Numerológico", styles['Title']))
+    elements.append(Paragraph("Mapa Numerologico", styles['Title']))
     elements.append(Spacer(1, 0.5*cm))
     elements.append(Paragraph(f"<b>Nome:</b> {result.name}", styles['Normal']))
     elements.append(Paragraph(f"<b>Data:</b> {result.birth_date}", styles['Normal']))
     elements.append(Spacer(1, 0.3*cm))
     elements.append(Paragraph(f"<b>Caminho de Vida:</b> {result.life_path}", styles['Normal']))
-    elements.append(Paragraph(f"<b>Expressão:</b> {result.expression}", styles['Normal']))
+    elements.append(Paragraph(f"<b>Expressao:</b> {result.expression}", styles['Normal']))
     elements.append(Paragraph(f"<b>Desejo da Alma:</b> {result.soul_urge}", styles['Normal']))
     elements.append(Paragraph(f"<b>Personalidade:</b> {result.personality}", styles['Normal']))
     elements.append(Paragraph(f"<b>Destino:</b> {result.destiny}", styles['Normal']))
     elements.append(Spacer(1, 1*cm))
-    elements.append(Paragraph("© A1ELOS Assessoria e Consultoria", styles['Normal']))
+    elements.append(Paragraph("(c) A1ELOS Assessoria e Consultoria", styles['Normal']))
     doc.build(elements)
 
 # ===== E-MAIL =====
 def send_email(to: str, subject: str, body: str, attachment_path: Optional[str] = None):
     if not SMTP_USER or not SMTP_PASS:
-        print(f"[SMTP] Credenciais ausentes. E-mail para {to} não enviado.")
+        print(f"[SMTP] Credenciais ausentes. E-mail para {to} nao enviado.")
         return
     msg = MIMEMultipart()
     msg["From"] = SMTP_FROM
@@ -179,7 +180,7 @@ def send_email(to: str, subject: str, body: str, attachment_path: Optional[str] 
         server.login(SMTP_USER, SMTP_PASS)
         server.send_message(msg)
 
-# ===== FUNÇÃO AUXILIAR: DISPARA PDF + E-MAIL APÓS PAGAMENTO =====
+# ===== FUNCAO AUXILIAR: DISPARA PDF + E-MAIL APOS PAGAMENTO =====
 async def process_paid_order(order_id: int, db):
     order = db.execute("SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone()
     if not order or not order["calculation_id"]:
@@ -199,8 +200,8 @@ async def process_paid_order(order_id: int, db):
     bt.add_task(
         send_email,
         to=order["email"],
-        subject="Seu Mapa Numerológico - Pagamento Confirmado ✅",
-        body=f"Olá {result.name},\n\nSeu pagamento foi confirmado!\nSegue em anexo seu mapa numerológico completo em PDF.\n\nObrigado pela confiança!\nA1ELOS Assessoria e Consultoria",
+        subject="Seu Mapa Numerologico - Pagamento Confirmado",
+        body=f"Ola {result.name},\n\nSeu pagamento foi confirmado!\nSegue em anexo seu mapa numerologico completo em PDF.\n\nObrigado pela confianca!\nA1ELOS Assessoria e Consultoria",
         attachment_path=pdf_path,
     )
 
@@ -240,10 +241,10 @@ def checkout(req: CheckoutRequest, db: sqlite3.Connection = Depends(get_db)):
 @app.post("/checkout/webhook")
 def checkout_webhook(payload: dict, background: BackgroundTasks, db: sqlite3.Connection = Depends(get_db)):
     if payload.get("secret") != CHECKOUT_WEBHOOK_SECRET:
-        raise HTTPException(status_code=403, detail="Secret inválido")
+        raise HTTPException(status_code=403, detail="Secret invalido")
     order = db.execute("SELECT * FROM orders WHERE id = ?", (payload["order_id"],)).fetchone()
     if not order:
-        raise HTTPException(status_code=404, detail="Pedido não encontrado")
+        raise HTTPException(status_code=404, detail="Pedido nao encontrado")
     db.execute("UPDATE orders SET status = ? WHERE id = ?", (payload["status"], payload["order_id"]))
     db.commit()
     if payload["status"] == "paid" and order["calculation_id"]:
@@ -256,16 +257,21 @@ def checkout_webhook(payload: dict, background: BackgroundTasks, db: sqlite3.Con
             pdf_path = os.path.join(PDF_DIR, f"mapa_{order['id']}.pdf")
             generate_pdf(result, pdf_path)
             background.add_task(send_email, to=order["email"],
-                subject="Seu Mapa Numerológico",
-                body=f"Olá {result.name},\n\nSegue em anexo o seu mapa numerológico.\n\nObrigado!",
+                subject="Seu Mapa Numerologico",
+                body=f"Ola {result.name},\n\nSegue em anexo o seu mapa numerologico.\n\nObrigado!",
                 attachment_path=pdf_path)
     return {"order_id": payload["order_id"], "status": payload["status"]}
 
-# ===== PAYMENT GATEWAYS =====
+# =====================================================================
+# PAYMENT GATEWAYS - MERCADO PAGO + STRIPE
+# =====================================================================
 
 @app.post("/api/pay/mercadopago")
 async def mp_create_payment(req: CheckoutRequest, db: sqlite3.Connection = Depends(get_db)):
-    """Mercado Pago: PIX, boleto, cartão crédito/débito (parcelado)"""
+    """Mercado Pago: PIX, boleto, cartao credito/debito (parcelado)"""
+    if not MP_ACCESS_TOKEN:
+        return {"error": "Mercado Pago nao configurado"}
+
     cur = db.execute(
         "INSERT INTO orders (email, product, price, status) VALUES (?, ?, ?, 'pending')",
         (req.email, req.product, req.price),
@@ -302,6 +308,9 @@ async def mp_create_payment(req: CheckoutRequest, db: sqlite3.Connection = Depen
 @app.post("/api/pay/pix")
 async def mp_pix_payment(req: CheckoutRequest):
     """PIX direto com QR Code via Mercado Pago"""
+    if not MP_ACCESS_TOKEN:
+        return {"error": "Mercado Pago nao configurado"}
+
     sdk = mercadopago.SDK(MP_ACCESS_TOKEN)
     payment_data = {
         "transaction_amount": float(req.price),
@@ -323,18 +332,23 @@ async def mp_pix_payment(req: CheckoutRequest):
 
 @app.post("/api/webhook/mercadopago")
 async def mp_webhook(request: Request, db: sqlite3.Connection = Depends(get_db)):
-    """Recebe notificação do Mercado Pago (IPN)"""
+    """Recebe notificacao do Mercado Pago (IPN)"""
     data = await request.json()
     action = data.get("action") or data.get("type", "")
     if "payment" not in action:
         return {"ok": True}
+
     payment_id = None
     if "data" in data and "id" in data["data"]:
         payment_id = data["data"]["id"]
     elif "resource" in data and "/payments/" in data["resource"]:
-        payment_id = data["resource"].split("/payments/")[-1]
+        try:
+            payment_id = data["resource"].split("/payments/")[-1]
+        except:
+            pass
     if not payment_id:
         return {"ok": False}
+
     sdk = mercadopago.SDK(MP_ACCESS_TOKEN)
     info = sdk.payment().get(payment_id)
     if info["status"] == 200:
@@ -350,7 +364,10 @@ async def mp_webhook(request: Request, db: sqlite3.Connection = Depends(get_db))
 
 @app.post("/api/pay/stripe")
 async def stripe_create_session(req: CheckoutRequest):
-    """Stripe: cartão internacional em USD"""
+    """Stripe: cartao internacional em USD"""
+    if not STRIPE_SECRET_KEY:
+        return {"error": "Stripe nao configurado"}
+
     stripe.api_key = STRIPE_SECRET_KEY
     cents = int(float(req.price) * 100)
     session = stripe.checkout.Session.create(
@@ -372,24 +389,27 @@ async def stripe_create_session(req: CheckoutRequest):
 
 @app.post("/api/webhook/stripe")
 async def stripe_webhook(request: Request, db: sqlite3.Connection = Depends(get_db)):
-    """Recebe confirmação do Stripe"""
+    """Recebe confirmacao do Stripe"""
     payload = await request.body()
     sig_header = request.headers.get("stripe-signature")
     if not sig_header:
         return {"ok": False}
+
     stripe.api_key = STRIPE_SECRET_KEY
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
     except (ValueError, stripe.error.SignatureVerificationError):
         return {"ok": False}
+
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
         email = session.get("customer_email", "")
         amount = float(session.get("amount_total", 0)) / 100
         cur = db.execute(
             "INSERT INTO orders (email, product, price, status) VALUES (?, ?, ?, 'paid')",
-            (email, "Mapa Numerológico", amount),
+            (email, "Mapa Numerologico", amount),
         )
         db.commit()
         await process_paid_order(cur.lastrowid, db)
+
     return {"ok": True}
