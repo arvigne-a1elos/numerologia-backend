@@ -36,6 +36,20 @@ STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
 
 os.makedirs(PDF_DIR, exist_ok=True)
 
+# ===== STATIC FILES - SERVE O HTML =====
+STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+os.makedirs(STATIC_DIR, exist_ok=True)
+
+HTML_PATH = os.path.join(os.path.dirname(__file__), "index.html")
+if os.path.exists(HTML_PATH):
+    with open(HTML_PATH, "r", encoding="utf-8") as f:
+        INDEX_HTML = f.read()
+else:
+    INDEX_HTML = """<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Numerologia API</title>
+<style>body{font-family:sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;background:#0a0a0a;color:#fff;text-align:center;}
+h1{color:#C9A94E;}p{color:#888;}</style></head><body><div><h1>Mapa Numerológico</h1>
+<p>API ativa. Frontend em deploy separado.</p></div></body></html>"""
+
 app = FastAPI(title="Numerologia API", version="1.2.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
@@ -206,9 +220,9 @@ async def process_paid_order(order_id: int, db):
     )
 
 # ===== ENDPOINTS =====
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 def root():
-    return {"status": "ok", "service": "numerologia-api"}
+    return INDEX_HTML
 
 @app.post("/calculate", response_model=NumerologyResult)
 def calculate(req: NumerologyRequest, db: sqlite3.Connection = Depends(get_db)):
