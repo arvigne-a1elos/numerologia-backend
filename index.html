@@ -252,7 +252,40 @@ function renderTables(){renderTable('pBody',0,10);renderTable('pBodyElec',4,5);r
 function renderEnergy(){var lang=localStorage.getItem('lang')||'pt';var g=document.getElementById('energyGrid');if(!g)return;var t=T[lang]||T.en;g.innerHTML='';energyData.forEach(function(e){var div=document.createElement('div');div.className='energy-card';div.innerHTML='<div class="big-num">'+e.n+'</div><div class="e-name">'+e.e+'</div><div class="e-for"><strong>'+(t.ide||'Ideal para:')+'</strong><br>'+e.f+'</div><div class="e-place">'+(t.ond||'Onde aplicar:')+'<br>'+e.p+'</div>';g.appendChild(div);});}
 async function handleCalc(){var btn=document.getElementById('sBtn');btn.disabled=true;var orig=btn.innerText;btn.innerText='...';try{var name=document.getElementById('name').value;if(name.length<2){alert('Nome muito curto.');btn.disabled=false;btn.innerText=orig;return;}var date=document.getElementById('date').value;if(!date){alert('Selecione a data.');btn.disabled=false;btn.innerText=orig;return;}lastEmail=document.getElementById('email').value;var res=await fetch(API+'/calculate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,birth_date:date,email:lastEmail||null})});if(!res.ok)throw new Error();var data=await res.json();if(!data||!data.life_path)throw new Error();lastData=data;currentId=data.id;renderResults(data);document.getElementById('res').style.display='block';renderTable('pBody',0,10);document.getElementById('res').scrollIntoView({behavior:'smooth'});}catch(e){alert('Erro ao conectar. Tente novamente.');}btn.disabled=false;btn.innerText=orig;}
 function renderResults(d){var c=localStorage.getItem('lang')||'pt';var g=document.getElementById('rGrid');var t=T[c]||T.en;var keys=['lp','ex','su','pe','de'];var vals=[d.life_path,d.expression,d.soul_urge,d.personality,d.destiny];g.innerHTML='';keys.forEach(function(k,i){g.innerHTML+='<div class="num-box"><div class="val">'+vals[i]+'</div><div class="label">'+(t[k]||k)+'</div></div>';});}
-async function buyP(idx){if(idx===0)return;var lang=localStorage.getItem('lang')||'pt';var t=T[lang]||T.en;var btns=document.querySelectorAll('.buy-btn');btns.forEach(function(b){b.disabled=true;});try{var email=lastEmail||document.getElementById('email').value;if(!email||!email.includes('@')){alert('Informe um e-mail.');btns.forEach(function(b){b.disabled=false;});return;}var amt=(prices[lang]||prices.en)[idx]||0;if(amt<=0){alert('Gratuito!');btns.forEach(function(b){b.disabled=false;});return;}if(!currentId){alert('Calcule primeiro!');btns.forEach(function(b){b.disabled=false;});return;}var res=await fetch(API+'/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,product:prodDefs[idx].id,price:amt,calculation_id:currentId})});if(!res.ok)throw new Error();var data=await res.json();var msg=document.getElementById('orderMsg');if(msg){msg.style.display='block';msg.innerHTML='<h4>✅</h4><p>#'+data.order_id+'</p>';}}catch(e){var msg=document.getElementById('orderMsg');if(msg)msg.style.display='block';msg.innerHTML='<p style="color:#e74c3c;">'+(t.er||'Erro.')+'</p>';}btns.forEach(function(b){b.disabled=false;});}
+async function buyP(idx){
+  if(idx===0)return;
+  var lang=localStorage.getItem('lang')||'pt';
+  var t=T[lang]||T.en;
+  var btns=document.querySelectorAll('.buy-btn');
+  btns.forEach(function(b){b.disabled=true;});
+  try{
+    var email=lastEmail||document.getElementById('email').value;
+    if(!email||!email.includes('@')){alert('Informe um e-mail.');btns.forEach(function(b){b.disabled=false;});return;}
+    var amt=(prices[lang]||prices.en)[idx]||0;
+    if(amt<=0){alert('Gratuito!');btns.forEach(function(b){b.disabled=false;});return;}
+    if(!currentId){alert('Calcule primeiro!');btns.forEach(function(b){b.disabled=false;});return;}
+
+    var mpRes=await fetch(API+'/api/pay/mercadopago',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:email,product:prodDefs[idx].n1,price:amt,calculation_id:currentId})
+    });
+    var mpData=await mpRes.json();
+    var msg=document.getElementById('orderMsg');
+    if(mpData.payment_url){
+      window.open(mpData.payment_url,'_blank');
+      if(msg){
+        msg.style.display='block';
+        msg.innerHTML='<h4>✅ Pedido #'+mpData.order_id+'</h4><p>Pagamento aberto em nova aba.<br>Após confirmar, o PDF chega no seu e-mail.</p>';
+      }
+    } else {
+      if(msg){msg.style.display='block';msg.innerHTML='<p style="color:#e74c3c;">Erro ao criar pagamento.</p>';}
+    }
+  }catch(e){
+    var msg=document.getElementById('orderMsg');
+    if(msg){msg.style.display='block';msg.innerHTML='<p style="color:#e74c3c;">Erro de conexão.</p>';}
+  }
+  btns.forEach(function(b){b.disabled=false;});
+}{if(idx===0)return;var lang=localStorage.getItem('lang')||'pt';var t=T[lang]||T.en;var btns=document.querySelectorAll('.buy-btn');btns.forEach(function(b){b.disabled=true;});try{var email=lastEmail||document.getElementById('email').value;if(!email||!email.includes('@')){alert('Informe um e-mail.');btns.forEach(function(b){b.disabled=false;});return;}var amt=(prices[lang]||prices.en)[idx]||0;if(amt<=0){alert('Gratuito!');btns.forEach(function(b){b.disabled=false;});return;}if(!currentId){alert('Calcule primeiro!');btns.forEach(function(b){b.disabled=false;});return;}var res=await fetch(API+'/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,product:prodDefs[idx].id,price:amt,calculation_id:currentId})});if(!res.ok)throw new Error();var data=await res.json();var msg=document.getElementById('orderMsg');if(msg){msg.style.display='block';msg.innerHTML='<h4>✅</h4><p>#'+data.order_id+'</p>';}}catch(e){var msg=document.getElementById('orderMsg');if(msg)msg.style.display='block';msg.innerHTML='<p style="color:#e74c3c;">'+(t.er||'Erro.')+'</p>';}btns.forEach(function(b){b.disabled=false;});}
 function resetForm(){document.getElementById('nForm').reset();document.getElementById('res').style.display='none';document.getElementById('orderMsg').style.display='none';currentId=null;lastData=null;}
 function renderFB(){
   var fbList=document.getElementById('fbList');if(!fbList)return;
