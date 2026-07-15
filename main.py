@@ -277,12 +277,28 @@ def create_mp_payment(req: MercadoPagoRequest):
         order_id = str(uuid.uuid4())[:12]
         
         preference_data = {
-            "items": [{
-                "title": req.product,
-                "quantity": 1,
-                "currency_id": "BRL",
-                "unit_price": float(req.price)
-            }],
+    "items": [{
+        "title": req.product,
+        "quantity": 1,
+        "currency_id": "BRL",
+        "unit_price": float(req.price)
+    }],
+    "payer": {"email": req.email},
+    "back_urls": {
+        "success": f"{BASE_URL}/api/pay/success",
+        "failure": f"{BASE_URL}/api/pay/failure",
+        "pending": f"{BASE_URL}/api/pay/pending"
+    },
+    "auto_return": "approved",
+    "external_reference": order_id,
+    "notification_url": f"{BASE_URL}/api/webhook/mercadopago",
+    "payment_methods": {
+        "excluded_payment_methods": [],
+        "excluded_payment_types": [],
+        "installments": 12
+    },
+    "statement_descriptor": "A1ELOS NUMEROLOGIA"
+}
             "payer": {"email": req.email},
             "back_urls": {
                 "success": f"{BASE_URL}/api/pay/success",
