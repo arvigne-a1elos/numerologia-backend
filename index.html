@@ -1,202 +1,26 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mapa Numerológico | A1ELOS</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-:root{--gold:#C9A94E;--dark:#0a0a0a}
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',sans-serif;background:var(--dark);color:#fff;overflow-x:hidden;line-height:1.6}
-[dir="rtl"]{direction:rtl;text-align:right}
-.lang-wrapper{position:fixed;top:0;width:100%;z-index:1000;background:rgba(10,10,10,0.85);backdrop-filter:blur(12px);border-bottom:1px solid #222;padding:6px 0}
-.lang-container{max-width:1200px;margin:0 auto;display:flex;justify-content:center;align-items:center;gap:3px;flex-wrap:wrap;padding:0 8px}
-.lang-btn{background:transparent;border:1px solid #333;color:#aaa;padding:3px 6px;border-radius:5px;cursor:pointer;font-size:9px;transition:all .3s;display:flex;align-items:center;gap:2px;font-family:'Inter',sans-serif}
-.lang-btn .flag{font-size:12px}
-.lang-btn:hover,.lang-btn.active{border-color:var(--gold);color:var(--gold)}
-nav.sections{position:fixed;top:34px;width:100%;z-index:999;background:rgba(10,10,10,0.9);backdrop-filter:blur(12px);border-bottom:1px solid #222;padding:4px 0;display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
-nav.sections a{color:#888;text-decoration:none;font-size:.6rem;transition:all .3s;padding:3px 8px;border-radius:5px;text-transform:uppercase;letter-spacing:.05em}
-nav.sections a:hover{color:var(--gold);background:rgba(201,169,78,0.08)}
-.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:130px 20px 50px;background:radial-gradient(ellipse at center,#1a1a1a 0%,#0a0a0a 70%)}
-.logo-img{width:120px;height:120px;margin-bottom:20px;border-radius:50%;object-fit:cover}
-h1{font-family:'Playfair Display',serif;font-size:clamp(1.6rem,5vw,3rem);color:var(--gold);margin-bottom:5px;letter-spacing:.05em}
-.subtitle{font-size:clamp(.85rem,1.5vw,1.1rem);color:#a0a0a0;margin-bottom:16px;font-weight:300}
-.hero-desc{max-width:550px;margin:0 auto 22px;color:#888;font-size:.9rem;font-weight:300}
-.btn{display:inline-block;padding:10px 22px;background:linear-gradient(135deg,var(--gold),#b8942e);color:#0a0a0a;font-weight:600;border-radius:50px;letter-spacing:.08em;transition:all .3s;border:none;font-family:'Inter',sans-serif;font-size:.7rem;text-transform:uppercase;cursor:pointer;text-decoration:none}
-.btn:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(201,169,78,0.3)}
-.btn-sm{padding:6px 12px;font-size:.6rem}
-.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
-.btn-outline{background:transparent;color:var(--gold);border:2px solid var(--gold)}
-.btn-outline:hover{background:rgba(201,169,78,0.1)}
-section{padding:50px 16px;max-width:1050px;margin:0 auto}
-.section-header{text-align:center;margin-bottom:30px}
-.section-header h2{font-family:'Playfair Display',serif;font-size:clamp(1.3rem,2.3vw,1.8rem);color:var(--gold);margin-bottom:8px}
-.section-header p{color:#888;font-size:.85rem;font-weight:300}
-.form-section{max-width:520px;margin:0 auto;background:#111;padding:28px;border-radius:16px;border:1px solid #222}
-.form-group{margin-bottom:14px;text-align:left}
-.form-group label{display:block;color:#a0a0a0;font-size:.7rem;margin-bottom:5px}
-.form-group input{width:100%;padding:10px;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;font-size:.85rem;outline:none;transition:border .3s;font-family:'Inter',sans-serif}
-.form-group input:focus{border-color:var(--gold)}
-.form-row{display:flex;gap:10px}
-.form-row .form-group{flex:1}
-@media(max-width:500px){.form-row{flex-direction:column;gap:0}}
-.result-card{margin-top:20px;display:none;animation:fadeIn .6s}
-.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-top:12px}
-.num-box{background:#1a1a1a;padding:12px 8px;border-radius:10px;border:1px solid #222;text-align:center}
-.num-box:hover{border-color:var(--gold)}
-.num-box .val{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold);font-weight:700}
-.num-box .label{font-size:.45rem;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-top:3px}
-.pricing-table{width:100%;margin-top:18px;border-collapse:collapse;font-size:.7rem}
-.pricing-table th{color:var(--gold);padding:8px 5px;border-bottom:2px solid var(--gold);text-align:left;font-family:'Playfair Display',serif;font-size:.75rem}
-.pricing-table th:last-child,.pricing-table td:last-child{text-align:center}
-.pricing-table td{padding:7px 5px;border-bottom:1px solid #222;color:#ccc;vertical-align:middle}
-.pricing-table tr:hover td{background:rgba(201,169,78,0.03)}
-.pricing-table .price-cell{color:var(--gold);font-weight:600;text-align:center}
-.pricing-table .free-cell{color:#4caf50;font-weight:600;text-align:center}
-.pricing-table .num{color:#888;font-size:.6rem;text-align:center}
-.pricing-table .badge{display:inline-block;background:var(--gold);color:#0a0a0a;padding:1px 6px;border-radius:10px;font-size:.5rem;font-weight:600}
-.pricing-table .buy-btn{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:2px 10px;border-radius:15px;cursor:pointer;font-size:.55rem;transition:all .3s;font-family:'Inter',sans-serif}
-.pricing-table .buy-btn:hover{background:var(--gold);color:#0a0a0a}
-.pricing-table .highlight{border-left:3px solid var(--gold)}
-.pricing-table .row-num{color:#555;text-align:center;font-size:.6rem}
-.product-desc{font-size:.6rem;color:#888;line-height:1.2}
-.product-name{font-weight:500;color:#fff;font-size:.7rem}
-.energy-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:20px}
-.energy-card{background:#111;border:1px solid #222;border-radius:12px;padding:18px 14px;text-align:center;transition:all .3s}
-.energy-card:hover{border-color:var(--gold);transform:translateY(-3px)}
-.energy-card .big-num{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;color:var(--gold);margin-bottom:4px}
-.energy-card .e-name{color:var(--gold);font-weight:600;font-size:.75rem;margin-bottom:3px}
-.energy-card .e-for{color:#888;font-size:.6rem;line-height:1.3}
-.energy-card .e-place{background:rgba(201,169,78,0.08);padding:5px;border-radius:6px;margin-top:6px;font-size:.55rem;color:#aaa}
-.energy-hero{background:linear-gradient(135deg,#1a1a1a 0%,#0a0a0a 50%,#1a1a1a 100%);border:1px solid rgba(201,169,78,0.2);border-radius:16px;padding:25px;margin:20px 0;text-align:center}
-.energy-hero .big-icon{font-size:2rem;margin-bottom:6px}
-.energy-hero h3{color:var(--gold);font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:6px}
-.energy-hero p{color:#aaa;font-size:.75rem;line-height:1.5;max-width:600px;margin:0 auto}
-.legal-note{color:#555;font-size:.55rem;margin-top:6px;font-style:italic}
-.order-msg{display:none;padding:10px;background:#1a2a1a;border:1px solid var(--gold);border-radius:10px;margin-top:16px;text-align:center;animation:fadeIn .5s}
-.order-msg h4{color:var(--gold);margin-bottom:3px;font-size:.8rem}
-.order-msg p{color:#888;font-size:.7rem}
-.guarantee-note{text-align:center;color:#555;font-size:.6rem;margin-top:10px}
-footer{text-align:center;padding:25px 20px;color:#555;font-size:.7rem}
-footer a{color:var(--gold);text-decoration:none}
-.badge-world{display:inline-block;background:var(--gold);color:#0a0a0a;padding:3px 14px;border-radius:16px;font-size:.5rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
-@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-@media(max-width:600px){.lang-btn{font-size:8px;padding:2px 4px}.lang-btn .flag{font-size:10px}nav.sections{top:30px}nav.sections a{font-size:.5rem;padding:2px 5px}section{padding:40px 12px}}
-</style>
-</head>
-<body>
-
-<nav class="lang-wrapper"><div class="lang-container" id="langSelector"></div></nav>
-<nav class="sections">
-<a href="#inicio" data-i18n="n1">🏛 Início</a>
-<a href="#calc" data-i18n="n2">🔮 Mapa</a>
-<a href="#eleitoral" data-i18n="n3">🗳️ Eleitoral</a>
-<a href="#energias" data-i18n="n4">✨ Energias</a>
-</nav>
-
-<section id="inicio" class="hero">
-<div class="badge-world" data-i18n="badge">🌍 A PLATAFORMA DE NUMEROLOGIA MAIS COMPLETA DO MUNDO</div>
-<img src="https://generated-images.adapta.one/arvigne%40gmail.com/019f56cb-b9e4-7644-9dd8-5d14c5261d46/2026-07-14T13-27-24-531Z_Original_user_intent_A_premium_minimalist_logo_s.png" class="logo-img" alt="Mapa Numerológico">
-<h1 data-i18n="h1">MAPA NUMEROLÓGICO</h1>
-<p class="subtitle" data-i18n="sub">A plataforma de numerologia mais completa do mundo — em 12 idiomas</p>
-<p class="hero-desc" data-i18n="desc">Mapa pessoal, validação empresarial, nome artístico, soluções eleitorais, planejamento de nomes, energia de imóveis e muito mais.</p>
-<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
-<button class="btn" onclick="document.getElementById('calc').scrollIntoView({behavior:'smooth'})" data-i18n="hb">✦ GERAR MEU MAPA GRÁTIS</button>
-<a class="btn btn-outline" href="#eleitoral" data-i18n="hb2">🗳️ CANDIDATOS</a>
-</div>
-</section>
-
-<section id="calc">
-<div class="section-header"><h2 data-i18n="c1">Calcule seu Mapa Numerológico</h2><p data-i18n="c2">Preencha seus dados para um cálculo preciso</p></div>
-<div class="form-section">
-<form id="nForm" onsubmit="event.preventDefault();handleCalc()">
-<div class="form-group"><label data-i18n="f1">Nome Completo</label><input type="text" id="name" required placeholder="Ex: Maria Silva"></div>
-<div class="form-row"><div class="form-group"><label data-i18n="f2">Data de Nascimento</label><input type="date" id="date" required></div><div class="form-group"><label data-i18n="f3">E-mail</label><input type="email" id="email" required placeholder="seu@email.com"></div></div>
-<button type="submit" class="btn" id="sBtn" style="width:100%;margin-top:5px" data-i18n="f4">✦ CALCULAR MEU MAPA GRÁTIS</button>
-</form>
-<div class="result-card" id="res">
-<h3 style="color:var(--gold);text-align:center;font-size:.95rem;margin-bottom:4px" data-i18n="r1">✨ Seus Números da Soma 8</h3>
-<p style="text-align:center;color:#888;font-size:.65rem;margin-bottom:10px" data-i18n="r2">🔮 Mapa Individual Express — grátis na tela</p>
-<div class="result-grid" id="rGrid"></div>
-<div style="margin-top:25px;padding-top:18px;border-top:1px solid #222">
-<h3 style="color:var(--gold);text-align:center;font-size:.95rem;margin-bottom:10px" data-i18n="p1">📄 Todos os Produtos — Soma 8</h3>
-<p style="text-align:center;color:#888;font-size:.65rem;margin-bottom:10px" data-i18n="p2">Preços alinhados com a energia de abundância, prosperidade e poder pessoal do número 8.</p>
-<div style="overflow-x:auto"><table class="pricing-table"><thead><tr><th style="width:20px">#</th><th data-i18n="t1">Produto / Serviço</th><th data-i18n="t2">O que inclui</th><th style="text-align:center;width:65px" data-i18n="t3">Valor</th><th style="text-align:center;width:20px">8</th><th style="width:50px"></th></tr></thead><tbody id="pBody"></tbody></table></div>
-<p class="guarantee-note" data-i18n="g1">✦ Cada valor reduz ao número 8 por soma dos dígitos ✦</p></div>
-<div id="orderMsg" class="order-msg"></div>
-<div style="text-align:center;margin-top:12px"><button class="btn btn-outline btn-sm" onclick="resetForm()" data-i18n="r3">⟳ NOVO CÁLCULO</button></div>
-</div></div>
-</section>
-
-<section id="eleitoral">
-<div class="section-header"><h2 data-i18n="e1">🗳️ Soluções Eleitorais</h2><p data-i18n="e2">Nome de urna e número eleitoral com soma 8</p></div>
-<div class="energy-hero"><div class="big-icon">🗳️</div><h3 data-i18n="e3">Eleições a cada 2 anos</h3><p data-i18n="e4">Cientista político em numerologia eleitoral. Validamos nome de urna com soma 8 e calculamos dígitos para Dep. Federal (4) e Estadual (5), respeitando o partido.</p><p class="legal-note" style="margin-top:6px" data-i18n="e5">† Exemplos genéricos. Partidos substituídos por X/0.</p></div>
-<div style="overflow-x:auto"><table class="pricing-table"><thead><tr><th style="width:20px">#</th><th data-i18n="t1">Produto / Serviço</th><th data-i18n="t2">O que inclui</th><th style="text-align:center;width:65px" data-i18n="t3">Valor</th><th style="text-align:center;width:20px">8</th><th style="width:50px"></th></tr></thead><tbody id="pBodyElec"></tbody></table></div>
-</section>
-
-<section id="energias">
-<div class="section-header"><h2 data-i18n="en1">✨ Energias da Vida</h2><p data-i18n="en2">Nomeie pessoas, negócios, produtos e escolha números para imóveis</p></div>
-<div class="energy-hero"><div class="big-icon">🌌</div><h3 data-i18n="en3">Tudo tem uma energia numerológica</h3><p data-i18n="en4">Nome de bebê, empresa, produto, número de casa, salão, templo, escritório — tudo vibra.</p></div>
-<div class="energy-grid" id="energyGrid"></div>
-<div style="margin-top:25px;padding-top:18px;border-top:1px solid #222">
-<h3 style="color:var(--gold);text-align:center;font-size:.95rem;margin-bottom:4px" data-i18n="en6">📄 Serviços de Energia Numerológica</h3>
-<p style="text-align:center;color:#888;font-size:.65rem;margin-bottom:10px" data-i18n="en7">Análise personalizada para qualquer nome, produto ou imóvel.</p>
-<div style="overflow-x:auto"><table class="pricing-table"><thead><tr><th style="width:20px">#</th><th data-i18n="t1">Produto / Serviço</th><th data-i18n="t2">O que inclui</th><th style="text-align:center;width:65px" data-i18n="t3">Valor</th><th style="text-align:center;width:20px">8</th><th style="width:50px"></th></tr></thead><tbody id="pBodyEner"></tbody></table></div></div>
-</section>
-
-<footer><p><a href="https://a1elos.com.br">A1ELOS Assessoria e Consultoria</a> — <span data-i18n="rights">© 2026. Todos os direitos reservados.</span></p></footer>
-
 <script>
 const API='https://numerologia-api-wd2q.onrender.com';
 let cId=null,lat=null,lda=null;
-
-const enr=[
-{n:1,e:'Início, Liderança, Criação',f:'Iniciar projetos, abrir negócios, primeiro passo',p:'Primeiro andar, sede inicial, startup'},
-{n:2,e:'Cooperação, Sensibilidade, Equilíbrio',f:'Ateliês, artesanato, trabalho em equipe',p:'Atelier, escritório de parcerias'},
-{n:3,e:'Comunicação, Expressão, Alegria',f:'Palcos, rádio, TV, teatro, marketing',p:'Teatro, estúdio de música, podcast'},
-{n:4,e:'Organização, Disciplina, Praticidade',f:'Escritórios, fábricas, rotina',p:'Escritório adm., fábrica, RH'},
-{n:5,e:'Liberdade, Desejo, Paixão, Amor',f:'Motéis, pousadas românticas, spa',p:'Motel, casa de casal, spa'},
-{n:6,e:'Família, Espiritualidade, Responsabilidade',f:'Igrejas, templos, centros espíritas',p:'Igreja, terreiro, casa de família'},
-{n:7,e:'Sabedoria, Introspecção, Conhecimento',f:'Bibliotecas, consultórios, terapia',p:'Biblioteca, consultório, meditação'},
-{n:8,e:'Poder, Abundância, Prosperidade, Sucesso',f:'Comércio, empresas, bancos, finanças',p:'Loja, banco, escritório executivo'},
-{n:9,e:'Compaixão, Humanitarismo, Conclusão',f:'Concluir ciclos, ONGs',p:'ONG, memorial, conclusão'},
-{n:10,e:'1+0=1 — Início com Estabilidade',f:'Começar com equilíbrio',p:'Casa para recomeçar'},
-{n:19,e:'1+9=10→1 — Início e Fim',f:'Iniciar e concluir no mesmo local',p:'Incubadora, consultoria'}];
-
-const prd=[
-{id:'free',n1:'🔮 Mapa Individual Express',d1:'Caminho de Vida + Expressão + Alma + Eu Íntimo (tela)'},
-{id:'pdf',n1:'📄 Mapa Individual Completo (PDF)',d1:'10 páginas + Grade + Ciclos + Desafios + Ano Pessoal'},
-{id:'emp',n1:'💼 Validação Empresarial',d1:'Nome + assinatura profissional + sugestão + PDF'},
-{id:'art',n1:'🎭 Validação Nome Artístico',d1:'Nome + assinatura artística + sugestão + PDF'},
-{id:'urna',n1:'🗳️ Validação Nome de Urna',d1:'Nome de campanha soma 8 + variações'},
-{id:'num',n1:'🔢 Cálculo do Número Eleitoral',d1:'Dígitos Dep. Federal (4) e Estadual (5) + soma 8'},
-{id:'casal',n1:'💞 Mapa do Casal (2 pessoas)',d1:'2 mapas individuais + compatibilidade + PDFs'},
-{id:'baby',n1:'👶 Planejamento Nome de Bebê',d1:'Nomes com energia ideal + combinação sobrenome'},
-{id:'loja',n1:'🏪 Nome para Negócio/Produto',d1:'Nome comercial + energia do setor + sugestão'},
-{id:'imov',n1:'🏠 Número de Imóvel',d1:'Energia do número por finalidade + PDF'},
-{id:'prem',n1:'🌟 Mapa Premium (Família)',d1:'Até 4 pessoas + compatibilidades + PDF único'}];
-
+const enr=[{n:1,e:'Início, Liderança, Criação',f:'Iniciar projetos, abrir negócios, primeiro passo',p:'Primeiro andar, sede inicial, startup'},{n:2,e:'Cooperação, Sensibilidade, Equilíbrio',f:'Ateliês, artesanato, trabalho em equipe',p:'Atelier, escritório de parcerias'},{n:3,e:'Comunicação, Expressão, Alegria',f:'Palcos, rádio, TV, teatro, marketing',p:'Teatro, estúdio de música, podcast'},{n:4,e:'Organização, Disciplina, Praticidade',f:'Escritórios, fábricas, rotina',p:'Escritório adm., fábrica, RH'},{n:5,e:'Liberdade, Desejo, Paixão, Amor',f:'Motéis, pousadas românticas, spa',p:'Motel, casa de casal, spa'},{n:6,e:'Família, Espiritualidade, Responsabilidade',f:'Igrejas, templos, centros espíritas',p:'Igreja, terreiro, casa de família'},{n:7,e:'Sabedoria, Introspecção, Conhecimento',f:'Bibliotecas, consultórios, terapia',p:'Biblioteca, consultório, meditação'},{n:8,e:'Poder, Abundância, Prosperidade, Sucesso',f:'Comércio, empresas, bancos, finanças',p:'Loja, banco, escritório executivo'},{n:9,e:'Compaixão, Humanitarismo, Conclusão',f:'Concluir ciclos, ONGs',p:'ONG, memorial, conclusão'},{n:10,e:'1+0=1 — Início com Estabilidade',f:'Começar com equilíbrio',p:'Casa para recomeçar'},{n:11,e:'1+9=10→1 — Início e Fim',f:'Iniciar e concluir no mesmo local',p:'Incubadora, consultoria'}];
+const prd=[{id:'free',n1:'🔮 Mapa Individual Express',d1:'Caminho de Vida + Expressão + Alma + Eu Íntimo (tela)'},{id:'pdf',n1:'📄 Mapa Individual Completo (PDF)',d1:'10 páginas + Grade + Ciclos + Desafios + Ano Pessoal'},{id:'emp',n1:'💼 Validação Empresarial',d1:'Nome + assinatura profissional + sugestão + PDF'},{id:'art',n1:'🎭 Validação Nome Artístico',d1:'Nome + assinatura artística + sugestão + PDF'},{id:'urna',n1:'🗳️ Validação Nome de Urna',d1:'Nome de campanha soma 8 + variações'},{id:'num',n1:'🔢 Cálculo do Número Eleitoral',d1:'Dígitos Dep. Federal (4) e Estadual (5) + soma 8'},{id:'casal',n1:'💞 Mapa do Casal (2 pessoas)',d1:'2 mapas individuais + compatibilidade + PDFs'},{id:'baby',n1:'👶 Planejamento Nome de Bebê',d1:'Nomes com energia ideal + combinação sobrenome'},{id:'loja',n1:'🏪 Nome para Negócio/Produto',d1:'Nome comercial + energia do setor + sugestão'},{id:'imov',n1:'🏠 Número de Imóvel',d1:'Energia do número por finalidade + PDF'},{id:'prem',n1:'🌟 Mapa Premium (Família)',d1:'Até 4 pessoas + compatibilidades + PDF único'}];
 const pv=[0,8,26,26,35,35,44,26,26,26,197];
 const prices={pt:pv,en:pv,es:pv,it:pv,fr:pv,de:pv,ja:[0,800,2600,2600,3500,3500,4400,2600,2600,2600,19700],zh:[0,80,260,260,350,350,440,260,260,260,1970],ru:[0,800,2600,2600,3500,3500,4400,2600,2600,2600,19700],hi:[0,800,2600,2600,3500,3500,4400,2600,2600,2600,19700],ar:[0,80,260,260,350,350,440,260,260,260,1970],he:[0,80,260,260,350,350,440,260,260,260,1970]};
 const cs={pt:'R$',en:'$',es:'€',it:'€',fr:'€',de:'€',ja:'¥',zh:'¥',ru:'₽',hi:'₹',ar:'SAR',he:'₪'};
 
-const T={};
-function add(c,o){T[c]=o}
-add('pt',{badge:'🌍 A PLATAFORMA DE NUMEROLOGIA MAIS COMPLETA DO MUNDO',n1:'🏛 Início',n2:'🔮 Mapa',n3:'🗳️ Eleitoral',n4:'✨ Energias',h1:'MAPA NUMEROLÓGICO',sub:'A plataforma de numerologia mais completa do mundo',desc:'Mapa pessoal, empresarial, artístico, eleitoral, energia de imóveis e mais.',hb:'✦ GERAR MEU MAPA GRÁTIS',hb2:'🗳️ CANDIDATOS',c1:'Calcule seu Mapa',c2:'Preencha seus dados',f1:'Nome Completo',f2:'Data de Nascimento',f3:'E-mail',f4:'✦ CALCULAR GRÁTIS',r1:'✨ Seus Números',r2:'🔮 Mapa Express grátis',r3:'⟳ NOVO',p1:'📄 Todos os Produtos',p2:'Preços alinhados com o número 8.',t1:'Produto',t2:'O que inclui',t3:'Valor',g1:'✦ Cada valor reduz ao 8 ✦',buy:'COMPRAR',free:'GRÁTIS',ld:'...',ok:'Pedido criado!',er:'Erro.',rights:'© 2026. A1ELOS.',lp:'CAMINHO DE VIDA',ex:'EXPRESSÃO',su:'MOTIVAÇÃO DA ALMA',pe:'PERSONALIDADE',de:'DESTINO',
+const PT={badge:'🌍 A PLATAFORMA DE NUMEROLOGIA MAIS COMPLETA DO MUNDO',n1:'🏛 Início',n2:'🔮 Mapa',n3:'🗳️ Eleitoral',n4:'✨ Energias',h1:'MAPA NUMEROLÓGICO',sub:'A plataforma de numerologia mais completa do mundo',desc:'Mapa pessoal, empresarial, artístico, eleitoral, energia de imóveis e mais.',hb:'✦ GERAR MEU MAPA GRÁTIS',hb2:'🗳️ CANDIDATOS',c1:'Calcule seu Mapa',c2:'Preencha seus dados',f1:'Nome Completo',f2:'Data de Nascimento',f3:'E-mail',f4:'✦ CALCULAR GRÁTIS',r1:'✨ Seus Números',r2:'🔮 Mapa Express grátis',r3:'⟳ NOVO',p1:'📄 Todos os Produtos',p2:'Preços alinhados com o número 8.',t1:'Produto',t2:'O que inclui',t3:'Valor',g1:'✦ Cada valor reduz ao 8 ✦',buy:'COMPRAR',free:'GRÁTIS',ld:'...',ok:'Pedido criado!',er:'Erro.',rights:'© 2026. A1ELOS.',lp:'CAMINHO DE VIDA',ex:'EXPRESSÃO',su:'MOTIVAÇÃO DA ALMA',pe:'PERSONALIDADE',de:'DESTINO',
 e1:'🗳️ Soluções Eleitorais',e2:'Nome de urna soma 8',e3:'Eleições a cada 2 anos',e4:'Cientista político. Nome de urna soma 8 + dígitos eleitorais.',e5:'† Exemplos genéricos. X/0.',
 en1:'✨ Energias da Vida',en2:'Nomeie pessoas, negócios, imóveis',en3:'Tudo tem energia numerológica',en4:'Nome de bebê, empresa, casa, templo, escritório.',en6:'📄 Serviços de Energia',en7:'Análise personalizada.',
-ide:'Ideal para:',ond:'Onde aplicar:'});
-add('en',{badge:'🌍 THE MOST COMPLETE NUMEROLOGY PLATFORM',n1:'🏛 Home',n2:'🔮 Map',n3:'🗳️ Electoral',n4:'✨ Energies',h1:'NUMEROLOGICAL MAP',sub:'The most complete numerology platform',desc:'Personal map, business, stage name, electoral, property energy.',hb:'✦ GENERATE MY MAP FREE',hb2:'🗳️ CANDIDATES',c1:'Calculate Your Map',c2:'Fill in your details',f1:'Full Name',f2:'Birth Date',f3:'Email',f4:'✦ CALCULATE FREE',r1:'✨ Your Numbers',r2:'🔮 Free Express Map',r3:'⟳ NEW',p1:'📄 All Products',p2:'Prices aligned with number 8.',t1:'Product',t2:'Includes',t3:'Price',g1:'✦ Every price reduces to 8 ✦',buy:'BUY',free:'FREE',ld:'...',ok:'Order created!',er:'Error.',rights:'© 2026. A1ELOS.',lp:'LIFE PATH',ex:'EXPRESSION',su:'SOUL URGE',pe:'PERSONALITY',de:'DESTINY',
+ide:'Ideal para:',ond:'Onde aplicar:'};
+const EN={badge:'🌍 THE MOST COMPLETE NUMEROLOGY PLATFORM',n1:'🏛 Home',n2:'🔮 Map',n3:'🗳️ Electoral',n4:'✨ Energies',h1:'NUMEROLOGICAL MAP',sub:'The most complete numerology platform',desc:'Personal map, business, stage name, electoral, property energy.',hb:'✦ GENERATE MY MAP FREE',hb2:'🗳️ CANDIDATES',c1:'Calculate Your Map',c2:'Fill in your details',f1:'Full Name',f2:'Birth Date',f3:'Email',f4:'✦ CALCULATE FREE',r1:'✨ Your Numbers',r2:'🔮 Free Express Map',r3:'⟳ NEW',p1:'📄 All Products',p2:'Prices aligned with number 8.',t1:'Product',t2:'Includes',t3:'Price',g1:'✦ Every price reduces to 8 ✦',buy:'BUY',free:'FREE',ld:'...',ok:'Order created!',er:'Error.',rights:'© 2026. A1ELOS.',lp:'LIFE PATH',ex:'EXPRESSION',su:'SOUL URGE',pe:'PERSONALITY',de:'DESTINY',
 e1:'🗳️ Electoral Solutions',e2:'Ballot name sum 8',e3:'Elections every 2 years',e4:'Political scientist. Ballot name sum 8 + electoral digits.',e5:'† Generic examples. X/0.',
 en1:'✨ Life Energies',en2:'Name babies, businesses, properties',en3:'Everything has numerological energy',en4:'Baby, company, house, temple, office.',en6:'📄 Energy Services',en7:'Personalized analysis.',
-ide:'Ideal for:',ond:'Where to apply:'});
-add('es',{badge:'🌍 LA MÁS COMPLETA DEL MUNDO',n1:'🏛 Inicio',n2:'🔮 Mapa',n3:'🗳️ Electoral',n4:'✨ Energías',h1:'MAPA NUMEROLÓGICO',sub:'La plataforma más completa',desc:'Mapa personal, empresarial, artístico, electoral.',hb:'✦ GENERAR MI MAPA GRATIS',hb2:'🗳️ CANDIDATOS',c1:'Calcula tu Mapa',c2:'Completa tus datos',f1:'Nombre Completo',f2:'Fecha de Nacimiento',f3:'Email',f4:'✦ CALCULAR GRATIS',r1:'✨ Tus Números',r2:'🔮 Mapa Express Gratis',r3:'⟳ NUEVO',p1:'📄 Todos los Productos',p2:'Precios alineados con el 8.',t1:'Producto',t2:'Incluye',t3:'Valor',g1:'✦ Cada valor reduce al 8 ✦',buy:'COMPRAR',free:'GRATIS',ld:'...',ok:'Pedido creado!',er:'Error.',rights:'© 2026.',lp:'CAMINO DE VIDA',ex:'EXPRESIÓN',su:'MOTIVACIÓN DEL ALMA',pe:'PERSONALIDAD',de:'DESTINO',
+ide:'Ideal for:',ond:'Where to apply:'};
+const ES={badge:'🌍 LA MÁS COMPLETA DEL MUNDO',n1:'🏛 Inicio',n2:'🔮 Mapa',n3:'🗳️ Electoral',n4:'✨ Energías',h1:'MAPA NUMEROLÓGICO',sub:'La plataforma más completa',desc:'Mapa personal, empresarial, artístico, electoral.',hb:'✦ GENERAR MI MAPA GRATIS',hb2:'🗳️ CANDIDATOS',c1:'Calcula tu Mapa',c2:'Completa tus datos',f1:'Nombre Completo',f2:'Fecha de Nacimiento',f3:'Email',f4:'✦ CALCULAR GRATIS',r1:'✨ Tus Números',r2:'🔮 Mapa Express Gratis',r3:'⟳ NUEVO',p1:'📄 Todos los Productos',p2:'Precios alineados con el 8.',t1:'Producto',t2:'Incluye',t3:'Valor',g1:'✦ Cada valor reduce al 8 ✦',buy:'COMPRAR',free:'GRATIS',ld:'...',ok:'Pedido creado!',er:'Error.',rights:'© 2026.',lp:'CAMINO DE VIDA',ex:'EXPRESIÓN',su:'MOTIVACIÓN DEL ALMA',pe:'PERSONALIDAD',de:'DESTINO',
 e1:'🗳️ Soluciones Electorales',e2:'Nombre de urna suma 8',e3:'Elecciones cada 2 años',e4:'Cientista político. Nombre de urna suma 8.',e5:'† Ejemplos genéricos.',
 en1:'✨ Energías de la Vida',en2:'Nombre bebés, negocios, inmuebles',en3:'Todo tiene energía numerológica',en4:'Bebé, empresa, casa, templo.',en6:'📄 Servicios de Energía',en7:'Análisis personalizado.',
-ide:'Ideal para:',ond:'Dónde aplicar:'});
-['it','fr','de','ja','zh','ru','hi','ar','he'].forEach(function(c){T[c]={};for(var k in T.en)T[c][k]=T.en[k]});
+ide:'Ideal para:',ond:'Dónde aplicar:'};
 
+const T={pt:PT,en:EN,es:ES,it:EN,fr:EN,de:EN,ja:EN,zh:EN,ru:EN,hi:EN,ar:EN,he:EN};
 const lgs=[{c:'pt',f:'🇧🇷'},{c:'en',f:'🇺🇸'},{c:'es',f:'🇪🇸'},{c:'it',f:'🇮🇹'},{c:'fr',f:'🇫🇷'},{c:'de',f:'🇩🇪'},{c:'ja',f:'🇯🇵'},{c:'zh',f:'🇨🇳'},{c:'ru',f:'🇷🇺'},{c:'hi',f:'🇮🇳'},{c:'ar',f:'🇸🇦'},{c:'he',f:'🇮🇱'}];
 
 function setLang(c){
@@ -204,20 +28,18 @@ function setLang(c){
   document.documentElement.lang=c;
   document.documentElement.dir=['ar','he'].includes(c)?'rtl':'ltr';
   document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.c===c)});
-  var t=T[c]||T.en;
+  var t=T[c]||EN;
   document.querySelectorAll('[data-i18n]').forEach(function(el){var k=el.dataset.i18n;if(t[k])el.innerText=t[k]});
   renderTables();renderE();if(lda)renderRes(lda);
 }
-function fmt(c,i){var v=(prices[c]||prices.en)[i]||0;if(i===0)return(T[c]||T.en).free;return(cs[c]||'$')+' '+v}
+function fmt(c,i){var v=(prices[c]||prices.en)[i]||0;if(i===0)return(T[c]||EN).free;return(cs[c]||'$')+' '+v}
 function dsp(n){if(!n||n===0)return'—';var s=String(n).split('').reduce(function(a,b){return a+parseInt(b)},0);var r=String(n).split('').join('+')+'='+s;if(s>9){var s2=String(s).split('').reduce(function(a,b){return a+parseInt(b)},0);r+='→'+s2}return r+' ✅'}
-function renderTable(id,st,en){var lang=localStorage.getItem('lang')||'pt',t=T[lang]||T.en,b=document.getElementById(id);if(!b)return;b.innerHTML='';for(var i=st;i<=en;i++){var p=prd[i];if(!p)continue;var tr=document.createElement('tr');if(i>0)tr.style.borderLeft='3px solid var(--gold)';var v=(prices[lang]||prices.en)[i]||0;tr.innerHTML='<td class="row-num">'+(i+1)+'</td><td><span class="product-name">'+p.n1+'</span></td><td><span class="product-desc">'+p.d1+'</span></td><td class="'+(i===0?'free-cell':'price-cell')+'">'+fmt(lang,i)+'</td><td class="num">'+(i===0?'—':dsp(v))+'</td><td>'+(i===0?'<span class="badge">'+t.free+'</span>':'<button class="buy-btn" onclick="buyP('+i+')">'+t.buy+'</button>')+'</td>';b.appendChild(tr)}}
+function renderTable(id,st,en){var lang=localStorage.getItem('lang')||'pt',t=T[lang]||EN,b=document.getElementById(id);if(!b)return;b.innerHTML='';for(var i=st;i<=en;i++){var p=prd[i];if(!p)continue;var tr=document.createElement('tr');if(i>0)tr.style.borderLeft='3px solid var(--gold)';var v=(prices[lang]||prices.en)[i]||0;tr.innerHTML='<td class="row-num">'+(i+1)+'</td><td><span class="product-name">'+p.n1+'</span></td><td><span class="product-desc">'+p.d1+'</span></td><td class="'+(i===0?'free-cell':'price-cell')+'">'+fmt(lang,i)+'</td><td class="num">'+(i===0?'—':dsp(v))+'</td><td>'+(i===0?'<span class="badge">'+t.free+'</span>':'<button class="buy-btn" onclick="buyP('+i+')">'+t.buy+'</button>')+'</td>';b.appendChild(tr)}}
 function renderTables(){renderTable('pBody',0,10);renderTable('pBodyElec',4,5);renderTable('pBodyEner',6,10)}
-function renderE(){var lang=localStorage.getItem('lang')||'pt',g=document.getElementById('energyGrid');if(!g)return;var t=T[lang]||T.en;g.innerHTML='';enr.forEach(function(e){var d=document.createElement('div');d.className='energy-card';d.innerHTML='<div class="big-num">'+e.n+'</div><div class="e-name">'+e.e+'</div><div class="e-for"><strong>'+(t.ide||'Ideal para:')+'</strong><br>'+e.f+'</div><div class="e-place">'+(t.ond||'Onde aplicar:')+'<br>'+e.p+'</div>';g.appendChild(d)})}
+function renderE(){var lang=localStorage.getItem('lang')||'pt',g=document.getElementById('energyGrid');if(!g)return;var t=T[lang]||EN;g.innerHTML='';enr.forEach(function(e){var d=document.createElement('div');d.className='energy-card';d.innerHTML='<div class="big-num">'+e.n+'</div><div class="e-name">'+e.e+'</div><div class="e-for"><strong>'+(t.ide||'Ideal para:')+'</strong><br>'+e.f+'</div><div class="e-place">'+(t.ond||'Onde aplicar:')+'<br>'+e.p+'</div>';g.appendChild(d)})}
 async function handleCalc(){var btn=document.getElementById('sBtn');btn.disabled=true;var orig=btn.innerText;btn.innerText='...';try{var name=document.getElementById('name').value;if(name.length<2){alert('Nome muito curto.');btn.disabled=false;btn.innerText=orig;return}var date=document.getElementById('date').value;if(!date){alert('Selecione a data.');btn.disabled=false;btn.innerText=orig;return}lat=document.getElementById('email').value;var res=await fetch(API+'/calculate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,birth_date:date,email:lat||null})});if(!res.ok)throw Error();var data=await res.json();if(!data||!data.life_path)throw Error();lda=data;cId=data.id;renderRes(data);document.getElementById('res').style.display='block';renderTable('pBody',0,10);document.getElementById('res').scrollIntoView({behavior:'smooth'})}catch(e){alert('Erro ao conectar. Tente novamente.')}btn.disabled=false;btn.innerText=orig}
-function renderRes(d){var c=localStorage.getItem('lang')||'pt',g=document.getElementById('rGrid'),t=T[c]||T.en,ks=['lp','ex','su','pe','de'],vs=[d.life_path,d.expression,d.soul_urge,d.personality,d.destiny];g.innerHTML='';ks.forEach(function(k,i){g.innerHTML+='<div class="num-box"><div class="val">'+vs[i]+'</div><div class="label">'+(t[k]||k)+'</div></div>'})}
-async function buyP(idx){if(idx===0)return;var lang=localStorage.getItem('lang')||'pt',t=T[lang]||T.en,bts=document.querySelectorAll('.buy-btn');bts.forEach(function(b){b.disabled=true});try{var email=lat||document.getElementById('email').value;if(!email||!email.includes('@')){alert('Informe um e-mail.');bts.forEach(function(b){b.disabled=false});return}var amt=(prices[lang]||prices.en)[idx]||0;if(amt<=0){alert('Gratuito!');bts.forEach(function(b){b.disabled=false});return}if(!cId){alert('Calcule primeiro!');bts.forEach(function(b){b.disabled=false});return}var res=await fetch(API+'/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,product:prd[idx].id,price:amt,calculation_id:cId})});if(!res.ok)throw Error();var data=await res.json();var msg=document.getElementById('orderMsg');if(msg){msg.style.display='block';msg.innerHTML='<h4>✅</h4><p>#'+data.order_id+'</p>'}}catch(e){var msg=document.getElementById('orderMsg');if(msg)msg.style.display='block';msg.innerHTML='<p style="color:#e74c3c">'+(t.er||'Erro.')+'</p>'}bts.forEach(function(b){b.disabled=false})}
+function renderRes(d){var c=localStorage.getItem('lang')||'pt',g=document.getElementById('rGrid'),t=T[c]||EN,ks=['lp','ex','su','pe','de'],vs=[d.life_path,d.expression,d.soul_urge,d.personality,d.destiny];g.innerHTML='';ks.forEach(function(k,i){g.innerHTML+='<div class="num-box"><div class="val">'+vs[i]+'</div><div class="label">'+(t[k]||k)+'</div></div>'})}
+async function buyP(idx){if(idx===0)return;var lang=localStorage.getItem('lang')||'pt',t=T[lang]||EN,bts=document.querySelectorAll('.buy-btn');bts.forEach(function(b){b.disabled=true});try{var email=lat||document.getElementById('email').value;if(!email||!email.includes('@')){alert('Informe um e-mail.');bts.forEach(function(b){b.disabled=false});return}var amt=(prices[lang]||prices.en)[idx]||0;if(amt<=0){alert('Gratuito!');bts.forEach(function(b){b.disabled=false});return}if(!cId){alert('Calcule primeiro!');bts.forEach(function(b){b.disabled=false});return}var res=await fetch(API+'/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,product:prd[idx].id,price:amt,calculation_id:cId})});if(!res.ok)throw Error();var data=await res.json();var msg=document.getElementById('orderMsg');if(msg){msg.style.display='block';msg.innerHTML='<h4>✅</h4><p>#'+data.order_id+'</p>'}}catch(e){var msg=document.getElementById('orderMsg');if(msg)msg.style.display='block';msg.innerHTML='<p style="color:#e74c3c">'+(t.er||'Erro.')+'</p>'}bts.forEach(function(b){b.disabled=false})}
 function resetForm(){document.getElementById('nForm').reset();document.getElementById('res').style.display='none';document.getElementById('orderMsg').style.display='none';cId=null;lda=null}
 window.onload=function(){var c=document.getElementById('langSelector');lgs.forEach(function(l){var b=document.createElement('button');b.className='lang-btn';b.dataset.c=l.c;b.innerHTML='<span class="flag">'+l.f+'</span> '+l.c.toUpperCase();b.onclick=function(){setLang(l.c)};c.appendChild(b)});setLang(localStorage.getItem('lang')||'pt');if(window.location.hash){setTimeout(function(){var el=document.querySelector(window.location.hash);if(el)el.scrollIntoView({behavior:'smooth'})},500)}};
 </script>
-</body>
-</html>
