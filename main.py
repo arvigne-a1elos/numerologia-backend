@@ -18,7 +18,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.units import mm
-import python_dateutil.parser as dp
+import dateutil.parser as dp
 import aiofiles
 
 logging.basicConfig(level=logging.INFO)
