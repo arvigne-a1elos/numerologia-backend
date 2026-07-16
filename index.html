@@ -77,6 +77,7 @@ section{padding:60px 20px;max-width:1100px;margin:0 auto;}
 .order-msg{display:none;padding:12px;background:#1a2a1a;border:1px solid var(--gold);border-radius:10px;margin-top:18px;text-align:center;animation:fadeIn .5s;}
 .order-msg h4{color:var(--gold);margin-bottom:4px;font-size:.85rem;}
 .order-msg p{color:#888;font-size:.75rem;}
+#loadingMsg{display:none;padding:12px;background:#1a1a1a;border:1px solid var(--gold);border-radius:10px;margin-top:18px;text-align:center;}
 .guarantee-note{text-align:center;color:#555;font-size:.65rem;margin-top:10px;}
 footer{text-align:center;padding:30px 20px;color:#555;font-size:.75rem;}
 footer a{color:var(--gold);text-decoration:none;}
@@ -169,8 +170,9 @@ const prodDefs=[
 {id:'loja',n1:'🏪 Nome para Negócio/Produto',d1:'Nome comercial + energia do setor + sugestão'},
 {id:'imov',n1:'🏠 Número de Imóvel',d1:'Energia do número por finalidade + PDF'},
 {id:'prem',n1:'🌟 Mapa Premium (Família)',d1:'Até 4 pessoas + compatibilidades + PDF único'}];
-const pv=[0,8,26,26,35,35,44,26,26,26,197];
-const prices={pt:pv,en:pv,es:pv,it:pv,fr:pv,de:pv,ja:[0,800,2600,2600,3500,3500,4400,2600,2600,2600,19700],zh:[0,80,260,260,350,350,440,260,260,260,1970],ru:[0,800,2600,2600,3500,3500,4400,2600,2600,2600,19700],hi:[0,800,2600,2600,3500,3500,4400,2600,2600,2600,19700],ar:[0,80,260,260,350,350,440,260,260,260,1970],he:[0,80,260,260,350,350,440,260,260,260,1970]};
+/* ===== NOVOS PREÇOS - valor mínimo R$ 17, TODOS reduzem a 8 ===== */
+const pv=[0,17,35,35,44,44,53,35,35,35,206];
+const prices={pt:pv,en:pv,es:pv,it:pv,fr:pv,de:pv,ja:[0,1700,3500,3500,4400,4400,5300,3500,3500,3500,20600],zh:[0,170,350,350,440,440,530,350,350,350,2060],ru:[0,1700,3500,3500,4400,4400,5300,3500,3500,3500,20600],hi:[0,1700,3500,3500,4400,4400,5300,3500,3500,3500,20600],ar:[0,170,350,350,440,440,530,350,350,350,2060],he:[0,170,350,350,440,440,530,350,350,350,2060]};
 const cs={pt:'R$',en:'$',es:'€',it:'€',fr:'€',de:'€',ja:'¥',zh:'¥',ru:'₽',hi:'₹',ar:'SAR',he:'₪'};
 const T={};
 function addLang(c,o){T[c]=o;}
@@ -216,8 +218,6 @@ function renderTables(){renderTable('pBody',0,10);renderTable('pBodyElec',4,5);r
 function renderEnergy(){var lang=localStorage.getItem('lang')||'pt';var g=document.getElementById('energyGrid');if(!g)return;var t=T[lang]||T.en;g.innerHTML='';energyData.forEach(function(e){var div=document.createElement('div');div.className='energy-card';div.innerHTML='<div class="big-num">'+e.n+'</div><div class="e-name">'+e.e+'</div><div class="e-for"><strong>'+(t.ide||'Ideal para:')+'</strong><br>'+e.f+'</div><div class="e-place">'+(t.ond||'Onde aplicar:')+'<br>'+e.p+'</div>';g.appendChild(div);});}
 async function handleCalc(){var btn=document.getElementById('sBtn');btn.disabled=true;var orig=btn.innerText;btn.innerText='...';try{var name=document.getElementById('name').value;if(name.length<2){alert('Nome muito curto.');btn.disabled=false;btn.innerText=orig;return;}var date=document.getElementById('date').value;if(!date){alert('Selecione a data.');btn.disabled=false;btn.innerText=orig;return;}lastEmail=document.getElementById('email').value;var res=await fetch(API+'/calculate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,birth_date:date,email:lastEmail||null})});if(!res.ok)throw new Error();var data=await res.json();if(!data||!data.life_path)throw new Error();lastData=data;currentId=data.id;renderResults(data);document.getElementById('res').style.display='block';renderTable('pBody',0,10);document.getElementById('res').scrollIntoView({behavior:'smooth'});}catch(e){alert('Erro ao conectar. Tente novamente.');}btn.disabled=false;btn.innerText=orig;}
 function renderResults(d){var c=localStorage.getItem('lang')||'pt';var g=document.getElementById('rGrid');var t=T[c]||T.en;var keys=['lp','ex','su','pe','de'];var vals=[d.life_path,d.expression,d.soul_urge,d.personality,d.destiny];g.innerHTML='';keys.forEach(function(k,i){g.innerHTML+='<div class="num-box"><div class="val">'+vals[i]+'</div><div class="label">'+(t[k]||k)+'</div></div>';});}
-
-// === FUNÇÃO buyP CORRIGIDA: envia nome + email para o Mercado Pago ===
 async function buyP(idx){
   if(idx===0)return;
   var t=T[localStorage.getItem('lang')||'pt']||T.en;
@@ -233,12 +233,9 @@ async function buyP(idx){
     var amt=(prices[localStorage.getItem('lang')||'pt']||prices.en)[idx]||0;
     if(amt<=0){alert('Gratuito!');btns.forEach(function(b){b.disabled=false;});return;}
     if(!currentId){alert('Calcule o mapa primeiro!');btns.forEach(function(b){b.disabled=false;});return;}
-
     var buyerName=document.getElementById('name').value||'';
-
     document.getElementById('loadingMsg').style.display='block';
     document.getElementById('orderMsg').style.display='none';
-
     var res=await fetch(API+'/api/pay/mercadopago',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
@@ -265,7 +262,6 @@ async function buyP(idx){
   }
   btns.forEach(function(b){b.disabled=false;});
 }
-
 function resetForm(){document.getElementById('nForm').reset();document.getElementById('res').style.display='none';document.getElementById('orderMsg').style.display='none';document.getElementById('loadingMsg').style.display='none';currentId=null;lastData=null;}
 window.onload=function(){var c=document.getElementById('langSelector');langs.forEach(function(l){var b=document.createElement('button');b.className='lang-btn';b.dataset.c=l.c;b.innerHTML='<span class="flag">'+l.f+'</span> '+l.c.toUpperCase();b.onclick=function(){setLang(l.c);};c.appendChild(b);});setLang(localStorage.getItem('lang')||'pt');if(window.location.hash){setTimeout(function(){var el=document.querySelector(window.location.hash);if(el)el.scrollIntoView({behavior:'smooth'});},500);}};
 </script>
