@@ -299,7 +299,16 @@ def create_mp_payment(req: MercadoPagoRequest):
     },
     "statement_descriptor": "A1ELOS NUMEROLOGIA"
 }
-            "payer": {"email": req.email},
+               preference_data = {
+        "items": [{
+            "title": req.product,
+            "quantity": 1,
+            "currency_id": "BRL",
+            "unit_price": float(req.price)
+        }],
+        "payer": {"email": req.email},
+        ...
+    }
             "back_urls": {
                 "success": f"{BASE_URL}/api/pay/success",
                 "failure": f"{BASE_URL}/api/pay/failure",
