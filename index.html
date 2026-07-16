@@ -234,7 +234,6 @@ async function buyP(idx){
     if(amt<=0){alert('Gratuito!');btns.forEach(function(b){b.disabled=false;});return;}
     if(!currentId){alert('Calcule o mapa primeiro!');btns.forEach(function(b){b.disabled=false;});return;}
 
-    // Pega o nome do comprador do formulário
     var buyerName=document.getElementById('name').value||'';
 
     document.getElementById('loadingMsg').style.display='block';
