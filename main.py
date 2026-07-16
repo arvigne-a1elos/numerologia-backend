@@ -309,17 +309,7 @@ def create_mp_payment(req: MercadoPagoRequest):
         "payer": {"email": req.email},
         ...
     }
-            "back_urls": {
-                "success": f"{BASE_URL}/api/pay/success",
-                "failure": f"{BASE_URL}/api/pay/failure",
-                "pending": f"{BASE_URL}/api/pay/pending"
-            },
-            "auto_return": "approved",
-            "external_reference": order_id,
-            "notification_url": f"{BASE_URL}/api/webhook/mercadopago"
-        }
-        
-        result = sdk.preference().create(preference_data)
+                    result = sdk.preference().create(preference_data)
         if result.get("status") in (200, 201):
             response = result.get("response", {})
             payment_url = response.get("init_point")
