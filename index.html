@@ -217,7 +217,7 @@ function renderEnergy(){var lang=localStorage.getItem('lang')||'pt';var g=docume
 async function handleCalc(){var btn=document.getElementById('sBtn');btn.disabled=true;var orig=btn.innerText;btn.innerText='...';try{var name=document.getElementById('name').value;if(name.length<2){alert('Nome muito curto.');btn.disabled=false;btn.innerText=orig;return;}var date=document.getElementById('date').value;if(!date){alert('Selecione a data.');btn.disabled=false;btn.innerText=orig;return;}lastEmail=document.getElementById('email').value;var res=await fetch(API+'/calculate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,birth_date:date,email:lastEmail||null})});if(!res.ok)throw new Error();var data=await res.json();if(!data||!data.life_path)throw new Error();lastData=data;currentId=data.id;renderResults(data);document.getElementById('res').style.display='block';renderTable('pBody',0,10);document.getElementById('res').scrollIntoView({behavior:'smooth'});}catch(e){alert('Erro ao conectar. Tente novamente.');}btn.disabled=false;btn.innerText=orig;}
 function renderResults(d){var c=localStorage.getItem('lang')||'pt';var g=document.getElementById('rGrid');var t=T[c]||T.en;var keys=['lp','ex','su','pe','de'];var vals=[d.life_path,d.expression,d.soul_urge,d.personality,d.destiny];g.innerHTML='';keys.forEach(function(k,i){g.innerHTML+='<div class="num-box"><div class="val">'+vals[i]+'</div><div class="label">'+(t[k]||k)+'</div></div>';});}
 
-// === FUNÇÃO buyP CORRIGIDA — chama Mercado Pago e redireciona ===
+// === FUNÇÃO buyP — Chama Mercado Pago e redireciona ===
 async function buyP(idx){
   if(idx===0)return;
   var lang=localStorage.getItem('lang')||'pt';
@@ -242,13 +242,12 @@ async function buyP(idx){
       btns.forEach(function(b){b.disabled=false;});
       return;
     }
-    // Mostra loading
     var msg=document.getElementById('orderMsg');
     var loading=document.getElementById('loadingMsg');
     if(loading)loading.style.display='block';
     if(msg)msg.style.display='none';
 
-    // Chama o endpoint do Mercado Pago
+    // Chama o endpoint do Mercado Pago (produção)
     var res=await fetch(API+'/api/pay/mercadopago',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
@@ -262,7 +261,6 @@ async function buyP(idx){
     if(!res.ok)throw new Error();
     var data=await res.json();
     if(data.payment_url){
-      // Redireciona para o checkout do Mercado Pago
       window.location.href=data.payment_url;
     } else {
       throw new Error('Sem URL de pagamento');
