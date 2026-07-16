@@ -287,7 +287,7 @@ def create_mp_payment(req: MercadoPagoRequest):
                 "currency_id": "BRL",
                 "unit_price": float(req.price)
             }],
-            # payer com nome, sobrenome e CPF para liberar o botão Pagar
+            # payer com nome, sobrenome e CPF para liberar botão Pagar
             "payer": {
                 "email": req.email,
                 "name": first_name,
