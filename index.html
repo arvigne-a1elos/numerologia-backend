@@ -233,13 +233,18 @@ async function buyP(idx){
     var amt=(prices[localStorage.getItem('lang')||'pt']||prices.en)[idx]||0;
     if(amt<=0){alert('Gratuito!');btns.forEach(function(b){b.disabled=false;});return;}
     if(!currentId){alert('Calcule o mapa primeiro!');btns.forEach(function(b){b.disabled=false;});return;}
-    var buyerName=document.getElementById('name').value||'';
     document.getElementById('loadingMsg').style.display='block';
     document.getElementById('orderMsg').style.display='none';
     var res=await fetch(API+'/api/pay/stripe',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({name:buyerName,email:email,product:prodDefs[idx].id,price:amt,calculation_id:currentId})
+      body:JSON.stringify({
+        name:document.getElementById('name').value||'',
+        email:email,
+        product:prodDefs[idx].id,
+        price:amt,
+        calculation_id:currentId
+      })
     });
     if(!res.ok)throw new Error();
     var data=await res.json();
