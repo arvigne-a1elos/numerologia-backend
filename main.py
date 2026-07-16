@@ -121,15 +121,15 @@ def calc_numerology(name, birth_date):
     bd = dp.parse(birth_date).date()
     nums = [bd.day, bd.month, bd.year]
     life_path = reduce_to_single(sum(nums))
-    
+
     name_upper = name.upper().replace(" ", "")
     table = {c: (i % 9 or 9) for i, c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)}
-    
+
     expression = 0
     vowel_sum = 0
     consonant_sum = 0
     vowels = "AEIOU"
-    
+
     for ch in name_upper:
         v = table.get(ch, 0)
         expression += v
@@ -137,14 +137,12 @@ def calc_numerology(name, birth_date):
             vowel_sum += v
         else:
             consonant_sum += v
-    
+
     expression = reduce_to_single(expression)
     soul_urge = reduce_to_single(vowel_sum)
     personality = reduce_to_single(consonant_sum)
-    
-    # Destiny = expression + life_path
     destiny = reduce_to_single(expression + life_path)
-    
+
     return {
         "life_path": life_path,
         "expression": expression,
@@ -158,15 +156,15 @@ def generate_pdf(calc, name):
     doc = SimpleDocTemplate(pdf_path, pagesize=A4)
     styles = getSampleStyleSheet()
     elements = []
-    
+
     title_style = ParagraphStyle("Title", parent=styles["Title"], fontSize=22, spaceAfter=20, textColor=colors.HexColor("#C9A94E"))
     normal_style = ParagraphStyle("Normal", parent=styles["Normal"], fontSize=12, spaceAfter=8)
-    
+
     elements.append(Paragraph("Mapa Numerológico", title_style))
     elements.append(Paragraph(f"<b>Nome:</b> {name}", normal_style))
     elements.append(Paragraph(f"<b>Data:</b> {calc.birth_date}", normal_style))
     elements.append(Spacer(1, 20))
-    
+
     data = [
         ["Número", "Valor"],
         ["Caminho de Vida", str(calc.life_path)],
@@ -275,46 +273,37 @@ def create_mp_payment(req: MercadoPagoRequest):
     try:
         db = SessionLocal()
         order_id = str(uuid.uuid4())[:12]
-        
+
         preference_data = {
-    "items": [{
-        "title": req.product,
-        "quantity": 1,
-        "currency_id": "BRL",
-        "unit_price": float(req.price)
-    }],
-    "payer": {"email": req.email},
-    "back_urls": {
-        "success": f"{BASE_URL}/api/pay/success",
-        "failure": f"{BASE_URL}/api/pay/failure",
-        "pending": f"{BASE_URL}/api/pay/pending"
-    },
-    "auto_return": "approved",
-    "external_reference": order_id,
-    "notification_url": f"{BASE_URL}/api/webhook/mercadopago",
-    "payment_methods": {
-        "excluded_payment_methods": [],
-        "excluded_payment_types": [],
-        "installments": 12
-    },
-    "statement_descriptor": "A1ELOS NUMEROLOGIA"
-}
-               preference_data = {
-        "items": [{
-            "title": req.product,
-            "quantity": 1,
-            "currency_id": "BRL",
-            "unit_price": float(req.price)
-        }],
-        "payer": {"email": req.email},
-        ...
-    }
-                    result = sdk.preference().create(preference_data)
+            "items": [{
+                "title": req.product,
+                "quantity": 1,
+                "currency_id": "BRL",
+                "unit_price": float(req.price)
+            }],
+            "payer": {"email": req.email},
+            "back_urls": {
+                "success": f"{BASE_URL}/api/pay/success",
+                "failure": f"{BASE_URL}/api/pay/failure",
+                "pending": f"{BASE_URL}/api/pay/pending"
+            },
+            "auto_return": "approved",
+            "external_reference": order_id,
+            "notification_url": f"{BASE_URL}/api/webhook/mercadopago",
+            "payment_methods": {
+                "excluded_payment_methods": [],
+                "excluded_payment_types": [],
+                "installments": 12
+            },
+            "statement_descriptor": "A1ELOS NUMEROLOGIA"
+        }
+
+        result = sdk.preference().create(preference_data)
         if result.get("status") in (200, 201):
             response = result.get("response", {})
             payment_url = response.get("init_point")
             mp_id = response.get("id")
-            
+
             order = Order(
                 id=order_id,
                 email=req.email,
@@ -327,7 +316,7 @@ def create_mp_payment(req: MercadoPagoRequest):
             db.add(order)
             db.commit()
             db.close()
-            
+
             return {
                 "payment_url": payment_url,
                 "order_id": order_id,
@@ -343,7 +332,7 @@ async def mp_webhook(request: Request):
     try:
         body = await request.json()
         logger.info(f"MP Webhook: {json.dumps(body)}")
-        
+
         if body.get("type") == "payment":
             payment_id = body.get("data", {}).get("id")
             if payment_id and sdk:
@@ -352,7 +341,7 @@ async def mp_webhook(request: Request):
                     data = payment.get("response", {})
                     status = data.get("status")
                     external_ref = data.get("external_reference")
-                    
+
                     if status == "approved" and external_ref:
                         db = SessionLocal()
                         order = db.query(Order).filter(Order.id == external_ref).first()
@@ -360,7 +349,7 @@ async def mp_webhook(request: Request):
                             order.status = "paid"
                             order.payment_id = str(payment_id)
                             db.commit()
-                            
+
                             if order.calculation_id:
                                 calc = db.query(Calculation).filter(Calculation.id == order.calculation_id).first()
                                 if calc:
@@ -374,7 +363,7 @@ async def mp_webhook(request: Request):
                                         )
                                     if os.path.exists(pdf_path):
                                         os.remove(pdf_path)
-                            db.close()
+                        db.close()
         return {"status": "ok"}
     except Exception as e:
         logger.error(f"Webhook error: {e}")
@@ -403,13 +392,13 @@ async def stripe_webhook(request: Request):
         payload = await request.body()
         sig = request.headers.get("stripe-signature", "")
         event = stripe.Webhook.construct_event(payload, sig, STRIPE_WEBHOOK_SECRET)
-        
+
         if event.get("type") == "payment_intent.succeeded":
             intent = event.get("data", {}).get("object", {})
             email = intent.get("receipt_email")
             product = intent.get("metadata", {}).get("product", "")
             calc_id = intent.get("metadata", {}).get("calculation_id", "")
-            
+
             db = SessionLocal()
             order_id = str(uuid.uuid4())[:12]
             order = Order(
@@ -423,7 +412,7 @@ async def stripe_webhook(request: Request):
                 payment_id=intent.get("id")
             )
             db.add(order)
-            
+
             if calc_id:
                 calc = db.query(Calculation).filter(Calculation.id == calc_id).first()
                 if calc and email:
@@ -433,7 +422,7 @@ async def stripe_webhook(request: Request):
                         os.remove(pdf_path)
             db.commit()
             db.close()
-        
+
         return {"status": "ok"}
     except Exception as e:
         logger.error(f"Stripe webhook error: {e}")
