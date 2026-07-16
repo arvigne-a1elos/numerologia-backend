@@ -2,7 +2,6 @@ import os, sys, json, hashlib, hmac, logging, uuid, asyncio
 from datetime import datetime, date, timedelta
 from typing import Optional
 from decimal import Decimal
-
 import stripe
 import mercadopago
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Request
@@ -20,11 +19,9 @@ from reportlab.lib import colors
 from reportlab.lib.units import mm
 import dateutil.parser as dp
 import aiofiles
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# ===== CONFIG =====
 MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN", "")
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
@@ -73,11 +70,11 @@ class Order(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 Base.metadata.create_all(bind=engine)
-
 app = FastAPI(title="Numerologia API")
 
 HTML_PATH = os.path.join(os.path.dirname(__file__), "index.html")
-INDEX_HTML = """<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Mapa Numerológico</title><style>body{background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;text-align:center;padding:20px}h1{color:#C9A94E;font-size:2.5rem;margin-bottom:10px}p{color:#888;margin-bottom:20px}.btn{background:#C9A94E;color:#0a0a0a;padding:12px 30px;border:none;border-radius:50px;cursor:pointer;font-weight:600;text-transform:uppercase;text-decoration:none;display:inline-block}</style></head><body><h1>🔮 Mapa Numerológico</h1><p>Calcule seu mapa numerológico gratuitamente.</p><p style="color:#666;font-size:0.9rem">API ativa. Aguarde o HTML completo no deploy com o index.html do repositório.</p></body></html>"""
+INDEX_HTML = """..."""  # fallback, não usado com Netlify
+
 if os.path.exists(HTML_PATH):
     with open(HTML_PATH, "r", encoding="utf-8") as f:
         INDEX_HTML = f.read()
@@ -100,7 +97,6 @@ class MercadoPagoRequest(BaseModel):
     price: float
     calculation_id: Optional[str] = None
 
-# ===== HELPERS =====
 def get_db():
     db = SessionLocal()
     try:
@@ -204,7 +200,6 @@ def send_email(to_email, subject, content, attachment_path=None):
         logger.error(f"SendGrid error: {e}")
         return False
 
-# ===== ENDPOINTS =====
 @app.get("/", response_class=HTMLResponse)
 def root():
     return INDEX_HTML
@@ -251,12 +246,9 @@ def create_mp_payment(req: MercadoPagoRequest):
     try:
         db = SessionLocal()
         order_id = str(uuid.uuid4())[:12]
-
-        # Separa nome e sobrenome para enviar ao Mercado Pago
         name_parts = (req.name or "").strip().split(" ", 1)
         first_name = name_parts[0] if name_parts else req.email
         last_name = name_parts[1] if len(name_parts) > 1 else ""
-
         preference_data = {
             "items": [{
                 "title": req.product,
@@ -268,10 +260,7 @@ def create_mp_payment(req: MercadoPagoRequest):
                 "email": req.email,
                 "name": first_name,
                 "surname": last_name,
-                "identification": {
-                    "type": "CPF",
-                    "number": "12345678909"
-                }
+                "identification": {"type": "CPF", "number": "12345678909"}
             },
             "back_urls": {
                 "success": f"{BASE_URL}/api/pay/success",
@@ -288,22 +277,18 @@ def create_mp_payment(req: MercadoPagoRequest):
             },
             "statement_descriptor": "A1ELOS NUMEROLOGIA"
         }
-
         result = sdk.preference().create(preference_data)
         if result.get("status") in (200, 201):
             response = result.get("response", {})
             payment_url = response.get("init_point")
             mp_id = response.get("id")
-
             order = Order(id=order_id, email=req.email, product=req.product,
                           price=req.price, calculation_id=req.calculation_id,
                           payment_method="mercadopago", payment_id=mp_id)
             db.add(order)
             db.commit()
             db.close()
-
             return {"payment_url": payment_url, "order_id": order_id, "mp_id": mp_id}
-
         db.close()
         raise HTTPException(500, "Erro Mercado Pago")
     except Exception as e:
@@ -314,7 +299,6 @@ async def mp_webhook(request: Request):
     try:
         body = await request.json()
         logger.info(f"MP Webhook: {json.dumps(body)}")
-
         if body.get("type") == "payment":
             payment_id = body.get("data", {}).get("id")
             if payment_id and sdk:
@@ -323,7 +307,6 @@ async def mp_webhook(request: Request):
                     data = payment.get("response", {})
                     status = data.get("status")
                     external_ref = data.get("external_reference")
-
                     if status == "approved" and external_ref:
                         db = SessionLocal()
                         order = db.query(Order).filter(Order.id == external_ref).first()
@@ -331,7 +314,6 @@ async def mp_webhook(request: Request):
                             order.status = "paid"
                             order.payment_id = str(payment_id)
                             db.commit()
-
                             if order.calculation_id:
                                 calc = db.query(Calculation).filter(
                                     Calculation.id == order.calculation_id
@@ -381,13 +363,11 @@ async def stripe_webhook(request: Request):
         payload = await request.body()
         sig = request.headers.get("stripe-signature", "")
         event = stripe.Webhook.construct_event(payload, sig, STRIPE_WEBHOOK_SECRET)
-
         if event.get("type") == "payment_intent.succeeded":
             intent = event.get("data", {}).get("object", {})
             email = intent.get("receipt_email")
             product = intent.get("metadata", {}).get("product", "")
             calc_id = intent.get("metadata", {}).get("calculation_id", "")
-
             db = SessionLocal()
             order_id = str(uuid.uuid4())[:12]
             order = Order(id=order_id, email=email or "unknown", product=product,
@@ -395,7 +375,6 @@ async def stripe_webhook(request: Request):
                           calculation_id=calc_id or None, status="paid",
                           payment_method="stripe", payment_id=intent.get("id"))
             db.add(order)
-
             if calc_id:
                 calc = db.query(Calculation).filter(Calculation.id == calc_id).first()
                 if calc and email:
@@ -405,7 +384,6 @@ async def stripe_webhook(request: Request):
                         os.remove(pdf_path)
             db.commit()
             db.close()
-
         return {"status": "ok"}
     except Exception as e:
         logger.error(f"Stripe webhook error: {e}")
