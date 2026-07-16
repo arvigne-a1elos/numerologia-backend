@@ -94,7 +94,7 @@ class CheckoutRequest(BaseModel):
     calculation_id: Optional[str] = None
 
 class MercadoPagoRequest(BaseModel):
-    name: str  # <<< ADICIONADO: nome do comprador
+    name: str
     email: str
     product: str
     price: float
@@ -252,7 +252,7 @@ def create_mp_payment(req: MercadoPagoRequest):
         db = SessionLocal()
         order_id = str(uuid.uuid4())[:12]
 
-        # Separa nome e sobrenome
+        # Separa nome e sobrenome para enviar ao Mercado Pago
         name_parts = (req.name or "").strip().split(" ", 1)
         first_name = name_parts[0] if name_parts else req.email
         last_name = name_parts[1] if len(name_parts) > 1 else ""
@@ -264,7 +264,6 @@ def create_mp_payment(req: MercadoPagoRequest):
                 "currency_id": "BRL",
                 "unit_price": float(req.price)
             }],
-            # payer completo com nome e CPF
             "payer": {
                 "email": req.email,
                 "name": first_name,
