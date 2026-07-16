@@ -99,6 +99,7 @@ class CheckoutRequest(BaseModel):
     calculation_id: Optional[str] = None
 
 class MercadoPagoRequest(BaseModel):
+    name: str  # Nome do comprador (adicionado)
     email: str
     product: str
     price: float
@@ -274,6 +275,11 @@ def create_mp_payment(req: MercadoPagoRequest):
         db = SessionLocal()
         order_id = str(uuid.uuid4())[:12]
 
+        # Separa nome e sobrenome
+        name_parts = (req.name or "").strip().split(" ", 1)
+        first_name = name_parts[0] if name_parts else req.email
+        last_name = name_parts[1] if len(name_parts) > 1 else ""
+
         preference_data = {
             "items": [{
                 "title": req.product,
@@ -281,7 +287,16 @@ def create_mp_payment(req: MercadoPagoRequest):
                 "currency_id": "BRL",
                 "unit_price": float(req.price)
             }],
-            "payer": {"email": req.email},
+            # payer com nome, sobrenome e CPF para liberar o botão Pagar
+            "payer": {
+                "email": req.email,
+                "name": first_name,
+                "surname": last_name,
+                "identification": {
+                    "type": "CPF",
+                    "number": "12345678909"
+                }
+            },
             "back_urls": {
                 "success": f"{BASE_URL}/api/pay/success",
                 "failure": f"{BASE_URL}/api/pay/failure",
