@@ -122,6 +122,7 @@ footer a{color:var(--gold);text-decoration:none;}
 <div style="overflow-x:auto;"><table class="pricing-table"><thead><tr><th style="width:22px;">#</th><th data-i18n="t1">Produto / Serviço</th><th data-i18n="t2">O que inclui</th><th style="text-align:center;width:72px;" data-i18n="t3">Valor</th><th style="text-align:center;width:22px;">8</th><th style="width:55px;"></th></tr></thead><tbody id="pBody"></tbody></table></div>
 <p class="guarantee-note" data-i18n="g1">✦ Cada valor reduz ao número 8 por soma dos dígitos ✦</p></div>
 <div id="orderMsg" class="order-msg"></div>
+<div id="loadingMsg" class="order-msg" style="display:none;border-color:#C9A94E;"><h4 data-i18n="ld">⏳ Redirecionando para o pagamento...</h4></div>
 <div style="text-align:center;margin-top:15px;"><button class="btn btn-outline btn-sm" onclick="resetForm();" data-i18n="r3">⟳ NOVO CÁLCULO</button></div>
 </div></div>
 </section>
@@ -173,15 +174,15 @@ const prices={pt:pv,en:pv,es:pv,it:pv,fr:pv,de:pv,ja:[0,800,2600,2600,3500,3500,
 const cs={pt:'R$',en:'$',es:'€',it:'€',fr:'€',de:'€',ja:'¥',zh:'¥',ru:'₽',hi:'₹',ar:'SAR',he:'₪'};
 const T={};
 function addLang(c,o){T[c]=o;}
-addLang('pt',{badge:'🌍 A PLATAFORMA DE NUMEROLOGIA MAIS COMPLETA DO MUNDO',n1:'🏛 Início',n2:'🔮 Mapa',n3:'🗳️ Eleitoral',n4:'✨ Energias',h1:'MAPA NUMEROLÓGICO',sub:'A plataforma de numerologia mais completa do mundo',desc:'Mapa pessoal, empresarial, artístico, eleitoral, energia de imóveis e mais.',hb:'✦ GERAR MEU MAPA GRÁTIS',hb2:'🗳️ CANDIDATOS',c1:'Calcule seu Mapa',c2:'Preencha seus dados',f1:'Nome Completo',f2:'Data de Nascimento',f3:'E-mail',f4:'✦ CALCULAR GRÁTIS',r1:'✨ Seus Números',r2:'🔮 Mapa Express grátis',r3:'⟳ NOVO',p1:'📄 Todos os Produtos',p2:'Preços alinhados com o número 8.',t1:'Produto',t2:'O que inclui',t3:'Valor',g1:'✦ Cada valor reduz ao 8 ✦',buy:'COMPRAR',free:'GRÁTIS',ld:'...',ok:'Pedido criado!',er:'Erro.',rights:'© 2026. A1ELOS.',lp:'CAMINHO DE VIDA',ex:'EXPRESSÃO',su:'MOTIVAÇÃO DA ALMA',pe:'PERSONALIDADE',de:'DESTINO',
+addLang('pt',{badge:'🌍 A PLATAFORMA DE NUMEROLOGIA MAIS COMPLETA DO MUNDO',n1:'🏛 Início',n2:'🔮 Mapa',n3:'🗳️ Eleitoral',n4:'✨ Energias',h1:'MAPA NUMEROLÓGICO',sub:'A plataforma de numerologia mais completa do mundo',desc:'Mapa pessoal, empresarial, artístico, eleitoral, energia de imóveis e mais.',hb:'✦ GERAR MEU MAPA GRÁTIS',hb2:'🗳️ CANDIDATOS',c1:'Calcule seu Mapa',c2:'Preencha seus dados',f1:'Nome Completo',f2:'Data de Nascimento',f3:'E-mail',f4:'✦ CALCULAR GRÁTIS',r1:'✨ Seus Números',r2:'🔮 Mapa Express grátis',r3:'⟳ NOVO',p1:'📄 Todos os Produtos',p2:'Preços alinhados com o número 8.',t1:'Produto',t2:'O que inclui',t3:'Valor',g1:'✦ Cada valor reduz ao 8 ✦',buy:'COMPRAR',free:'GRÁTIS',ld:'⏳ Redirecionando...',ok:'Pedido criado!',er:'Erro.',rights:'© 2026. A1ELOS.',lp:'CAMINHO DE VIDA',ex:'EXPRESSÃO',su:'MOTIVAÇÃO DA ALMA',pe:'PERSONALIDADE',de:'DESTINO',
 e1:'🗳️ Soluções Eleitorais',e2:'Nome de urna soma 8',e3:'Eleições a cada 2 anos',e4:'Cientista político. Nome de urna soma 8 + dígitos eleitorais.',e5:'† Exemplos genéricos. X/0.',
 en1:'✨ Energias da Vida',en2:'Nomeie pessoas, negócios, imóveis',en3:'Tudo tem energia numerológica',en4:'Nome de bebê, empresa, casa, templo, escritório.',en5:'🔢 Tabela de Energias',en6:'📄 Serviços',en7:'Análise personalizada.',
 ide:'Ideal para:',ond:'Onde aplicar:'});
-addLang('en',{badge:'🌍 THE MOST COMPLETE NUMEROLOGY PLATFORM IN THE WORLD',n1:'🏛 Home',n2:'🔮 Map',n3:'🗳️ Electoral',n4:'✨ Energies',h1:'NUMEROLOGICAL MAP',sub:'The most complete numerology platform in the world',desc:'Personal map, business, stage name, electoral, property energy and more.',hb:'✦ GENERATE MY MAP FREE',hb2:'🗳️ CANDIDATES',c1:'Calculate Your Map',c2:'Fill in your details',f1:'Full Name',f2:'Birth Date',f3:'Email',f4:'✦ CALCULATE FREE',r1:'✨ Your Numbers',r2:'🔮 Free Express Map',r3:'⟳ NEW',p1:'📄 All Products',p2:'Prices aligned with number 8.',t1:'Product',t2:'Includes',t3:'Price',g1:'✦ Every price reduces to 8 ✦',buy:'BUY',free:'FREE',ld:'...',ok:'Order created!',er:'Error.',rights:'© 2026. A1ELOS.',lp:'LIFE PATH',ex:'EXPRESSION',su:'SOUL URGE',pe:'PERSONALITY',de:'DESTINY',
+addLang('en',{badge:'🌍 THE MOST COMPLETE NUMEROLOGY PLATFORM IN THE WORLD',n1:'🏛 Home',n2:'🔮 Map',n3:'🗳️ Electoral',n4:'✨ Energies',h1:'NUMEROLOGICAL MAP',sub:'The most complete numerology platform in the world',desc:'Personal map, business, stage name, electoral, property energy and more.',hb:'✦ GENERATE MY MAP FREE',hb2:'🗳️ CANDIDATES',c1:'Calculate Your Map',c2:'Fill in your details',f1:'Full Name',f2:'Birth Date',f3:'Email',f4:'✦ CALCULATE FREE',r1:'✨ Your Numbers',r2:'🔮 Free Express Map',r3:'⟳ NEW',p1:'📄 All Products',p2:'Prices aligned with number 8.',t1:'Product',t2:'Includes',t3:'Price',g1:'✦ Every price reduces to 8 ✦',buy:'BUY',free:'FREE',ld:'⏳ Redirecting...',ok:'Order created!',er:'Error.',rights:'© 2026. A1ELOS.',lp:'LIFE PATH',ex:'EXPRESSION',su:'SOUL URGE',pe:'PERSONALITY',de:'DESTINY',
 e1:'🗳️ Electoral Solutions',e2:'Ballot name sum 8',e3:'Elections every 2 years',e4:'Political scientist. Ballot name sum 8 + electoral digits.',e5:'† Generic examples. X/0.',
 en1:'✨ Life Energies',en2:'Name babies, businesses, properties',en3:'Everything has numerological energy',en4:'Baby, company, house, temple, office.',en5:'🔢 Energy Table',en6:'📄 Services',en7:'Personalized analysis.',
 ide:'Ideal for:',ond:'Where to apply:'});
-addLang('es',{badge:'🌍 LA MÁS COMPLETA DEL MUNDO',n1:'🏛 Inicio',n2:'🔮 Mapa',n3:'🗳️ Electoral',n4:'✨ Energías',h1:'MAPA NUMEROLÓGICO',sub:'La plataforma más completa',desc:'Mapa personal, empresarial, artístico, electoral.',hb:'✦ GENERAR MI MAPA GRATIS',hb2:'🗳️ CANDIDATOS',c1:'Calcula tu Mapa',c2:'Completa tus datos',f1:'Nombre Completo',f2:'Fecha de Nacimiento',f3:'Email',f4:'✦ CALCULAR GRATIS',r1:'✨ Tus Números',r2:'🔮 Mapa Express Gratis',r3:'⟳ NUEVO',p1:'📄 Todos los Productos',p2:'Precios alineados con el 8.',t1:'Producto',t2:'Incluye',t3:'Valor',g1:'✦ Cada valor reduce al 8 ✦',buy:'COMPRAR',free:'GRATIS',ld:'...',ok:'Pedido creado!',er:'Error.',rights:'© 2026.',lp:'CAMINO DE VIDA',ex:'EXPRESIÓN',su:'MOTIVACIÓN DEL ALMA',pe:'PERSONALIDAD',de:'DESTINO',
+addLang('es',{badge:'🌍 LA MÁS COMPLETA DEL MUNDO',n1:'🏛 Inicio',n2:'🔮 Mapa',n3:'🗳️ Electoral',n4:'✨ Energías',h1:'MAPA NUMEROLÓGICO',sub:'La plataforma más completa',desc:'Mapa personal, empresarial, artístico, electoral.',hb:'✦ GENERAR MI MAPA GRATIS',hb2:'🗳️ CANDIDATOS',c1:'Calcula tu Mapa',c2:'Completa tus datos',f1:'Nombre Completo',f2:'Fecha de Nacimiento',f3:'Email',f4:'✦ CALCULAR GRATIS',r1:'✨ Tus Números',r2:'🔮 Mapa Express Gratis',r3:'⟳ NUEVO',p1:'📄 Todos los Productos',p2:'Precios alineados con el 8.',t1:'Producto',t2:'Incluye',t3:'Valor',g1:'✦ Cada valor reduce al 8 ✦',buy:'COMPRAR',free:'GRATIS',ld:'⏳ Redirigiendo...',ok:'Pedido creado!',er:'Error.',rights:'© 2026.',lp:'CAMINO DE VIDA',ex:'EXPRESIÓN',su:'MOTIVACIÓN DEL ALMA',pe:'PERSONALIDAD',de:'DESTINO',
 e1:'🗳️ Soluciones Electorales',e2:'Nombre de urna suma 8',e3:'Elecciones cada 2 años',e4:'Cientista político. Nombre de urna suma 8.',e5:'† Ejemplos genéricos.',
 en1:'✨ Energías de la Vida',en2:'Nombre bebés, negocios, inmuebles',en3:'Todo tiene energía numerológica',en4:'Bebé, empresa, casa, templo.',en5:'🔢 Tabla de Energías',en6:'📄 Servicios',en7:'Análisis personalizado.',
 ide:'Ideal para:',ond:'Dónde aplicar:'});
@@ -194,7 +195,7 @@ ide:'Ideal para:',ond:'Dónde aplicar:'});
 ['hi','हिन्दी','🇮🇳','अंक ज्योतिष मानचित्र','गणना करें','खरीदें','मुफ्त','नई गणना','अंक ज्योतिष मानचित्र','✨ आपकी संख्याएं','🔮 एक्सप्रेस मुफ्त','मुफ्त गणना','पूरा नाम','जन्म तिथि','ईमेल','जीवन पथ','अभिव्यक्ति','आत्मा की इच्छा','व्यक्तित्व','भाग्य','🗳️ चुनाव समाधान','चुनाव नाम योग 8','✨ जीवन की ऊर्जाएं','बच्चों, व्यवसायों को नाम दें','सबमें अंक ज्योतिष ऊर्जा','🔢 ऊर्जा तालिका','📄 सेवाएं','व्यक्तिगत विश्लेषण।','इसके लिए आदर्श:','कहां लागू करें:'],
 ['ar','العربية','🇸🇦','خريطة الأرقام','احسب','اشتر','مجاني','جديد','خريطة الأرقام','✨ أرقامك','🔮 سريع مجاني','احسب مجاناً','الاسم','تاريخ الميلاد','البريد','مسار الحياة','التعبير','رغبة الروح','الشخصية','القدر','🗳️ حلول انتخابية','اسم الاقتراع مجموع 8','✨ طاقات الحياة','سمِّ الأطفال والشركات','كل شيء له طاقة عددية','🔢 جدول الطاقات','📄 خدمات','تحليل مخصص.','مثالي لـ:','أين تطبق:'],
 ['he','עברית','🇮🇱','מפה נומרולוגית','חשב','קנה','חינם','חישוב חדש','מפה נומרולוגית','✨ המספרים שלך','🔮 אקספרס חינם','חשב בחינם','שם מלא','תאריך לידה','אימייל','נתיב חיים','ביטוי','דחף הנשמה','אישיות','גורל','🗳️ פתרונות בחירות','שם קלפי סכום 8','✨ אנרגיות החיים','תנו שמות לתינוקות, עסקים','לכל דבר יש אנרגיה נומרולוגית','🔢 טבלת אנרגיות','📄 שירותים','ניתוח מותאם אישית.','אידיאלי ל:','היכן ליישם:']]
-.forEach(function(a){var c=a[0];addLang(c,{badge:'',n1:a[0]==='he'?'🏛 בית':'🏛 '+(a[1]),n2:'🔮 '+(a[0]==='pt'?'Mapa':a[0]==='en'?'Map':'Mappa'),n3:'🗳️ '+(a[0]==='pt'?'Eleitoral':a[0]==='en'?'Electoral':'Elettorale'),n4:'✨ '+(a[0]==='pt'?'Energias':a[0]==='en'?'Energies':'Energie'),h1:a[3],sub:['pt','en','es','it','fr','de'].includes(c)?'A plataforma mais completa':'',desc:'',hb:a[4],hb2:'🗳️ '+(a[0]==='pt'?'CANDIDATOS':'CANDIDATES'),c1:a[3].replace('Mapa','Calcule ').replace('Carte','Calculez ').replace('Mappa','Calcola ').replace('Karte','Berechnen ').replace('Map',''),c2:'',f1:a[9],f2:a[10],f3:a[11],f4:a[8],r1:a[7],r2:a[6],r3:a[5],p1:'📄 '+(a[0]==='he'?'כל המוצרים':a[0]==='ar'?'جميع المنتجات':'All Products'),p2:'',t1:a[0]==='he'?'מוצר':a[0]==='ar'?'المنتج':'Product',t2:a[0]==='he'?'כולל':a[0]==='ar'?'يشمل':'Includes',t3:a[0]==='he'?'מחיר':a[0]==='ar'?'السعر':'Price',g1:'',buy:a[5],free:a[6],ld:'...',ok:a[0]==='he'?'הזמנה נוצרה!':a[0]==='ar'?'تم الطلب!':'Order created!',er:a[0]==='he'?'שגיאה.':a[0]==='ar'?'خطأ.':'Error.',rights:'© 2026.',lp:a[12],ex:a[13],su:a[14],pe:a[15],de:a[16],
+.forEach(function(a){var c=a[0];addLang(c,{badge:'',n1:a[0]==='he'?'🏛 בית':'🏛 '+(a[1]),n2:'🔮 '+(a[0]==='pt'?'Mapa':a[0]==='en'?'Map':'Mappa'),n3:'🗳️ '+(a[0]==='pt'?'Eleitoral':a[0]==='en'?'Electoral':'Elettorale'),n4:'✨ '+(a[0]==='pt'?'Energias':a[0]==='en'?'Energies':'Energie'),h1:a[3],sub:['pt','en','es','it','fr','de'].includes(c)?'A plataforma mais completa':'',desc:'',hb:a[4],hb2:'🗳️ '+(a[0]==='pt'?'CANDIDATOS':'CANDIDATES'),c1:a[3].replace('Mapa','Calcule ').replace('Carte','Calculez ').replace('Mappa','Calcola ').replace('Karte','Berechnen ').replace('Map',''),c2:'',f1:a[9],f2:a[10],f3:a[11],f4:a[8],r1:a[7],r2:a[6],r3:a[5],p1:'📄 '+(a[0]==='he'?'כל המוצרים':a[0]==='ar'?'جميع المنتجات':'All Products'),p2:'',t1:a[0]==='he'?'מוצר':a[0]==='ar'?'المنتج':'Product',t2:a[0]==='he'?'כולל':a[0]==='ar'?'يشمل':'Includes',t3:a[0]==='he'?'מחיר':a[0]==='ar'?'السعر':'Price',g1:'',buy:a[5],free:a[6],ld:a[0]==='he'?'⏳ מפנה...':a[0]==='ar'?'⏳ جارٍ إعادة التوجيه...':'⏳ Redirecting...',ok:a[0]==='he'?'הזמנה נוצרה!':a[0]==='ar'?'تم الطلب!':'Order created!',er:a[0]==='he'?'שגיאה.':a[0]==='ar'?'خطأ.':'Error.',rights:'© 2026.',lp:a[12],ex:a[13],su:a[14],pe:a[15],de:a[16],
 e1:a[17],e2:a[18],e3:a[0]==='pt'?'Eleições a cada 2 anos':'Elections every 2 years',e4:a[0]==='pt'?'Cientista político.':'Political scientist.',e5:'†',
 en1:a[19],en2:a[20],en3:a[21],en4:a[0]==='pt'?'Nome de bebê, empresa, casa.':'Baby, company, house.',en5:a[22],en6:a[23],en7:a[24],
 ide:a[25],ond:a[26]});});
@@ -215,37 +216,70 @@ function renderTables(){renderTable('pBody',0,10);renderTable('pBodyElec',4,5);r
 function renderEnergy(){var lang=localStorage.getItem('lang')||'pt';var g=document.getElementById('energyGrid');if(!g)return;var t=T[lang]||T.en;g.innerHTML='';energyData.forEach(function(e){var div=document.createElement('div');div.className='energy-card';div.innerHTML='<div class="big-num">'+e.n+'</div><div class="e-name">'+e.e+'</div><div class="e-for"><strong>'+(t.ide||'Ideal para:')+'</strong><br>'+e.f+'</div><div class="e-place">'+(t.ond||'Onde aplicar:')+'<br>'+e.p+'</div>';g.appendChild(div);});}
 async function handleCalc(){var btn=document.getElementById('sBtn');btn.disabled=true;var orig=btn.innerText;btn.innerText='...';try{var name=document.getElementById('name').value;if(name.length<2){alert('Nome muito curto.');btn.disabled=false;btn.innerText=orig;return;}var date=document.getElementById('date').value;if(!date){alert('Selecione a data.');btn.disabled=false;btn.innerText=orig;return;}lastEmail=document.getElementById('email').value;var res=await fetch(API+'/calculate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,birth_date:date,email:lastEmail||null})});if(!res.ok)throw new Error();var data=await res.json();if(!data||!data.life_path)throw new Error();lastData=data;currentId=data.id;renderResults(data);document.getElementById('res').style.display='block';renderTable('pBody',0,10);document.getElementById('res').scrollIntoView({behavior:'smooth'});}catch(e){alert('Erro ao conectar. Tente novamente.');}btn.disabled=false;btn.innerText=orig;}
 function renderResults(d){var c=localStorage.getItem('lang')||'pt';var g=document.getElementById('rGrid');var t=T[c]||T.en;var keys=['lp','ex','su','pe','de'];var vals=[d.life_path,d.expression,d.soul_urge,d.personality,d.destiny];g.innerHTML='';keys.forEach(function(k,i){g.innerHTML+='<div class="num-box"><div class="val">'+vals[i]+'</div><div class="label">'+(t[k]||k)+'</div></div>';});}
+
+// === FUNÇÃO buyP CORRIGIDA — chama Mercado Pago e redireciona ===
 async function buyP(idx){
   if(idx===0)return;
   var lang=localStorage.getItem('lang')||'pt';
   var t=T[lang]||T.en;
   var btns=document.querySelectorAll('.buy-btn');
-  for(var j=0;j<btns.length;j++)btns[j].disabled=true;
+  btns.forEach(function(b){b.disabled=true;});
   try{
     var email=lastEmail||document.getElementById('email').value;
-    if(!email||email.indexOf('@')===-1){alert('Informe um e-mail.');for(var j=0;j<btns.length;j++)btns[j].disabled=false;return;}
+    if(!email||!email.includes('@')){
+      alert('Informe um e-mail.');
+      btns.forEach(function(b){b.disabled=false;});
+      return;
+    }
     var amt=(prices[lang]||prices.en)[idx]||0;
-    if(amt<=0){alert('Gratuito!');for(var j=0;j<btns.length;j++)btns[j].disabled=false;return;}
-    if(!currentId){alert('Calcule primeiro!');for(var j=0;j<btns.length;j++)btns[j].disabled=false;return;}
-    var mpRes=await fetch(API+'/api/pay/mercadopago',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({email:email,product:prodDefs[idx].n1,price:amt,calculation_id:currentId})
-    });
-    var mpData=await mpRes.json();
+    if(amt<=0){
+      alert('Gratuito!');
+      btns.forEach(function(b){b.disabled=false;});
+      return;
+    }
+    if(!currentId){
+      alert('Calcule primeiro!');
+      btns.forEach(function(b){b.disabled=false;});
+      return;
+    }
+    // Mostra loading
     var msg=document.getElementById('orderMsg');
-    if(mpData.payment_url){
-      window.open(mpData.payment_url,'_blank');
-      if(msg){msg.style.display='block';msg.innerHTML='<h4>✅ Pedido #'+mpData.order_id+'</h4><p>Pagamento aberto em nova aba.<br>Após confirmar, o PDF chega no seu e-mail.</p>';}
+    var loading=document.getElementById('loadingMsg');
+    if(loading)loading.style.display='block';
+    if(msg)msg.style.display='none';
+
+    // Chama o endpoint do Mercado Pago
+    var res=await fetch(API+'/api/pay/mercadopago',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        email:email,
+        product:prodDefs[idx].id,
+        price:amt,
+        calculation_id:currentId
+      })
+    });
+    if(!res.ok)throw new Error();
+    var data=await res.json();
+    if(data.payment_url){
+      // Redireciona para o checkout do Mercado Pago
+      window.location.href=data.payment_url;
     } else {
-      if(msg){msg.style.display='block';msg.innerHTML='<p style="color:#e74c3c;">Erro ao criar pagamento.</p>';}
+      throw new Error('Sem URL de pagamento');
     }
   }catch(e){
     var msg=document.getElementById('orderMsg');
-    if(msg){msg.style.display='block';msg.innerHTML='<p style="color:#e74c3c;">Erro de conexão.</p>';}
+    var loading=document.getElementById('loadingMsg');
+    if(loading)loading.style.display='none';
+    if(msg){
+      msg.style.display='block';
+      msg.innerHTML='<p style="color:#e74c3c;">'+(t.er||'Erro ao processar pagamento.')+'</p>';
+    }
   }
-  for(var j=0;j<btns.length;j++)btns[j].disabled=false;
+  btns.forEach(function(b){b.disabled=false;});
 }
-function resetForm(){document.getElementById('nForm').reset();document.getElementById('res').style.display='none';document.getElementById('orderMsg').style.display='none';currentId=null;lastData=null;}
+
+function resetForm(){document.getElementById('nForm').reset();document.getElementById('res').style.display='none';document.getElementById('orderMsg').style.display='none';document.getElementById('loadingMsg').style.display='none';currentId=null;lastData=null;}
 window.onload=function(){var c=document.getElementById('langSelector');langs.forEach(function(l){var b=document.createElement('button');b.className='lang-btn';b.dataset.c=l.c;b.innerHTML='<span class="flag">'+l.f+'</span> '+l.c.toUpperCase();b.onclick=function(){setLang(l.c);};c.appendChild(b);});setLang(localStorage.getItem('lang')||'pt');if(window.location.hash){setTimeout(function(){var el=document.querySelector(window.location.hash);if(el)el.scrollIntoView({behavior:'smooth'});},500);}};
 </script>
 </body>
