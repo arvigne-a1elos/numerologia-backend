@@ -73,10 +73,23 @@ class Order(Base):
 Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Numerologia API")
 
+HTML_PATH = os.path.join(os.path.dirname(__file__), "index.html")
+INDEX_HTML = """<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Mapa Numerológico</title><style>body{background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;text-align:center;padding:20px}h1{color:#C9A94E;font-size:2.5rem;margin-bottom:10px}p{color:#888;margin-bottom:20px}.btn{background:#C9A94E;color:#0a0a0a;padding:12px 30px;border:none;border-radius:50px;cursor:pointer;font-weight:600;text-transform:uppercase;text-decoration:none;display:inline-block}</style></head><body><h1>🔮 Mapa Numerológico</h1><p>Calcule seu mapa numerológico gratuitamente.</p><p style="color:#666;font-size:0.9rem">API ativa.</p></body></html>"""
+
+if os.path.exists(HTML_PATH):
+    with open(HTML_PATH, "r", encoding="utf-8") as f:
+        INDEX_HTML = f.read()
+
 class CalculateRequest(BaseModel):
     name: str
     birth_date: str
     email: Optional[str] = None
+
+class CheckoutRequest(BaseModel):
+    email: str
+    product: str
+    price: float
+    calculation_id: Optional[str] = None
 
 class MercadoPagoRequest(BaseModel):
     name: str
@@ -110,7 +123,13 @@ def calc_numerology(name, birth_date):
     soul_urge = reduce_to_single(vowel_sum)
     personality = reduce_to_single(consonant_sum)
     destiny = reduce_to_single(expression + life_path)
-    return {"life_path": life_path, "expression": expression, "soul_urge": soul_urge, "personality": personality, "destiny": destiny}
+    return {
+        "life_path": life_path,
+        "expression": expression,
+        "soul_urge": soul_urge,
+        "personality": personality,
+        "destiny": destiny
+    }
 
 def generate_pdf(calc, name):
     pdf_path = f"/tmp/mapa_{calc.id}.pdf"
@@ -120,19 +139,26 @@ def generate_pdf(calc, name):
     title_style = ParagraphStyle("Title", parent=styles["Title"], fontSize=22,
                                  spaceAfter=20, textColor=colors.HexColor("#C9A94E"))
     normal_style = ParagraphStyle("Normal", parent=styles["Normal"], fontSize=12, spaceAfter=8)
-    elements.append(Paragraph("Mapa Numerologico", title_style))
+    elements.append(Paragraph("Mapa Numerológico", title_style))
     elements.append(Paragraph(f"<b>Nome:</b> {name}", normal_style))
     elements.append(Paragraph(f"<b>Data:</b> {calc.birth_date}", normal_style))
     elements.append(Spacer(1, 20))
-    data = [["Numero", "Valor"], ["Caminho de Vida", str(calc.life_path)],
-            ["Expressao", str(calc.expression)], ["Desejo da Alma", str(calc.soul_urge)],
-            ["Personalidade", str(calc.personality)], ["Destino", str(calc.destiny)]]
+    data = [
+        ["Número", "Valor"],
+        ["Caminho de Vida", str(calc.life_path)],
+        ["Expressão", str(calc.expression)],
+        ["Desejo da Alma", str(calc.soul_urge)],
+        ["Personalidade", str(calc.personality)],
+        ["Destino", str(calc.destiny)]
+    ]
     t = Table(data, colWidths=[200, 100])
-    t.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#C9A94E")),
-                           ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                           ("FONTSIZE", (0, 0), (-1, -1), 12),
-                           ("GRID", (0, 0), (-1, -1), 1, colors.grey),
-                           ("ALIGN", (1, 0), (-1, -1), "CENTER")]))
+    t.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#C9A94E")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTSIZE", (0, 0), (-1, -1), 12),
+        ("GRID", (0, 0), (-1, -1), 1, colors.grey),
+        ("ALIGN", (1, 0), (-1, -1), "CENTER")
+    ]))
     elements.append(t)
     doc.build(elements)
     return pdf_path
@@ -143,16 +169,25 @@ def send_email(to_email, subject, content, attachment_path=None):
         return False
     try:
         sg = SendGridAPIClient(SENDGRID_API_KEY)
-        mail = Mail(from_email=Email(FROM_EMAIL, "Mapa Numerologico"), to_emails=To(to_email),
-                    subject=subject, plain_text_content=Content("text/plain", content))
+        mail = Mail(
+            from_email=Email(FROM_EMAIL, "Mapa Numerológico"),
+            to_emails=To(to_email),
+            subject=subject,
+            plain_text_content=Content("text/plain", content)
+        )
         if attachment_path and os.path.exists(attachment_path):
             with open(attachment_path, "rb") as f:
                 data = f.read()
             import base64
             encoded = base64.b64encode(data).decode()
             from sendgrid.helpers.mail import Attachment, FileContent, FileName, FileType, Disposition
-            mail.attachment = Attachment(FileContent(encoded), FileName("Mapa_Numerologico.pdf"),
-                                         FileType("application/pdf"), Disposition("attachment"))
+            attachment = Attachment(
+                FileContent(encoded),
+                FileName("Mapa_Numerologico.pdf"),
+                FileType("application/pdf"),
+                Disposition("attachment")
+            )
+            mail.attachment = attachment
         sg.send(mail)
         return True
     except Exception as e:
@@ -161,11 +196,11 @@ def send_email(to_email, subject, content, attachment_path=None):
 
 @app.get("/", response_class=HTMLResponse)
 def root():
-    return "<html><body style='background:#0a0a0a;color:#fff;text-align:center;padding:40px'><h1 style='color:#C9A94E'>API Numerologia</h1><p style='color:#888'>Ativa</p></body></html>"
+    return INDEX_HTML
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok"}
+    return {"status": "ok", "service": "numerologia-api", "version": "1.2.0"}
 
 @app.post("/calculate")
 def calculate(req: CalculateRequest):
@@ -183,19 +218,80 @@ def calculate(req: CalculateRequest):
     finally:
         db.close()
 
+@app.post("/api/pay/mercadopago")
+def create_mp_payment(req: MercadoPagoRequest):
+    if not sdk:
+        raise HTTPException(503, "Mercado Pago não configurado")
+    try:
+        db = SessionLocal()
+        order_id = str(uuid.uuid4())[:12]
+        name_parts = (req.name or "").strip().split(" ", 1)
+        first_name = name_parts[0] if name_parts else req.email
+        last_name = name_parts[1] if len(name_parts) > 1 else ""
+        preference_data = {
+            "items": [{
+                "title": req.product,
+                "quantity": 1,
+                "currency_id": "BRL",
+                "unit_price": float(req.price)
+            }],
+            "payer": {
+                "email": req.email,
+                "name": first_name,
+                "surname": last_name,
+                "identification": {"type": "CPF", "number": "12345678909"}
+            },
+            "back_urls": {
+                "success": f"{BASE_URL}/api/pay/success",
+                "failure": f"{BASE_URL}/api/pay/failure",
+                "pending": f"{BASE_URL}/api/pay/pending"
+            },
+            "auto_return": "approved",
+            "external_reference": order_id,
+            "notification_url": f"{BASE_URL}/api/webhook/mercadopago",
+            "statement_descriptor": "A1ELOS NUMEROLOGIA"
+        }
+        result = sdk.preference().create(preference_data)
+        if result.get("status") in (200, 201):
+            response = result.get("response", {})
+            payment_url = response.get("init_point")
+            mp_id = response.get("id")
+            order = Order(id=order_id, email=req.email, product=req.product,
+                          price=req.price, calculation_id=req.calculation_id,
+                          payment_method="mercadopago", payment_id=mp_id)
+            db.add(order)
+            db.commit()
+            db.close()
+            return {"payment_url": payment_url, "order_id": order_id, "mp_id": mp_id}
+        db.close()
+        raise HTTPException(500, "Erro Mercado Pago")
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
 @app.post("/api/pay/stripe")
 def create_stripe_payment(req: MercadoPagoRequest):
     if not STRIPE_SECRET_KEY:
-        raise HTTPException(503, "Stripe nao configurado")
+        raise HTTPException(503, "Stripe não configurado")
     try:
         checkout = stripe.checkout.Session.create(
-            mode='payment', payment_method_types=['card'],
-            line_items=[{'price_data': {'currency': 'brl', 'product_data': {'name': req.product},
-                                        'unit_amount': int(req.price * 100)}, 'quantity': 1}],
+            mode='payment',
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'brl',
+                    'product_data': {'name': req.product},
+                    'unit_amount': int(req.price * 100),
+                },
+                'quantity': 1,
+            }],
             customer_email=req.email,
-            metadata={"product": req.product, "calculation_id": req.calculation_id or ""},
+            metadata={
+                "product": req.product,
+                "calculation_id": req.calculation_id or ""
+            },
             success_url=f"{BASE_URL}/api/pay/success?session_id={{CHECKOUT_SESSION_ID}}",
-            cancel_url=f"{BASE_URL}/api/pay/failure")
+            cancel_url=f"{BASE_URL}/api/pay/failure",
+        )
         return {"payment_url": checkout.url, "id": checkout.id}
     except Exception as e:
         raise HTTPException(500, str(e))
@@ -217,28 +313,50 @@ def pay_success(request: Request):
                 order_id = str(uuid.uuid4())[:12]
                 order = Order(id=order_id, email=email or "unknown", product=product,
                               price=amount, calculation_id=calc_id or None,
-                              status="paid", payment_method="stripe", payment_id=session.get("id"))
+                              status="paid", payment_method="stripe",
+                              payment_id=session.get("id"))
                 db.add(order)
                 if calc_id:
                     calc = db.query(Calculation).filter(Calculation.id == calc_id).first()
                     if calc and email:
                         pdf_path = generate_pdf(calc, calc.name)
-                        send_email(email, "Seu Mapa Numerologico esta pronto!",
-                                   "Segue em anexo seu mapa numerologico completo.", pdf_path)
+                        send_email(email, "Seu Mapa Numerológico está pronto!",
+                                   "Segue em anexo seu mapa numerológico completo.", pdf_path)
                         if os.path.exists(pdf_path):
                             os.remove(pdf_path)
                 db.commit()
                 db.close()
                 processed = True
         except Exception as e:
-            logger.error(f"Success error: {e}")
+            logger.error(f"Success processing error: {e}")
     if processed:
-        return HTMLResponse("<html><body style='background:#0a0a0a;color:#C9A94E;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>✅ Pagamento Confirmado!</h1><p style='color:#aaa'>Seu PDF foi enviado por e-mail em instantes.</p><a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>")
-    return HTMLResponse("<html><body style='background:#0a0a0a;color:#f39c12;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>⏳ Aguardando confirmacao</h1><p style='color:#aaa'>Seu pagamento esta sendo processado.</p><a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>")
+        return HTMLResponse(
+            "<html><body style='background:#0a0a0a;color:#C9A94E;"
+            "display:flex;align-items:center;justify-content:center;"
+            "min-height:100vh;font-family:sans-serif'>"
+            "<div style='text-align:center'><h1>✅ Pagamento Confirmado!</h1>"
+            "<p style='color:#aaa'>Seu PDF foi enviado por e-mail em instantes.</p>"
+            "<a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>"
+        )
+    return HTMLResponse(
+        "<html><body style='background:#0a0a0a;color:#f39c12;"
+        "display:flex;align-items:center;justify-content:center;"
+        "min-height:100vh;font-family:sans-serif'>"
+        "<div style='text-align:center'><h1>⏳ Aguardando confirmação</h1>"
+        "<p style='color:#aaa'>Seu pagamento está sendo processado.</p>"
+        "<a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>"
+    )
 
 @app.get("/api/pay/failure")
 def pay_failure():
-    return HTMLResponse("<html><body style='background:#0a0a0a;color:#e74c3c;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>❌ Pagamento nao concluido</h1><p style='color:#aaa'>Tente novamente.</p><a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>")
+    return HTMLResponse(
+        "<html><body style='background:#0a0a0a;color:#e74c3c;"
+        "display:flex;align-items:center;justify-content:center;"
+        "min-height:100vh;font-family:sans-serif'>"
+        "<div style='text-align:center'><h1>❌ Pagamento não concluído</h1>"
+        "<p style='color:#aaa'>Tente novamente.</p>"
+        "<a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>"
+    )
 
 if __name__ == "__main__":
     import uvicorn
