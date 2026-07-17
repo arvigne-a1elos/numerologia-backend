@@ -277,7 +277,7 @@ def pay_success(request: Request):
     if session_id and STRIPE_SECRET_KEY:
         try:
             session = stripe.checkout.Session.retrieve(session_id)
-            if session.get("payment_status") == "paid":
+            if session.get("payment_status") in ("paid", "no_payment_required"):
                 email = session.get("customer_email") or session.get("customer_details", {}).get("email")
                 metadata = session.get("metadata", {})
                 calc_id = metadata.get("calculation_id", "")
@@ -302,7 +302,7 @@ def pay_success(request: Request):
                 db.close()
                 processed = True
         except Exception as e:
-            logger.error(f"Success processing error: {e}")
+            logger.error(f"Success error: {e}")
     if processed:
         return HTMLResponse(
             "<html><body style='background:#0a0a0a;color:#C9A94E;"
@@ -318,17 +318,6 @@ def pay_success(request: Request):
         "min-height:100vh;font-family:sans-serif'>"
         "<div style='text-align:center'><h1>⏳ Aguardando confirmação</h1>"
         "<p style='color:#aaa'>Seu pagamento está sendo processado.</p>"
-        "<a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>"
-    )
-
-@app.get("/api/pay/failure")
-def pay_failure():
-    return HTMLResponse(
-        "<html><body style='background:#0a0a0a;color:#e74c3c;"
-        "display:flex;align-items:center;justify-content:center;"
-        "min-height:100vh;font-family:sans-serif'>"
-        "<div style='text-align:center'><h1>❌ Pagamento não concluído</h1>"
-        "<p style='color:#aaa'>Tente novamente.</p>"
         "<a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>"
     )
 
