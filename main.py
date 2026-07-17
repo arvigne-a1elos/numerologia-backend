@@ -22,6 +22,7 @@ import aiofiles
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# ===== CONFIG =====
 MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN", "")
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
@@ -73,7 +74,7 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Numerologia API")
 
 HTML_PATH = os.path.join(os.path.dirname(__file__), "index.html")
-INDEX_HTML = """..."""  # fallback, não usado com Netlify
+INDEX_HTML = """<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Mapa Numerológico</title><style>body{background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;text-align:center;padding:20px}h1{color:#C9A94E;font-size:2.5rem;margin-bottom:10px}p{color:#888;margin-bottom:20px}.btn{background:#C9A94E;color:#0a0a0a;padding:12px 30px;border:none;border-radius:50px;cursor:pointer;font-weight:600;text-transform:uppercase;text-decoration:none;display:inline-block}</style></head><body><h1>🔮 Mapa Numerológico</h1><p>Calcule seu mapa numerológico gratuitamente.</p><p style="color:#666;font-size:0.9rem">API ativa. Aguarde o HTML completo no deploy com o index.html do repositório.</p></body></html>"""
 
 if os.path.exists(HTML_PATH):
     with open(HTML_PATH, "r", encoding="utf-8") as f:
@@ -97,6 +98,7 @@ class MercadoPagoRequest(BaseModel):
     price: float
     calculation_id: Optional[str] = None
 
+# ===== HELPERS =====
 def get_db():
     db = SessionLocal()
     try:
@@ -200,6 +202,7 @@ def send_email(to_email, subject, content, attachment_path=None):
         logger.error(f"SendGrid error: {e}")
         return False
 
+# ===== ENDPOINTS =====
 @app.get("/", response_class=HTMLResponse)
 def root():
     return INDEX_HTML
@@ -346,12 +349,26 @@ def create_stripe_payment(req: MercadoPagoRequest):
     if not STRIPE_SECRET_KEY:
         raise HTTPException(503, "Stripe não configurado")
     try:
-        intent = stripe.PaymentIntent.create(
-            amount=int(req.price * 100), currency="brl",
-            receipt_email=req.email,
-            metadata={"product": req.product, "calculation_id": req.calculation_id or ""}
+        checkout = stripe.checkout.Session.create(
+            mode='payment',
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'brl',
+                    'product_data': {'name': req.product},
+                    'unit_amount': int(req.price * 100),
+                },
+                'quantity': 1,
+            }],
+            customer_email=req.email,
+            metadata={
+                "product": req.product,
+                "calculation_id": req.calculation_id or ""
+            },
+            success_url=f"{BASE_URL}/api/pay/success?session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{BASE_URL}/api/pay/failure",
         )
-        return {"client_secret": intent.client_secret, "id": intent.id}
+        return {"payment_url": checkout.url, "id": checkout.id}
     except Exception as e:
         raise HTTPException(500, str(e))
 
@@ -363,17 +380,19 @@ async def stripe_webhook(request: Request):
         payload = await request.body()
         sig = request.headers.get("stripe-signature", "")
         event = stripe.Webhook.construct_event(payload, sig, STRIPE_WEBHOOK_SECRET)
-        if event.get("type") == "payment_intent.succeeded":
-            intent = event.get("data", {}).get("object", {})
-            email = intent.get("receipt_email")
-            product = intent.get("metadata", {}).get("product", "")
-            calc_id = intent.get("metadata", {}).get("calculation_id", "")
+        if event.get("type") == "checkout.session.completed":
+            session = event.get("data", {}).get("object", {})
+            email = session.get("customer_email") or session.get("customer_details", {}).get("email")
+            metadata = session.get("metadata", {})
+            product = metadata.get("product", "")
+            calc_id = metadata.get("calculation_id", "")
+            amount = float(session.get("amount_total", 0)) / 100
             db = SessionLocal()
             order_id = str(uuid.uuid4())[:12]
             order = Order(id=order_id, email=email or "unknown", product=product,
-                          price=float(intent.get("amount", 0)) / 100,
-                          calculation_id=calc_id or None, status="paid",
-                          payment_method="stripe", payment_id=intent.get("id"))
+                          price=amount, calculation_id=calc_id or None,
+                          status="paid", payment_method="stripe",
+                          payment_id=session.get("id"))
             db.add(order)
             if calc_id:
                 calc = db.query(Calculation).filter(Calculation.id == calc_id).first()
