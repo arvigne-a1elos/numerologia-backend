@@ -277,7 +277,7 @@ def pay_success(request: Request):
     if session_id and STRIPE_SECRET_KEY:
         try:
             session = stripe.checkout.Session.retrieve(session_id)
-            if session.get("payment_status") in ("paid", "no_payment_required"):
+            if session.get("payment_status") in ("paid", "no_payment_required", "processing", "complete", "succeeded"):
                 email = session.get("customer_email") or session.get("customer_details", {}).get("email")
                 metadata = session.get("metadata", {})
                 calc_id = metadata.get("calculation_id", "")
