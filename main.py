@@ -295,3 +295,112 @@ def consult_electoral(req: PayRequest):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", "10000")))
+
+@app.post("/api/consult/compatibility")
+def consult_compatibility(req: Request):
+    """Endpoint para consultar compatibilidade direta entre dois números"""
+    data = asyncio.run(req.json())
+    n1 = data.get("number1", 0)
+    n2 = data.get("number2", 0)
+    lang = data.get("lang", "pt")
+    if not n1 or not n2:
+        raise HTTPException(400, "Informe number1 e number2")
+    result = calc_compatibility(n1, n2, lang)
+    return {
+        "number1": n1,
+        "number2": n2,
+        "compatibility_score": result["score"],
+        "compatibility_level": result["level"],
+        "source": "Monique Cissay - Numerologia p.159"
+    }
+
+# ===== TABELA DE COMPATIBILIDADE - Monique Cissay p.159 =====
+# Compatibilidade entre números para casais, famílias e parcerias
+
+COMPAT_TABLE = {
+    1: {"com": [1, 3, 5, 7, 9], "neutro": [2, 4], "desafio": [6, 8]},
+    2: {"com": [2, 4, 6, 8, 9], "neutro": [1, 7], "desafio": [3, 5]},
+    3: {"com": [1, 3, 5, 6, 9], "neutro": [2, 4], "desafio": [7, 8]},
+    4: {"com": [2, 4, 6, 8], "neutro": [1, 7], "desafio": [3, 5, 9]},
+    5: {"com": [1, 3, 5, 7, 9], "neutro": [2, 4, 8], "desafio": [6]},
+    6: {"com": [2, 3, 4, 6, 8, 9], "neutro": [1], "desafio": [5, 7]},
+    7: {"com": [1, 5, 7], "neutro": [2, 3, 4, 8], "desafio": [6, 9]},
+    8: {"com": [2, 4, 6, 8], "neutro": [1, 5, 7], "desafio": [3, 9]},
+    9: {"com": [1, 2, 3, 5, 6, 9], "neutro": [4, 8], "desafio": [7]},
+    11: {"com": [2, 3, 5, 7, 9, 11], "neutro": [1, 4, 8], "desafio": [6]},
+    22: {"com": [4, 6, 8, 11, 22], "neutro": [1, 2, 7], "desafio": [3, 5, 9]},
+    33: {"com": [3, 6, 9, 11, 33], "neutro": [1, 2, 4], "desafio": [5, 7, 8]}
+}
+
+def calc_compatibility(n1, n2, lang="pt"):
+    """Calcula compatibilidade entre dois números conforme Monique Cissay p.159"""
+    t1 = COMPAT_TABLE.get(n1, {})
+    score = 50  # base neutra
+    
+    if n1 == n2:
+        score = 80  # mesma vibração = forte afinidade
+    elif n2 in t1.get("com", []):
+        score = 85 + (5 if n2 in [11, 22, 33] else 0)
+    elif n2 in t1.get("neutro", []):
+        score = 55
+    elif n2 in t1.get("desafio", []):
+        score = 30
+    else:
+        # Verifica pelo complemento 9 (regra dos opostos complementares)
+        if n1 + n2 == 9 or n1 + n2 == 11 or abs(n1 - n2) == 9:
+            score = 70
+        elif n1 + n2 == 10:
+            score = 65
+    
+    score = max(5, min(100, score))
+    
+    if lang == "pt":
+        if score >= 80: nivel = "🌟 Altamente Compatível"
+        elif score >= 65: nivel = "✨ Compatível"
+        elif score >= 45: nivel = "⚖️ Neutro"
+        else: nivel = "⚠️ Desafiante"
+    elif lang == "en":
+        if score >= 80: nivel = "🌟 Highly Compatible"
+        elif score >= 65: nivel = "✨ Compatible"
+        elif score >= 45: nivel = "⚖️ Neutral"
+        else: nivel = "⚠️ Challenging"
+    else:
+        if score >= 80: nivel = "🌟 Altamente Compatible"
+        elif score >= 65: nivel = "✨ Compatible"
+        elif score >= 45: nivel = "⚖️ Neutro"
+        else: nivel = "⚠️ Desafiante"
+    
+    return {"score": score, "level": nivel, "number1": n1, "number2": n2}
+
+def analyze_couple(data1, data2, lang="pt"):
+    """Análise completa de compatibilidade entre duas pessoas"""
+    paths = calc_compatibility(data1["life_path"], data2["life_path"], lang)
+    exps = calc_compatibility(data1["expression"], data2["expression"], lang)
+    dests = calc_compatibility(data1["destiny"], data2["destiny"], lang)
+    
+    avg = (paths["score"] + exps["score"] + dests["score"]) // 3
+    
+    if lang == "pt":
+        if avg >= 80: geral = "🌟 Parceria excelente"
+        elif avg >= 65: geral = "✨ Boa parceria"
+        elif avg >= 45: geral = "⚖️ Parceria com desafios"
+        else: geral = "⚠️ Parceria desafiadora"
+    elif lang == "en":
+        if avg >= 80: geral = "🌟 Excellent partnership"
+        elif avg >= 65: geral = "✨ Good partnership"
+        elif avg >= 45: geral = "⚖️ Partnership with challenges"
+        else: geral = "⚠️ Challenging partnership"
+    else:
+        if avg >= 80: geral = "🌟 Excelente asociación"
+        elif avg >= 65: geral = "✨ Buena asociación"
+        elif avg >= 45: geral = "⚖️ Asociación con desafíos"
+        else: geral = "⚠️ Asociación desafiante"
+    
+    return {
+        "general_score": avg,
+        "general_level": geral,
+        "life_path_compat": paths,
+        "expression_compat": exps,
+        "destiny_compat": dests,
+        "table_source": "Monique Cissay - Numerologia: A Importância do Nome no Seu Destino, p.159"
+    }
