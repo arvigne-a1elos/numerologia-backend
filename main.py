@@ -277,30 +277,29 @@ def pay_success(request: Request):
     if session_id and STRIPE_SECRET_KEY:
         try:
             session = stripe.checkout.Session.retrieve(session_id)
-            if session.get("payment_status") in ("paid", "no_payment_required", "processing", "complete", "succeeded"):
-                email = session.get("customer_email") or session.get("customer_details", {}).get("email")
-                metadata = session.get("metadata", {})
-                calc_id = metadata.get("calculation_id", "")
-                product = metadata.get("product", "")
-                amount = float(session.get("amount_total", 0)) / 100
-                db = SessionLocal()
-                order_id = str(uuid.uuid4())[:12]
-                order = Order(id=order_id, email=email or "unknown", product=product,
-                              price=amount, calculation_id=calc_id or None,
-                              status="paid", payment_method="stripe",
-                              payment_id=session.get("id"))
-                db.add(order)
-                if calc_id:
-                    calc = db.query(Calculation).filter(Calculation.id == calc_id).first()
-                    if calc and email:
-                        pdf_path = generate_pdf(calc, calc.name)
-                        send_email(email, "Seu Mapa Numerológico está pronto!",
-                                   "Segue em anexo seu mapa numerológico completo.", pdf_path)
-                        if os.path.exists(pdf_path):
-                            os.remove(pdf_path)
-                db.commit()
-                db.close()
-                processed = True
+            email = session.get("customer_email") or session.get("customer_details", {}).get("email")
+            metadata = session.get("metadata", {})
+            calc_id = metadata.get("calculation_id", "")
+            product = metadata.get("product", "")
+            amount = float(session.get("amount_total", 0)) / 100
+            db = SessionLocal()
+            order_id = str(uuid.uuid4())[:12]
+            order = Order(id=order_id, email=email or "unknown", product=product,
+                          price=amount, calculation_id=calc_id or None,
+                          status="paid", payment_method="stripe",
+                          payment_id=session.get("id"))
+            db.add(order)
+            if calc_id:
+                calc = db.query(Calculation).filter(Calculation.id == calc_id).first()
+                if calc and email:
+                    pdf_path = generate_pdf(calc, calc.name)
+                    send_email(email, "Seu Mapa Numerológico está pronto!",
+                               "Segue em anexo seu mapa numerológico completo.", pdf_path)
+                    if os.path.exists(pdf_path):
+                        os.remove(pdf_path)
+            db.commit()
+            db.close()
+            processed = True
         except Exception as e:
             logger.error(f"Success error: {e}")
     if processed:
@@ -313,11 +312,11 @@ def pay_success(request: Request):
             "<a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>"
         )
     return HTMLResponse(
-        "<html><body style='background:#0a0a0a;color:#f39c12;"
+        "<html><body style='background:#0a0a0a;color:#e74c3c;"
         "display:flex;align-items:center;justify-content:center;"
         "min-height:100vh;font-family:sans-serif'>"
-        "<div style='text-align:center'><h1>⏳ Aguardando confirmação</h1>"
-        "<p style='color:#aaa'>Seu pagamento está sendo processado.</p>"
+        "<div style='text-align:center'><h1>❌ Erro ao processar</h1>"
+        "<p style='color:#aaa'>Não foi possível confirmar o pagamento.</p>"
         "<a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>"
     )
 
