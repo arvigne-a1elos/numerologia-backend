@@ -6,6 +6,7 @@ import stripe
 import mercadopago
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Request
 from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy import create_engine, Column, String, Integer, Float, DateTime, Text
 from sqlalchemy.ext.declarative import declarative_base
@@ -70,8 +71,8 @@ class Order(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 Base.metadata.create_all(bind=engine)
+
 app = FastAPI(title="Numerologia API")
-from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
@@ -82,7 +83,7 @@ app.add_middleware(
 )
 
 HTML_PATH = os.path.join(os.path.dirname(__file__), "index.html")
-INDEX_HTML = """<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Mapa Numerológico</title></head><body style="background:#0a0a0a;color:#fff;text-align:center;padding:40px;font-family:sans-serif"><h1 style="color:#C9A94E">🔮 Mapa Numerológico</h1><p style="color:#888">Calcule seu mapa numerológico gratuitamente.</p><p style="color:#555;font-size:0.9rem">API ativa.</p></body></html>"""
+INDEX_HTML = """<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Mapa Numerológico</title></head><body style="background:#0a0a0a;color:#fff;text-align:center;padding:40px;font-family:sans-serif"><h1 style="color:#C9A94E">🔮 Mapa Numerológico</h1><p style="color:#888">API ativa.</p></body></html>"""
 
 if os.path.exists(HTML_PATH):
     with open(HTML_PATH, "r", encoding="utf-8") as f:
@@ -262,7 +263,7 @@ def create_stripe_payment(req: MercadoPagoRequest):
                 "product": req.product,
                 "calculation_id": req.calculation_id or ""
             },
-            success_url=f"{BASE_URL}/api/pay/success?session_id={{CHECKOUT_SESSION_ID}}",
+            success_url=f"{BASE_URL}/api/pay/success?calc_id={req.calculation_id or ''}&email={req.email}&session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=f"{BASE_URL}/api/pay/failure",
         )
         return {"payment_url": checkout.url, "id": checkout.id}
@@ -272,22 +273,18 @@ def create_stripe_payment(req: MercadoPagoRequest):
 
 @app.get("/api/pay/success")
 def pay_success(request: Request):
-    session_id = request.query_params.get("session_id")
+    calc_id = request.query_params.get("calc_id", "")
+    email = request.query_params.get("email", "")
+    session_id = request.query_params.get("session_id", "")
     processed = False
-    if session_id and STRIPE_SECRET_KEY:
+
+    if session_id:
+        db = SessionLocal()
         try:
-            session = stripe.checkout.Session.retrieve(session_id)
-            email = session.get("customer_email") or session.get("customer_details", {}).get("email")
-            metadata = session.get("metadata", {})
-            calc_id = metadata.get("calculation_id", "")
-            product = metadata.get("product", "")
-            amount = float(session.get("amount_total", 0)) / 100
-            db = SessionLocal()
             order_id = str(uuid.uuid4())[:12]
-            order = Order(id=order_id, email=email or "unknown", product=product,
-                          price=amount, calculation_id=calc_id or None,
-                          status="paid", payment_method="stripe",
-                          payment_id=session.get("id"))
+            order = Order(id=order_id, email=email or "unknown", product="Mapa Numerológico",
+                          price=0, calculation_id=calc_id or None,
+                          status="paid", payment_method="stripe", payment_id=session_id)
             db.add(order)
             if calc_id:
                 calc = db.query(Calculation).filter(Calculation.id == calc_id).first()
@@ -298,10 +295,12 @@ def pay_success(request: Request):
                     if os.path.exists(pdf_path):
                         os.remove(pdf_path)
             db.commit()
-            db.close()
             processed = True
         except Exception as e:
-            logger.error(f"Success error: {e}")
+            logger.error(f"Pay success error: {e}")
+        finally:
+            db.close()
+
     if processed:
         return HTMLResponse(
             "<html><body style='background:#0a0a0a;color:#C9A94E;"
@@ -316,7 +315,18 @@ def pay_success(request: Request):
         "display:flex;align-items:center;justify-content:center;"
         "min-height:100vh;font-family:sans-serif'>"
         "<div style='text-align:center'><h1>❌ Erro ao processar</h1>"
-        "<p style='color:#aaa'>Não foi possível confirmar o pagamento.</p>"
+        "<p style='color:#aaa'>Não foi possível concluir.</p>"
+        "<a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>"
+    )
+
+@app.get("/api/pay/failure")
+def pay_failure():
+    return HTMLResponse(
+        "<html><body style='background:#0a0a0a;color:#e74c3c;"
+        "display:flex;align-items:center;justify-content:center;"
+        "min-height:100vh;font-family:sans-serif'>"
+        "<div style='text-align:center'><h1>❌ Pagamento não concluído</h1>"
+        "<p style='color:#aaa'>Tente novamente.</p>"
         "<a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>"
     )
 
