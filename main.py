@@ -1,530 +1,284 @@
 import os
-import json
-import hashlib
-import hmac
-import datetime
 import logging
-import traceback
-from io import BytesIO
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from pymongo import MongoClient
+import uuid
 import stripe
+import base64
+from datetime import datetime
+from typing import Optional
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from sqlalchemy import create_engine, Column, String, Integer, Float, DateTime
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail, Email, To, Content, Attachment, FileContent, FileName, FileType, Disposition
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import mm, cm
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
 from reportlab.lib import colors
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.base import MIMEBase
-from email.mime.text import MIMEText
-from email import encoders
+import dateutil.parser as dp
 
-# ─── CONFIGURAÇÃO ────────────────────────────────────────────────
-app = Flask(__name__)
-CORS(app)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(message)s',
-    handlers=[logging.StreamHandler()]
+# ===== CONFIG =====
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
+SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "")
+FROM_EMAIL = os.getenv("FROM_EMAIL", "arvigne@gmail.com")
+BASE_URL = os.getenv("BASE_URL", "https://numerologia-api-wd2q.onrender.com")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./numerologia.db")
+
+if STRIPE_SECRET_KEY:
+    stripe.api_key = STRIPE_SECRET_KEY
+
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+Base = declarative_base()
+SessionLocal = sessionmaker(bind=engine)
+
+class Calculation(Base):
+    __tablename__ = "calculations"
+    id = Column(String, primary_key=True)
+    name = Column(String)
+    birth_date = Column(String)
+    email = Column(String, nullable=True)
+    life_path = Column(Integer)
+    expression = Column(Integer)
+    soul_urge = Column(Integer)
+    personality = Column(Integer)
+    destiny = Column(Integer)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Order(Base):
+    __tablename__ = "orders"
+    id = Column(String, primary_key=True)
+    email = Column(String)
+    product = Column(String)
+    price = Column(Float)
+    status = Column(String, default="pending")
+    payment_id = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(title="Numerologia API")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-# MongoDB
-MONGO_URI = os.environ.get('MONGO_URI', 'mongodb+srv://seu_usuario:senha@cluster.mongodb.net/numerologia?retryWrites=true&w=majority')
-mongo_client = MongoClient(MONGO_URI)
-db = mongo_client.get_database()
-calculations_col = db['calculations']
-orders_col = db['orders']
+class PayRequest(BaseModel):
+    name: str
+    email: str
+    product: str
+    price: float
+    calculation_id: Optional[str] = None
+    birth_date: Optional[str] = None
+    lang: Optional[str] = "pt"
 
-# Stripe
-STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', 'sk_test_...')
-STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', 'whsec_...')
-stripe.api_key = STRIPE_SECRET_KEY
+# ===== FUNÇÕES =====
+def reduce_to_single(n):
+    while n > 9 and n not in (11, 22, 33):
+        n = sum(int(d) for d in str(n))
+    return n
 
-# Email (SMTP)
-SMTP_HOST = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
-SMTP_PORT = int(os.environ.get('SMTP_PORT', 587))
-SMTP_USER = os.environ.get('SMTP_USER', 'seu_email@gmail.com')
-SMTP_PASS = os.environ.get('SMTP_PASS', 'sua_senha_app')
-FROM_EMAIL = os.environ.get('FROM_EMAIL', SMTP_USER)
-FROM_NAME = os.environ.get('FROM_NAME', 'Mapa Numerológico | A1ELOS')
-
-# URLs
-SITE_URL = os.environ.get('SITE_URL', 'https://seusite.netlify.app')
-API_URL = os.environ.get('API_URL', 'https://numerologia-api-wd2q.onrender.com')
-
-# ─── FUNÇÕES AUXILIARES ─────────────────────────────────────────
-def calcular_numerologia(nome_completo, data_nascimento):
-    """Calcula os 5 números principais da numerologia pitagórica."""
-    nome = nome_completo.strip().upper()
-    
-    # Tabela Pitagórica (A=1, B=2, ..., I=9, J=1, ...)
-    tabela = {}
-    letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    for i, letra in enumerate(letras):
-        tabela[letra] = (i % 9) + 1
-    
-    def soma_pitagorica(palavra):
-        total = 0
-        for char in palavra:
-            if char in tabela:
-                total += tabela[char]
-        return reduzir(total)
-    
-    def reduzir(n):
-        while n > 9 and n not in (11, 22, 33):
-            n = sum(int(d) for d in str(n))
-        return n
-    
-    def somar_vogais(nome):
-        vogais = 'AEIOU'
-        total = 0
-        for char in nome:
-            if char in vogais and char in tabela:
-                total += tabela[char]
-        return reduzir(total)
-    
-    def somar_consoantes(nome):
-        consoantes = 'BCDFGHJKLMNPQRSTVWXYZ'
-        total = 0
-        for char in nome:
-            if char in consoantes and char in tabela:
-                total += tabela[char]
-        return reduzir(total)
-    
-    # Separar nome em partes
-    partes = nome.split()
-    nome_completo_str = ''.join(partes)
-    
-    # Caminho de Vida = soma da data de nascimento
-    data = data_nascimento.replace('-', '')
-    cv = reduzir(sum(int(d) for d in data))
-    
-    # Expressão = soma de todas as letras do nome
-    exp = soma_pitagorica(nome_completo_str)
-    
-    # Motivação da Alma = soma das vogais
-    ma = somar_vogais(nome)
-    
-    # Personalidade = soma das consoantes
-    pe = somar_consoantes(nome)
-    
-    # Destino = Expressão + Caminho de Vida reduzido
-    de = reduzir(exp + cv)
-    
+def calc_numerology(name, birth_date):
+    bd = dp.parse(birth_date).date()
+    life_path = reduce_to_single(bd.day + bd.month + bd.year)
+    name_upper = name.upper().replace(" ", "")
+    table = {c: (i % 9 or 9) for i, c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)}
+    exp = 0; vow = 0; cons = 0
+    for ch in name_upper:
+        v = table.get(ch, 0)
+        exp += v
+        if ch in "AEIOU": vow += v
+        else: cons += v
     return {
-        'life_path': cv,
-        'expression': exp,
-        'soul_urge': ma,
-        'personality': pe,
-        'destiny': de,
-        'name': nome_completo.strip(),
-        'birth_date': data_nascimento
+        "life_path": life_path,
+        "expression": reduce_to_single(exp),
+        "soul_urge": reduce_to_single(vow),
+        "personality": reduce_to_single(cons),
+        "destiny": reduce_to_single(reduce_to_single(exp) + life_path)
     }
 
-def gerar_pdf_mapa(dados, nome_arquivo='mapa_numerologico.pdf'):
-    """Gera PDF do mapa numerológico."""
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(
-        buffer, pagesize=A4,
-        topMargin=2*cm, bottomMargin=2*cm,
-        leftMargin=2*cm, rightMargin=2*cm
-    )
-    
+def generate_pdf(data, name, birth_date_str, lang="pt"):
+    pdf_path = f"/tmp/mapa_{uuid.uuid4().hex[:8]}.pdf"
+    doc = SimpleDocTemplate(pdf_path, pagesize=A4, leftMargin=40, rightMargin=40, topMargin=40, bottomMargin=40)
     styles = getSampleStyleSheet()
-    estilo_titulo = ParagraphStyle(
-        'Titulo', parent=styles['Title'],
-        fontName='Helvetica-Bold', fontSize=22,
-        textColor=colors.HexColor('#C9A94E'),
-        spaceAfter=8, alignment=TA_CENTER
-    )
-    estilo_sub = ParagraphStyle(
-        'Sub', parent=styles['Normal'],
-        fontSize=11, textColor=colors.HexColor('#555'),
-        spaceAfter=20, alignment=TA_CENTER
-    )
-    estilo_num = ParagraphStyle(
-        'Num', parent=styles['Normal'],
-        fontSize=28, textColor=colors.HexColor('#C9A94E'),
-        fontName='Helvetica-Bold', alignment=TA_CENTER,
-        spaceAfter=2
-    )
-    estilo_label = ParagraphStyle(
-        'Label', parent=styles['Normal'],
-        fontSize=7, textColor=colors.HexColor('#888'),
-        alignment=TA_CENTER, spaceAfter=10
-    )
-    estilo_normal = ParagraphStyle(
-        'Normal', parent=styles['Normal'],
-        fontSize=10, textColor=colors.HexColor('#333'),
-        spaceAfter=6
-    )
-    
-    elementos = []
-    
-    # Título
-    elementos.append(Paragraph('MAPA NUMEROLÓGICO', estilo_titulo))
-    elementos.append(Paragraph(dados.get('name', ''), estilo_sub))
-    elementos.append(Spacer(1, 15))
-    
-    # Grid de números
-    campos = [
-        ('Caminho de Vida', dados.get('life_path', '—')),
-        ('Expressão', dados.get('expression', '—')),
-        ('Motivação da Alma', dados.get('soul_urge', '—')),
-        ('Personalidade', dados.get('personality', '—')),
-        ('Destino', dados.get('destiny', '—'))
-    ]
-    
-    # Tabela 2x3 (2 linhas, 3 colunas na primeira linha)
-    dados_tabela = []
-    linha1 = []
-    for label, val in campos[:3]:
-        linha1.append(Paragraph(f'<b>{val}</b>', estilo_num))
-    dados_tabela.append(linha1)
-    
-    linha2 = []
-    for label, val in campos[:3]:
-        linha2.append(Paragraph(label, estilo_label))
-    dados_tabela.append(linha2)
-    
-    linha3 = []
-    for label, val in campos[3:]:
-        linha3.append(Paragraph(f'<b>{val}</b>', estilo_num))
-    dados_tabela.append(linha3)
-    
-    linha4 = []
-    for label, val in campos[3:]:
-        linha4.append(Paragraph(label, estilo_label))
-    dados_tabela.append(linha4)
-    
-    if len(campos) == 5:
-        # Centralizar
-        for i in range(3 - len(campos[3:])):
-            dados_tabela[2].append(Paragraph('', estilo_num))
-            dados_tabela[3].append(Paragraph('', estilo_label))
-    
-    col_widths = [doc.width/3]*3
-    tabela = Table(dados_tabela, colWidths=col_widths)
-    tabela.setStyle(TableStyle([
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor('#C9A94E')),
-        ('INNERGRID', (0, 0), (-1, -1), 0.3, colors.HexColor('#ddd')),
-        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#fafafa')),
-        ('ROWBACKGROUNDS', (0, 0), (-1, -1), [colors.white, colors.HexColor('#f5f5f5')])
-    ]))
-    elementos.append(tabela)
-    elementos.append(Spacer(1, 20))
-    
-    # Informações adicionais
-    elementos.append(Paragraph(f'<b>Nome:</b> {dados.get("name", "—")}', estilo_normal))
-    elementos.append(Paragraph(f'<b>Data de Nascimento:</b> {dados.get("birth_date", "—")}', estilo_normal))
-    elementos.append(Spacer(1, 15))
-    
-    # Interpretações básicas
-    interpretacoes = {
-        1: 'Inovador, líder, independente. Tem faro para iniciar projetos e influenciar pessoas.',
-        2: 'Cooperativo, sensível, diplomático. Sua força está nas parcerias e na intuição.',
-        3: 'Comunicativo, criativo, otimista. Expressa-se com talento em palavras e arte.',
-        4: 'Prático, organizado, confiável. Constrói bases sólidas para qualquer projeto.',
-        5: 'Versátil, curioso, adaptável. Prospera na liberdade e na mudança.',
-        6: 'Responsável, acolhedor, familiar. Cuida dos outros com dedicação e amor.',
-        7: 'Analítico, espiritual, sábio. Busca o conhecimento profundo da vida.',
-        8: 'Realizador, ambicioso, próspero. Tem talento natural para negócios e poder.',
-        9: 'Humanitário, compassivo, generoso. Sua missão é servir ao próximo.'
-    }
-    
-    elementos.append(Paragraph('<b>Interpretação do Caminho de Vida:</b>', estilo_normal))
-    cv = dados.get('life_path', 0)
-    if cv in interpretacoes:
-        elementos.append(Paragraph(interpretacoes[cv], estilo_normal))
-    elementos.append(Spacer(1, 10))
-    
-    elementos.append(Paragraph('<i>© A1ELOS Assessoria e Consultoria — Mapa Numerológico</i>', 
-        ParagraphStyle('Footer', parent=styles['Normal'], fontSize=7, textColor=colors.HexColor('#999'), alignment=TA_CENTER)))
-    
-    doc.build(elementos)
-    buffer.seek(0)
-    return buffer
 
-def enviar_email(destino, assunto, corpo_html, anexo=None, nome_anexo='documento.pdf'):
-    """Envia e-mail com opção de anexo."""
+    title_style = ParagraphStyle("Title", fontSize=24, spaceAfter=10, textColor=colors.HexColor("#C9A94E"), alignment=1, fontName="Helvetica-Bold")
+    name_style = ParagraphStyle("Name", fontSize=14, spaceAfter=4, textColor=colors.white, alignment=1)
+    section_style = ParagraphStyle("Section", fontSize=14, spaceBefore=14, spaceAfter=6, textColor=colors.HexColor("#C9A94E"), fontName="Helvetica-Bold")
+    desc_style = ParagraphStyle("Desc", fontSize=10, spaceAfter=10, textColor=colors.white, leading=14)
+    normal_style = ParagraphStyle("Normal", fontSize=10, spaceAfter=6, textColor=colors.white, leading=13)
+
+    elements = []
+    elements.append(Paragraph("MAPA NUMEROLÓGICO", title_style))
+    elements.append(Paragraph(f"<b>Nome:</b> {name}", name_style))
+    elements.append(Paragraph(f"<b>Data:</b> {birth_date_str}", name_style))
+    elements.append(Spacer(1, 15))
+
+    # Tabela principal
+    table_data = [
+        ["Número", "Valor"],
+        ["Caminho de Vida", str(data["life_path"])],
+        ["Expressão", str(data["expression"])],
+        ["Motivação da Alma", str(data["soul_urge"])],
+        ["Personalidade", str(data["personality"])],
+        ["Destino", str(data["destiny"])],
+    ]
+    t = Table(table_data, colWidths=[200, 100])
+    t.setStyle(TableStyle([
+        ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#C9A94E")),
+        ("TEXTCOLOR", (0,0), (-1,0), colors.white),
+        ("FONTSIZE", (0,0), (-1,-1), 10),
+        ("GRID", (0,0), (-1,-1), 1, colors.grey),
+        ("ALIGN", (1,0), (1,-1), "CENTER"),
+        ("BACKGROUND", (0,1), (-1,-1), colors.HexColor("#1a1a1a")),
+        ("TEXTCOLOR", (0,1), (-1,-1), colors.white),
+    ]))
+    elements.append(t)
+    elements.append(Spacer(1, 20))
+
+    # Textos por número
+    textos = {
+        1: "Líder nato, pioneiro, independente. Sua missão é inovar e abrir caminhos.",
+        2: "Diplomata, sensível, cooperativo. Sua missão é criar harmonia.",
+        3: "Criativo, comunicador, otimista. Sua missão é espalhar alegria.",
+        4: "Prático, disciplinado, confiável. Sua missão é construir bases sólidas.",
+        5: "Livre, versátil, aventureiro. Sua missão é explorar e inspirar liberdade.",
+        6: "Responsável, amoroso, protetor. Sua missão é servir e cuidar.",
+        7: "Sábio, analítico, espiritual. Sua missão é buscar a verdade.",
+        8: "Poderoso, realizador, próspero. Sua missão é manifestar abundância.",
+        9: "Humanitário, generoso, compassivo. Sua missão é servir à humanidade.",
+        11: "Mestre intuitivo. Inspira outros com sua visão espiritual elevada.",
+        22: "Mestre construtor. Transforma sonhos em realidade concreta.",
+    }
+
+    for key, label in [("life_path", "Caminho de Vida"), ("expression", "Expressão"),
+                        ("soul_urge", "Motivação da Alma"), ("personality", "Personalidade"),
+                        ("destiny", "Destino")]:
+        val = data[key]
+        elements.append(Paragraph(f"<b>{label} — {val}</b>", section_style))
+        elements.append(Paragraph(textos.get(val, "Energia única e especial."), desc_style))
+
+    elements.append(Spacer(1, 25))
+    elements.append(Paragraph("© A1ELOS Assessoria e Consultoria", ParagraphStyle("Footer", fontSize=8, textColor=colors.grey, alignment=1, fontName="Helvetica")))
+
+    doc.build(elements)
+    return pdf_path
+
+def send_email(to_email, subject, content, attachment_path=None):
+    if not SENDGRID_API_KEY:
+        logger.warning("SendGrid não configurado")
+        return False
     try:
-        msg = MIMEMultipart('mixed')
-        msg['From'] = f'{FROM_NAME} <{FROM_EMAIL}>'
-        msg['To'] = destino
-        msg['Subject'] = assunto
-        
-        # Parte HTML
-        alt = MIMEMultipart('alternative')
-        alt.attach(MIMEText(corpo_html, 'html'))
-        msg.attach(alt)
-        
-        # Anexo
-        if anexo:
-            part = MIMEBase('application', 'octet-stream')
-            part.set_payload(anexo.read())
-            encoders.encode_base64(part)
-            part.add_header('Content-Disposition', f'attachment; filename="{nome_anexo}"')
-            msg.attach(part)
-        
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-            server.starttls()
-            server.login(SMTP_USER, SMTP_PASS)
-            server.send_message(msg)
-        logging.info(f'Email enviado para {destino}')
+        sg = SendGridAPIClient(SENDGRID_API_KEY)
+        mail = Mail(
+            from_email=Email(FROM_EMAIL, "Mapa Numerológico A1ELOS"),
+            to_emails=To(to_email),
+            subject=subject,
+            plain_text_content=Content("text/plain", content)
+        )
+        if attachment_path and os.path.exists(attachment_path):
+            with open(attachment_path, "rb") as f:
+                encoded = base64.b64encode(f.read()).decode()
+            mail.attachment = Attachment(
+                FileContent(encoded),
+                FileName("Mapa_Numerologico.pdf"),
+                FileType("application/pdf"),
+                Disposition("attachment")
+            )
+        sg.send(mail)
+        logger.info(f"Email enviado para {to_email}")
         return True
     except Exception as e:
-        logging.error(f'Erro ao enviar email: {e}')
+        logger.error(f"SendGrid erro: {e}")
         return False
 
-# ─── ROTAS DA API ────────────────────────────────────────────────
-@app.route('/')
-def home():
-    return jsonify({'status': 'ok', 'api': 'Numerologia API', 'versao': '2.0'})
+# ===== ROTAS =====
+@app.get("/", response_class=HTMLResponse)
+def root():
+    return HTMLResponse("<html><body style='background:#0a0a0a;color:#C9A94E;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>🔮 Mapa Numerológico API</h1><p style='color:#aaa'>API ativa — versão FastAPI</p></div></body></html>")
 
-@app.route('/calculate', methods=['POST'])
-def calculate():
-    """Calcula o mapa numerológico."""
+@app.get("/api/health")
+def health():
+    return {"status": "ok", "service": "numerologia-api", "version": "2.0.0"}
+
+@app.post("/calculate")
+def calculate(req: PayRequest):
+    db = SessionLocal()
     try:
-        data = request.json
-        nome = data.get('name', '').strip()
-        data_nascimento = data.get('birth_date', '').strip()
-        email = data.get('email', '').strip()
-        
-        if not nome or not data_nascimento:
-            return jsonify({'error': 'Nome e data são obrigatórios'}), 400
-        
-        resultado = calcular_numerologia(nome, data_nascimento)
-        
-        # Salvar no MongoDB
-        doc = {
-            'name': nome,
-            'birth_date': data_nascimento,
-            'email': email,
-            'life_path': resultado['life_path'],
-            'expression': resultado['expression'],
-            'soul_urge': resultado['soul_urge'],
-            'personality': resultado['personality'],
-            'destiny': resultado['destiny'],
-            'created_at': datetime.datetime.utcnow()
-        }
-        insert_result = calculations_col.insert_one(doc)
-        resultado['id'] = str(insert_result.inserted_id)
-        
-        return jsonify(resultado), 200
-    
+        result = calc_numerology(req.name, req.birth_date)
+        calc_id = uuid.uuid4().hex[:8]
+        calc = Calculation(id=calc_id, name=req.name, birth_date=req.birth_date, email=req.email, **result)
+        db.add(calc)
+        db.commit()
+        return {"id": calc_id, **result}
     except Exception as e:
-        logging.error(f'Erro no cálculo: {traceback.format_exc()}')
-        return jsonify({'error': str(e)}), 500
+        raise HTTPException(400, str(e))
+    finally:
+        db.close()
 
-@app.route('/api/pay/stripe', methods=['POST'])
-def create_stripe_session():
-    """Cria sessão de checkout no Stripe."""
+@app.post("/api/pay/stripe")
+def pay_stripe(req: PayRequest):
+    if not STRIPE_SECRET_KEY:
+        raise HTTPException(503, "Stripe não configurado")
     try:
-        data = request.json
-        name = data.get('name', 'Cliente')
-        email = data.get('email', '')
-        product = data.get('product', '')
-        price = int(data.get('price', 0))
-        calculation_id = data.get('calculation_id', None)
-        
-        if price <= 0:
-            return jsonify({'error': 'Preço inválido'}), 400
-        
-        # Mapear produto para descrição
-        prod_map = {
-            'pdf': '📄 Mapa Individual Completo (PDF)',
-            'emp': '💼 Validação Empresarial',
-            'art': '🎭 Validação Nome Artístico',
-            'urna': '🗳️ Validação Nome de Urna',
-            'num': '🔢 Cálculo do Número Eleitoral',
-            'casal': '💞 Mapa do Casal (2 pessoas)',
-            'baby': '👶 Planejamento Nome de Bebê',
-            'loja': '🏪 Nome para Negócio/Produto',
-            'imov': '🏠 Número de Imóvel',
-            'prem': '🌟 Mapa Premium (Família)'
-        }
-        descricao = prod_map.get(product, 'Produto Numerologia')
-        
-        # Criar sessão Stripe
-        session = stripe.checkout.Session.create(
+        checkout = stripe.checkout.Session.create(
+            mode='payment',
             payment_method_types=['card'],
             line_items=[{
                 'price_data': {
                     'currency': 'brl',
-                    'product_data': {
-                        'name': descricao,
-                        'description': f'Mapa Numerológico - {product}',
-                    },
-                    'unit_amount': price,  # em centavos
+                    'product_data': {'name': req.product},
+                    'unit_amount': int(req.price * 100),
                 },
                 'quantity': 1,
             }],
-            mode='payment',
-            success_url=f'{SITE_URL}/sucesso.html?session_id={{CHECKOUT_SESSION_ID}}',
-            cancel_url=f'{SITE_URL}/#calc',
-            customer_email=email if email else None,
-            metadata={
-                'product': product,
-                'calculation_id': calculation_id or '',
-                'customer_name': name
-            }
+            customer_email=req.email,
+            metadata={"product": req.product, "calculation_id": req.calculation_id or ""},
+            success_url=f"{BASE_URL}/api/pay/success?name={req.name}&birth_date={req.birth_date or ''}&email={req.email}&product={req.product}&lang={req.lang}&session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{BASE_URL}/api/pay/failure",
         )
-        
-        # Salvar pedido pendente
-        order_doc = {
-            'session_id': session.id,
-            'product': product,
-            'price': price,
-            'email': email,
-            'customer_name': name,
-            'calculation_id': calculation_id,
-            'status': 'pending',
-            'created_at': datetime.datetime.utcnow()
-        }
-        
-        # Se vier nomes/datas extras (multi-pessoa), salvar
-        if data.get('names'):
-            order_doc['names'] = data.get('names')
-        if data.get('dates'):
-            order_doc['dates'] = data.get('dates')
-        
-        orders_col.insert_one(order_doc)
-        
-        return jsonify({'payment_url': session.url}), 200
-    
+        return {"payment_url": checkout.url, "id": checkout.id}
     except Exception as e:
-        logging.error(f'Erro Stripe: {traceback.format_exc()}')
-        return jsonify({'error': str(e)}), 500
+        logger.error(f"Stripe erro: {e}")
+        raise HTTPException(500, str(e))
 
-@app.route('/stripe/webhook', methods=['POST'])
-def stripe_webhook():
-    """Webhook do Stripe para processar pagamentos confirmados."""
-    payload = request.get_data()
-    sig_header = request.headers.get('Stripe-Signature')
-    
-    try:
-        event = stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
-    except ValueError:
-        return jsonify({'error': 'Invalid payload'}), 400
-    except stripe.error.SignatureVerificationError:
-        return jsonify({'error': 'Invalid signature'}), 400
-    
-    if event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
-        session_id = session.get('id')
-        
-        # Atualizar pedido
-        orders_col.update_one(
-            {'session_id': session_id},
-            {'$set': {
-                'status': 'completed',
-                'payment_intent': session.get('payment_intent'),
-                'completed_at': datetime.datetime.utcnow()
-            }}
-        )
-        
-        # Buscar dados do pedido
-        order = orders_col.find_one({'session_id': session_id})
-        if not order:
-            return jsonify({'status': 'not_found'}), 200
-        
-        product = order.get('product', '')
-        email = order.get('email', '')
-        customer_name = order.get('customer_name', 'Cliente')
-        calc_id = order.get('calculation_id')
-        
-        # Buscar dados do cálculo
-        calc_data = None
-        if calc_id:
-            from bson.objectid import ObjectId
-            try:
-                calc = calculations_col.find_one({'_id': ObjectId(calc_id)})
-                if calc:
-                    calc_data = calc
-            except:
-                pass
-        
-        if not calc_data:
-            calc_data = {
-                'name': customer_name or 'Cliente',
-                'birth_date': '',
-                'life_path': '—', 'expression': '—',
-                'soul_urge': '—', 'personality': '—', 'destiny': '—'
-            }
-        
-        # Gerar PDF se for produto com mapa
-        if product in ('pdf', 'casal', 'prem'):
-            try:
-                pdf_buffer = gerar_pdf_mapa(calc_data)
-                
-                assunto = 'Seu Mapa Numerológico está pronto!'
-                corpo = f'''
-                <h2 style="color:#C9A94E;">Mapa Numerológico</h2>
-                <p>Olá {customer_name},</p>
-                <p>Seu mapa numerológico foi gerado com sucesso. Segue em anexo o PDF completo.</p>
-                <p><b>Caminho de Vida:</b> {calc_data.get("life_path", "—")}<br>
-                <b>Expressão:</b> {calc_data.get("expression", "—")}<br>
-                <b>Motivação da Alma:</b> {calc_data.get("soul_urge", "—")}<br>
-                <b>Personalidade:</b> {calc_data.get("personality", "—")}<br>
-                <b>Destino:</b> {calc_data.get("destiny", "—")}</p>
-                <p>Atenciosamente,<br><b>A1ELOS Assessoria e Consultoria</b></p>
-                '''
-                enviar_email(email, assunto, corpo, pdf_buffer, 'mapa_numerologico.pdf')
-            except Exception as e:
-                logging.error(f'Erro ao gerar/enviar PDF: {e}')
-        else:
-            # Email sem anexo
-            assunto = 'Confirmação de Pedido - Mapa Numerológico'
-            corpo = f'''
-            <h2 style="color:#C9A94E;">Pedido Confirmado!</h2>
-            <p>Olá {customer_name},</p>
-            <p>Seu pedido foi confirmado com sucesso.</p>
-            <p><b>Produto:</b> {product}</p>
-            <p>Em breve você receberá mais informações.</p>
-            <p>Atenciosamente,<br><b>A1ELOS Assessoria e Consultoria</b></p>
-            '''
-            enviar_email(email, assunto, corpo)
-    
-    elif event['type'] == 'checkout.session.expired':
-        session = event['data']['object']
-        orders_col.update_one(
-            {'session_id': session.get('id')},
-            {'$set': {'status': 'expired'}}
-        )
-    
-    elif event['type'] == 'payment_intent.payment_failed':
-        session = event['data']['object']
-        orders_col.update_one(
-            {'payment_intent': session.get('id')},
-            {'$set': {'status': 'failed'}}
-        )
-    
-    return jsonify({'status': 'success'}), 200
+@app.get("/api/pay/success")
+def pay_success(request: Request):
+    name = request.query_params.get("name", "")
+    birth_date = request.query_params.get("birth_date", "")
+    email = request.query_params.get("email", "")
+    product = request.query_params.get("product", "pdf")
+    lang = request.query_params.get("lang", "pt")
+    processed = False
 
-@app.route('/api/orders/<session_id>', methods=['GET'])
-def get_order(session_id):
-    """Consulta status do pedido."""
-    order = orders_col.find_one({'session_id': session_id}, {'_id': 0})
-    if not order:
-        return jsonify({'error': 'Pedido não encontrado'}), 404
-    return jsonify(order), 200
+    if name and email:
+        try:
+            data = calc_numerology(name, birth_date)
+            pdf = generate_pdf(data, name, birth_date, lang)
+            send_email(email, "Seu Mapa Numerológico está pronto!",
+                      f"Olá {name},\n\nSeu mapa numerológico foi gerado e segue em anexo.\n\nAtenciosamente,\nA1ELOS Assessoria e Consultoria", pdf)
+            if os.path.exists(pdf):
+                os.remove(pdf)
+            processed = True
+        except Exception as e:
+            logger.error(f"Erro no success: {e}")
 
-@app.route('/admin/health', methods=['GET'])
-def health():
-    return jsonify({
-        'status': 'ok',
-        'mongo': 'connected',
-        'stripe': bool(STRIPE_SECRET_KEY.startswith('sk_')),
-        'time': datetime.datetime.utcnow().isoformat()
-    })
+    if processed:
+        return HTMLResponse("<html><body style='background:#0a0a0a;color:#C9A94E;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>✅ Pagamento Confirmado!</h1><p style='color:#aaa'>Seu PDF foi enviado por e-mail.</p><a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>")
+    return HTMLResponse("<html><body style='background:#0a0a0a;color:#e74c3c;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>❌ Erro ao processar</h1><p style='color:#aaa'>Não foi possível concluir.</p><a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>")
 
-# ─── INICIALIZAÇÃO ───────────────────────────────────────────────
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+@app.get("/api/pay/failure")
+def pay_failure():
+    return HTMLResponse("<html><body style='background:#0a0a0a;color:#e74c3c;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>❌ Pagamento não concluído</h1><p style='color:#aaa'>Tente novamente.</p><a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", "10000")))
