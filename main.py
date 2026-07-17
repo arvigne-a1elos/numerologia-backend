@@ -158,7 +158,7 @@ def generate_pdf(calc, name):
         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#C9A94E")),
         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
         ("FONTSIZE", (0, 0), (-1, -1), 12),
-        ("GRID", (0, 0), (-1, -1), 1, colours.grey),
+        ("GRID", (0, 0), (-1, -1), 1, colors.grey),
         ("ALIGN", (1, 0), (-1, -1), "CENTER")
     ]))
     elements.append(t)
@@ -403,13 +403,53 @@ async def stripe_webhook(request: Request):
         return {"status": "ok"}
 
 @app.get("/api/pay/success")
-def pay_success():
+def pay_success(request: Request):
+    session_id = request.query_params.get("session_id")
+    processed = False
+    if session_id and STRIPE_SECRET_KEY:
+        try:
+            session = stripe.checkout.Session.retrieve(session_id)
+            if session.get("payment_status") == "paid":
+                email = session.get("customer_email") or session.get("customer_details", {}).get("email")
+                metadata = session.get("metadata", {})
+                calc_id = metadata.get("calculation_id", "")
+                product = metadata.get("product", "")
+                amount = float(session.get("amount_total", 0)) / 100
+                db = SessionLocal()
+                order_id = str(uuid.uuid4())[:12]
+                order = Order(id=order_id, email=email or "unknown", product=product,
+                              price=amount, calculation_id=calc_id or None,
+                              status="paid", payment_method="stripe",
+                              payment_id=session.get("id"))
+                db.add(order)
+                if calc_id:
+                    calc = db.query(Calculation).filter(Calculation.id == calc_id).first()
+                    if calc and email:
+                        pdf_path = generate_pdf(calc, calc.name)
+                        send_email(email, "Seu Mapa Numerológico está pronto!",
+                                   "Segue em anexo seu mapa numerológico completo.", pdf_path)
+                        if os.path.exists(pdf_path):
+                            os.remove(pdf_path)
+                db.commit()
+                db.close()
+                processed = True
+        except Exception as e:
+            logger.error(f"Success processing error: {e}")
+    if processed:
+        return HTMLResponse(
+            "<html><body style='background:#0a0a0a;color:#C9A94E;"
+            "display:flex;align-items:center;justify-content:center;"
+            "min-height:100vh;font-family:sans-serif'>"
+            "<div style='text-align:center'><h1>✅ Pagamento Confirmado!</h1>"
+            "<p style='color:#aaa'>Seu PDF foi enviado por e-mail em instantes.</p>"
+            "<a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>"
+        )
     return HTMLResponse(
-        "<html><body style='background:#0a0a0a;color:#C9A94E;"
+        "<html><body style='background:#0a0a0a;color:#f39c12;"
         "display:flex;align-items:center;justify-content:center;"
         "min-height:100vh;font-family:sans-serif'>"
-        "<div style='text-align:center'><h1>✅ Pagamento Confirmado!</h1>"
-        "<p style='color:#aaa'>Seu PDF será enviado por e-mail em instantes.</p>"
+        "<div style='text-align:center'><h1>⏳ Aguardando confirmação</h1>"
+        "<p style='color:#aaa'>Seu pagamento está sendo processado.</p>"
         "<a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>"
     )
 
