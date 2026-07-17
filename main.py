@@ -23,7 +23,6 @@ import dateutil.parser as dp
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# ===== CONFIG =====
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
 SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "")
 FROM_EMAIL = os.getenv("FROM_EMAIL", "arvigne@gmail.com")
@@ -65,11 +64,12 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Numerologia API")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
+# ===== CORREÇÃO: todos os campos comuns como opcionais =====
 class PayRequest(BaseModel):
     name: str
     email: str
-    product: str
-    price: float
+    product: Optional[str] = "pdf"
+    price: Optional[float] = 0
     calculation_id: Optional[str] = None
     birth_date: Optional[str] = None
     lang: Optional[str] = "pt"
@@ -90,22 +90,18 @@ def calc_numerology(name, birth_date):
         exp += v
         if ch in "AEIOU": vow += v
         else: cons += v
-    return {
-        "life_path": life_path,
-        "expression": reduce_to_single(exp),
-        "soul_urge": reduce_to_single(vow),
-        "personality": reduce_to_single(cons),
-        "destiny": reduce_to_single(reduce_to_single(exp) + life_path)
-    }
+    return {"life_path": life_path, "expression": reduce_to_single(exp),
+            "soul_urge": reduce_to_single(vow), "personality": reduce_to_single(cons),
+            "destiny": reduce_to_single(reduce_to_single(exp) + life_path)}
 
-def generate_pdf(data, name, birth_date_str, lang="pt"):
+def generate_pdf(data, name, birth_date_str):
     pdf_path = f"/tmp/mapa_{uuid.uuid4().hex[:8]}.pdf"
     doc = SimpleDocTemplate(pdf_path, pagesize=A4, leftMargin=40, rightMargin=40, topMargin=40, bottomMargin=40)
     styles = getSampleStyleSheet()
-    title_style = ParagraphStyle("Title", fontSize=24, spaceAfter=10, textColor=colors.HexColor("#C9A94E"), alignment=1, fontName="Helvetica-Bold")
-    name_style = ParagraphStyle("Name", fontSize=14, spaceAfter=4, textColor=colors.white, alignment=1)
-    section_style = ParagraphStyle("Section", fontSize=14, spaceBefore=14, spaceAfter=6, textColor=colors.HexColor("#C9A94E"), fontName="Helvetica-Bold")
-    desc_style = ParagraphStyle("Desc", fontSize=10, spaceAfter=10, textColor=colors.white, leading=14)
+    title_style = ParagraphStyle("Title", fontSize=24, textColor=colors.HexColor("#C9A94E"), alignment=1, fontName="Helvetica-Bold", spaceAfter=10)
+    name_style = ParagraphStyle("Name", fontSize=14, alignment=1, spaceAfter=4)
+    section_style = ParagraphStyle("Section", fontSize=14, textColor=colors.HexColor("#C9A94E"), fontName="Helvetica-Bold", spaceBefore=14, spaceAfter=6)
+    desc_style = ParagraphStyle("Desc", fontSize=10, spaceAfter=10, leading=14)
     textos = {
         1: "Líder nato, pioneiro, independente. Sua missão é inovar e abrir caminhos.",
         2: "Diplomata, sensível, cooperativo. Sua missão é criar harmonia e unir pessoas.",
@@ -131,9 +127,9 @@ def generate_pdf(data, name, birth_date_str, lang="pt"):
     elements.append(t)
     elements.append(Spacer(1, 20))
     for key, label in [("life_path","Caminho de Vida"),("expression","Expressão"),("soul_urge","Motivação da Alma"),("personality","Personalidade"),("destiny","Destino")]:
-        val = data[key]
-        elements.append(Paragraph(f"<b>{label} — {val}</b>", section_style))
-        elements.append(Paragraph(textos.get(val, "Energia única e especial."), desc_style))
+        v = data[key]
+        elements.append(Paragraph(f"<b>{label} — {v}</b>", section_style))
+        elements.append(Paragraph(textos.get(v, "Energia única e especial."), desc_style))
     elements.append(Spacer(1, 25))
     elements.append(Paragraph("© A1ELOS Assessoria e Consultoria", ParagraphStyle("Footer", fontSize=8, textColor=colors.grey, alignment=1)))
     doc.build(elements)
@@ -156,7 +152,7 @@ def send_email(to_email, subject, content, attachment_path=None):
         logger.error(f"SendGrid erro: {e}")
         return False
 
-# ===== ROTA PRINCIPAL - SERVE O INDEX.HTML =====
+# ===== ROTA PRINCIPAL =====
 INDEX_PATH = os.path.join(os.path.dirname(__file__), "index.html")
 
 @app.get("/", response_class=HTMLResponse)
@@ -167,7 +163,7 @@ def root():
                 return HTMLResponse(f.read())
     except Exception as e:
         logger.error(f"Erro ao ler index.html: {e}")
-    return HTMLResponse("<html><body style='background:#0a0a0a;color:#C9A94E;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>🔮 Mapa Numerológico</h1><p style='color:#aaa'>Site em manutenção.</p></div></body></html>")
+    return HTMLResponse("<html><body style='background:#0a0a0a;color:#C9A94E;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>🔮 Mapa Numerológico</h1><p style='color:#aaa'>API ativa.</p></div></body></html>")
 
 @app.get("/api/health")
 def health():
@@ -175,6 +171,7 @@ def health():
 
 @app.post("/calculate")
 def calculate(req: PayRequest):
+    """Cálculo gratuito - aceita apenas name, birth_date e email"""
     db = SessionLocal()
     try:
         result = calc_numerology(req.name, req.birth_date)
@@ -184,14 +181,18 @@ def calculate(req: PayRequest):
         db.commit()
         return {"id": calc_id, **result}
     except Exception as e:
+        logger.error(f"Erro no cálculo: {e}")
         raise HTTPException(400, str(e))
     finally:
         db.close()
 
 @app.post("/api/pay/stripe")
 def pay_stripe(req: PayRequest):
+    """Cria sessão de pagamento Stripe"""
     if not STRIPE_SECRET_KEY:
         raise HTTPException(503, "Stripe não configurado")
+    if not req.price or req.price <= 0:
+        raise HTTPException(400, "Preço inválido")
     try:
         checkout = stripe.checkout.Session.create(
             mode='payment', payment_method_types=['card'],
@@ -216,7 +217,7 @@ def pay_success(request: Request):
     if name and email:
         try:
             data = calc_numerology(name, birth_date)
-            pdf = generate_pdf(data, name, birth_date, lang)
+            pdf = generate_pdf(data, name, birth_date)
             send_email(email, "Seu Mapa Numerológico está pronto!", f"Olá {name},\n\nSeu mapa numerológico foi gerado e segue em anexo.\n\nAtenciosamente,\nA1ELOS Assessoria e Consultoria", pdf)
             if os.path.exists(pdf): os.remove(pdf)
             processed = True
