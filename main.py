@@ -63,13 +63,7 @@ class Order(Base):
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Numerologia API")
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 class PayRequest(BaseModel):
     name: str
@@ -80,7 +74,6 @@ class PayRequest(BaseModel):
     birth_date: Optional[str] = None
     lang: Optional[str] = "pt"
 
-# ===== FUNÇÕES =====
 def reduce_to_single(n):
     while n > 9 and n not in (11, 22, 33):
         n = sum(int(d) for d in str(n))
@@ -109,46 +102,14 @@ def generate_pdf(data, name, birth_date_str, lang="pt"):
     pdf_path = f"/tmp/mapa_{uuid.uuid4().hex[:8]}.pdf"
     doc = SimpleDocTemplate(pdf_path, pagesize=A4, leftMargin=40, rightMargin=40, topMargin=40, bottomMargin=40)
     styles = getSampleStyleSheet()
-
     title_style = ParagraphStyle("Title", fontSize=24, spaceAfter=10, textColor=colors.HexColor("#C9A94E"), alignment=1, fontName="Helvetica-Bold")
     name_style = ParagraphStyle("Name", fontSize=14, spaceAfter=4, textColor=colors.white, alignment=1)
     section_style = ParagraphStyle("Section", fontSize=14, spaceBefore=14, spaceAfter=6, textColor=colors.HexColor("#C9A94E"), fontName="Helvetica-Bold")
     desc_style = ParagraphStyle("Desc", fontSize=10, spaceAfter=10, textColor=colors.white, leading=14)
-    normal_style = ParagraphStyle("Normal", fontSize=10, spaceAfter=6, textColor=colors.white, leading=13)
-
-    elements = []
-    elements.append(Paragraph("MAPA NUMEROLÓGICO", title_style))
-    elements.append(Paragraph(f"<b>Nome:</b> {name}", name_style))
-    elements.append(Paragraph(f"<b>Data:</b> {birth_date_str}", name_style))
-    elements.append(Spacer(1, 15))
-
-    # Tabela principal
-    table_data = [
-        ["Número", "Valor"],
-        ["Caminho de Vida", str(data["life_path"])],
-        ["Expressão", str(data["expression"])],
-        ["Motivação da Alma", str(data["soul_urge"])],
-        ["Personalidade", str(data["personality"])],
-        ["Destino", str(data["destiny"])],
-    ]
-    t = Table(table_data, colWidths=[200, 100])
-    t.setStyle(TableStyle([
-        ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#C9A94E")),
-        ("TEXTCOLOR", (0,0), (-1,0), colors.white),
-        ("FONTSIZE", (0,0), (-1,-1), 10),
-        ("GRID", (0,0), (-1,-1), 1, colors.grey),
-        ("ALIGN", (1,0), (1,-1), "CENTER"),
-        ("BACKGROUND", (0,1), (-1,-1), colors.HexColor("#1a1a1a")),
-        ("TEXTCOLOR", (0,1), (-1,-1), colors.white),
-    ]))
-    elements.append(t)
-    elements.append(Spacer(1, 20))
-
-    # Textos por número
     textos = {
         1: "Líder nato, pioneiro, independente. Sua missão é inovar e abrir caminhos.",
-        2: "Diplomata, sensível, cooperativo. Sua missão é criar harmonia.",
-        3: "Criativo, comunicador, otimista. Sua missão é espalhar alegria.",
+        2: "Diplomata, sensível, cooperativo. Sua missão é criar harmonia e unir pessoas.",
+        3: "Criativo, comunicador, otimista. Sua missão é espalhar alegria e inspirar.",
         4: "Prático, disciplinado, confiável. Sua missão é construir bases sólidas.",
         5: "Livre, versátil, aventureiro. Sua missão é explorar e inspirar liberdade.",
         6: "Responsável, amoroso, protetor. Sua missão é servir e cuidar.",
@@ -157,18 +118,24 @@ def generate_pdf(data, name, birth_date_str, lang="pt"):
         9: "Humanitário, generoso, compassivo. Sua missão é servir à humanidade.",
         11: "Mestre intuitivo. Inspira outros com sua visão espiritual elevada.",
         22: "Mestre construtor. Transforma sonhos em realidade concreta.",
+        33: "Mestre do amor incondicional. Canal de cura e compaixão."
     }
-
-    for key, label in [("life_path", "Caminho de Vida"), ("expression", "Expressão"),
-                        ("soul_urge", "Motivação da Alma"), ("personality", "Personalidade"),
-                        ("destiny", "Destino")]:
+    elements = []
+    elements.append(Paragraph("MAPA NUMEROLÓGICO", title_style))
+    elements.append(Paragraph(f"<b>Nome:</b> {name}", name_style))
+    elements.append(Paragraph(f"<b>Data:</b> {birth_date_str}", name_style))
+    elements.append(Spacer(1, 15))
+    table_data = [["Número", "Valor"],["Caminho de Vida", str(data["life_path"])],["Expressão", str(data["expression"])],["Motivação da Alma", str(data["soul_urge"])],["Personalidade", str(data["personality"])],["Destino", str(data["destiny"])]]
+    t = Table(table_data, colWidths=[200, 100])
+    t.setStyle(TableStyle([("BACKGROUND",(0,0),(-1,0),colors.HexColor("#C9A94E")),("TEXTCOLOR",(0,0),(-1,0),colors.white),("FONTSIZE",(0,0),(-1,-1),10),("GRID",(0,0),(-1,-1),1,colors.grey),("ALIGN",(1,0),(1,-1),"CENTER"),("BACKGROUND",(0,1),(-1,-1),colors.HexColor("#1a1a1a")),("TEXTCOLOR",(0,1),(-1,-1),colors.white)]))
+    elements.append(t)
+    elements.append(Spacer(1, 20))
+    for key, label in [("life_path","Caminho de Vida"),("expression","Expressão"),("soul_urge","Motivação da Alma"),("personality","Personalidade"),("destiny","Destino")]:
         val = data[key]
         elements.append(Paragraph(f"<b>{label} — {val}</b>", section_style))
         elements.append(Paragraph(textos.get(val, "Energia única e especial."), desc_style))
-
     elements.append(Spacer(1, 25))
-    elements.append(Paragraph("© A1ELOS Assessoria e Consultoria", ParagraphStyle("Footer", fontSize=8, textColor=colors.grey, alignment=1, fontName="Helvetica")))
-
+    elements.append(Paragraph("© A1ELOS Assessoria e Consultoria", ParagraphStyle("Footer", fontSize=8, textColor=colors.grey, alignment=1)))
     doc.build(elements)
     return pdf_path
 
@@ -178,32 +145,29 @@ def send_email(to_email, subject, content, attachment_path=None):
         return False
     try:
         sg = SendGridAPIClient(SENDGRID_API_KEY)
-        mail = Mail(
-            from_email=Email(FROM_EMAIL, "Mapa Numerológico A1ELOS"),
-            to_emails=To(to_email),
-            subject=subject,
-            plain_text_content=Content("text/plain", content)
-        )
+        mail = Mail(from_email=Email(FROM_EMAIL, "Mapa Numerológico A1ELOS"), to_emails=To(to_email), subject=subject, plain_text_content=Content("text/plain", content))
         if attachment_path and os.path.exists(attachment_path):
             with open(attachment_path, "rb") as f:
                 encoded = base64.b64encode(f.read()).decode()
-            mail.attachment = Attachment(
-                FileContent(encoded),
-                FileName("Mapa_Numerologico.pdf"),
-                FileType("application/pdf"),
-                Disposition("attachment")
-            )
+            mail.attachment = Attachment(FileContent(encoded), FileName("Mapa_Numerologico.pdf"), FileType("application/pdf"), Disposition("attachment"))
         sg.send(mail)
-        logger.info(f"Email enviado para {to_email}")
         return True
     except Exception as e:
         logger.error(f"SendGrid erro: {e}")
         return False
 
-# ===== ROTAS =====
+# ===== ROTA PRINCIPAL - SERVE O INDEX.HTML =====
+INDEX_PATH = os.path.join(os.path.dirname(__file__), "index.html")
+
 @app.get("/", response_class=HTMLResponse)
 def root():
-    return HTMLResponse("<html><body style='background:#0a0a0a;color:#C9A94E;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>🔮 Mapa Numerológico API</h1><p style='color:#aaa'>API ativa — versão FastAPI</p></div></body></html>")
+    try:
+        if os.path.exists(INDEX_PATH):
+            with open(INDEX_PATH, "r", encoding="utf-8") as f:
+                return HTMLResponse(f.read())
+    except Exception as e:
+        logger.error(f"Erro ao ler index.html: {e}")
+    return HTMLResponse("<html><body style='background:#0a0a0a;color:#C9A94E;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>🔮 Mapa Numerológico</h1><p style='color:#aaa'>Site em manutenção.</p></div></body></html>")
 
 @app.get("/api/health")
 def health():
@@ -230,21 +194,12 @@ def pay_stripe(req: PayRequest):
         raise HTTPException(503, "Stripe não configurado")
     try:
         checkout = stripe.checkout.Session.create(
-            mode='payment',
-            payment_method_types=['card'],
-            line_items=[{
-                'price_data': {
-                    'currency': 'brl',
-                    'product_data': {'name': req.product},
-                    'unit_amount': int(req.price * 100),
-                },
-                'quantity': 1,
-            }],
+            mode='payment', payment_method_types=['card'],
+            line_items=[{'price_data': {'currency': 'brl', 'product_data': {'name': req.product}, 'unit_amount': int(req.price * 100)}, 'quantity': 1}],
             customer_email=req.email,
             metadata={"product": req.product, "calculation_id": req.calculation_id or ""},
             success_url=f"{BASE_URL}/api/pay/success?name={req.name}&birth_date={req.birth_date or ''}&email={req.email}&product={req.product}&lang={req.lang}&session_id={{CHECKOUT_SESSION_ID}}",
-            cancel_url=f"{BASE_URL}/api/pay/failure",
-        )
+            cancel_url=f"{BASE_URL}/api/pay/failure")
         return {"payment_url": checkout.url, "id": checkout.id}
     except Exception as e:
         logger.error(f"Stripe erro: {e}")
@@ -258,19 +213,15 @@ def pay_success(request: Request):
     product = request.query_params.get("product", "pdf")
     lang = request.query_params.get("lang", "pt")
     processed = False
-
     if name and email:
         try:
             data = calc_numerology(name, birth_date)
             pdf = generate_pdf(data, name, birth_date, lang)
-            send_email(email, "Seu Mapa Numerológico está pronto!",
-                      f"Olá {name},\n\nSeu mapa numerológico foi gerado e segue em anexo.\n\nAtenciosamente,\nA1ELOS Assessoria e Consultoria", pdf)
-            if os.path.exists(pdf):
-                os.remove(pdf)
+            send_email(email, "Seu Mapa Numerológico está pronto!", f"Olá {name},\n\nSeu mapa numerológico foi gerado e segue em anexo.\n\nAtenciosamente,\nA1ELOS Assessoria e Consultoria", pdf)
+            if os.path.exists(pdf): os.remove(pdf)
             processed = True
         except Exception as e:
             logger.error(f"Erro no success: {e}")
-
     if processed:
         return HTMLResponse("<html><body style='background:#0a0a0a;color:#C9A94E;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>✅ Pagamento Confirmado!</h1><p style='color:#aaa'>Seu PDF foi enviado por e-mail.</p><a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>")
     return HTMLResponse("<html><body style='background:#0a0a0a;color:#e74c3c;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>❌ Erro ao processar</h1><p style='color:#aaa'>Não foi possível concluir.</p><a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>")
