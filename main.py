@@ -1,31 +1,26 @@
-import os, sys, json, hashlib, hmac, logging, uuid, asyncio
-from datetime import datetime, date, timedelta
+import os, logging, uuid, stripe, mercadopago, base64
+from datetime import datetime
 from typing import Optional
-from decimal import Decimal
-import stripe
-import mercadopago
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from sqlalchemy import create_engine, Column, String, Integer, Float, DateTime, Text
+from sqlalchemy import create_engine, Column, String, Integer, Float, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, Email, To, Content
+from sendgrid.helpers.mail import Mail, Email, To, Content, Attachment, FileContent, FileName, FileType, Disposition
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 import dateutil.parser as dp
-import aiofiles
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN", "")
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
-STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
 SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "")
 FROM_EMAIL = os.getenv("FROM_EMAIL", "arvigne@gmail.com")
 BASE_URL = os.getenv("BASE_URL", "https://numerologia-api-wd2q.onrender.com")
@@ -34,12 +29,13 @@ DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./numerologia.db")
 if STRIPE_SECRET_KEY:
     stripe.api_key = STRIPE_SECRET_KEY
 
-sdk = None
+sdk_mp = None
 if MP_ACCESS_TOKEN:
     try:
-        sdk = mercadopago.SDK(MP_ACCESS_TOKEN)
+        import mercadopago
+        sdk_mp = mercadopago.SDK(MP_ACCESS_TOKEN)
     except Exception as e:
-        logger.warning(f"Mercado Pago SDK init failed: {e}")
+        logger.error(f"MP SDK: {e}")
 
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 Base = declarative_base()
@@ -64,49 +60,54 @@ class Order(Base):
     email = Column(String)
     product = Column(String)
     price = Column(Float)
-    calculation_id = Column(String, nullable=True)
     status = Column(String, default="pending")
-    payment_method = Column(String, nullable=True)
     payment_id = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 Base.metadata.create_all(bind=engine)
-
 app = FastAPI(title="Numerologia API")
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-HTML_PATH = os.path.join(os.path.dirname(__file__), "index.html")
-INDEX_HTML = """<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Mapa Numerológico</title></head><body style="background:#0a0a0a;color:#fff;text-align:center;padding:40px;font-family:sans-serif"><h1 style="color:#C9A94E">🔮 Mapa Numerológico</h1><p style="color:#888">API ativa.</p></body></html>"""
-
-if os.path.exists(HTML_PATH):
-    with open(HTML_PATH, "r", encoding="utf-8") as f:
-        INDEX_HTML = f.read()
-
-class CalculateRequest(BaseModel):
-    name: str
-    birth_date: str
-    email: Optional[str] = None
-
-class CheckoutRequest(BaseModel):
-    email: str
-    product: str
-    price: float
-    calculation_id: Optional[str] = None
-
-class MercadoPagoRequest(BaseModel):
+class PayRequest(BaseModel):
     name: str
     email: str
     product: str
     price: float
     calculation_id: Optional[str] = None
     birth_date: Optional[str] = None
+    lang: Optional[str] = "pt"
+
+# ===== 12 IDIOMAS =====
+T = {
+"pt": {"title":"Mapa Numerológico","subtitle":"Baseado na obra de Monique Cissay","lp":"Caminho de Vida","ex":"Expressão","su":"Desejo da Alma","pe":"Personalidade","de":"Destino",
+"1":"Líder nato, pioneiro, independente. Sua missão é inovar e abrir caminhos.","2":"Diplomata, sensível, cooperativo. Sua missão é criar harmonia.","3":"Criativo, comunicador, otimista. Sua missão é espalhar alegria.","4":"Prático, disciplinado, confiável. Sua missão é construir bases sólidas.","5":"Livre, versátil, aventureiro. Sua missão é explorar.","6":"Responsável, amoroso, protetor. Sua missão é servir.","7":"Sábio, analítico, espiritual. Sua missão é buscar a verdade.","8":"Poderoso, realizador, próspero. Sua missão é manifestar abundância.","9":"Humanitário, generoso, compassivo. Sua missão é servir à humanidade.","11":"Mestre intuitivo. Inspira com visão espiritual.","22":"Mestre construtor. Transforma sonhos em realidade.","33":"Mestre do amor. Canal de cura e compaixão.","letter":"Análise Monique Cissay — Cada letra do seu nome vibra uma energia específica:","monique":"Referência: 'Numerologia — A Importância do Nome no Seu Destino', Monique Cissay, Ed. Pensamento."},
+"en": {"title":"Numerology Map","subtitle":"Based on Monique Cissay's work","lp":"Life Path","ex":"Expression","su":"Soul Urge","pe":"Personality","de":"Destiny",
+"1":"Natural leader, pioneer, independent. Your mission is to innovate.","2":"Diplomat, sensitive, cooperative. Your mission is to create harmony.","3":"Creative, communicative, optimistic. Your mission is to spread joy.","4":"Practical, disciplined, reliable. Your mission is to build.","5":"Free, versatile, adventurous. Your mission is to explore.","6":"Responsible, loving, protective. Your mission is to serve.","7":"Wise, analytical, spiritual. Your mission is to seek truth.","8":"Powerful, achiever, prosperous. Your mission is to manifest abundance.","9":"Humanitarian, generous, compassionate. Your mission is to serve humanity.","11":"Intuitive master. Inspires with spiritual vision.","22":"Master builder. Turns dreams into reality.","33":"Master of love. Channel of healing.","letter":"Monique Cissay Analysis: Each letter vibrates a specific energy.","monique":"Reference: 'Numerology' by Monique Cissay."},
+"es": {"title":"Mapa Numerológico","subtitle":"Según Monique Cissay","lp":"Camino de Vida","ex":"Expresión","su":"Deseo del Alma","pe":"Personalidad","de":"Destino",
+"1":"Líder nato. Tu misión es innovar.","2":"Diplomático. Creas armonía.","3":"Creativo. Expresas alegría.","4":"Práctico. Construyes.","5":"Libre. Explorador.","6":"Responsable. Sirves.","7":"Sabio. Buscas la verdad.","8":"Poderoso. Manifiestas.","9":"Humanitario. Sirves.","11":"Maestro intuitivo.","22":"Maestro constructor.","33":"Maestro del amor.","letter":"Análisis Monique Cissay:","monique":"Referencia: 'Numerología' de Monique Cissay."},
+"it": {"title":"Mappa Numerologica","subtitle":"Basata su Monique Cissay","lp":"Sentiero di Vita","ex":"Espressione","su":"Desiderio dell'Anima","pe":"Personalità","de":"Destino",
+"1":"Leader nato.","2":"Diplomatico.","3":"Creativo.","4":"Pratico.","5":"Libero.","6":"Responsabile.","7":"Saggio.","8":"Potente.","9":"Umanitario.","11":"Maestro intuitivo.","22":"Maestro costruttore.","33":"Maestro d'amore.","letter":"Analisi Monique Cissay:","monique":"Riferimento: 'Numerologia' di Monique Cissay."},
+"fr": {"title":"Carte Numérologique","subtitle":"Basée sur Monique Cissay","lp":"Chemin de Vie","ex":"Expression","su":"Élan de l'Âme","pe":"Personnalité","de":"Destin",
+"1":"Leader né.","2":"Diplomate.","3":"Créatif.","4":"Pratique.","5":"Libre.","6":"Responsable.","7":"Sage.","8":"Puissant.","9":"Humanitaire.","11":"Maître intuitif.","22":"Maître constructeur.","33":"Maître d'amour.","letter":"Analyse Monique Cissay:","monique":"Référence: 'Numérologie' de Monique Cissay."},
+"de": {"title":"Numerologische Karte","subtitle":"Nach Monique Cissay","lp":"Lebensweg","ex":"Ausdruck","su":"Seelendrang","pe":"Persönlichkeit","de":"Schicksal",
+"1":"Führer.","2":"Diplomat.","3":"Kreativ.","4":"Praktisch.","5":"Frei.","6":"Verantwortlich.","7":"Weise.","8":"Mächtig.","9":"Humanitär.","11":"Intuitiver Meister.","22":"Baumeister.","33":"Meister der Liebe.","letter":"Monique Cissay Analyse:","monique":"Referenz: 'Numerologie' von Monique Cissay."},
+"ja": {"title":"数秘術マップ","subtitle":"モニーク・シセイに基づく","lp":"ライフパス","ex":"表現","su":"魂の衝動","pe":"人格","de":"運命",
+"1":"リーダー。","2":"外交的。","3":"創造的。","4":"実用的。","5":"自由。","6":"責任感。","7":"賢明。","8":"力強い。","9":"博愛的。","11":"直感の達人。","22":"建設の達人。","33":"愛の達人。","letter":"モニーク・シセイ分析：","monique":"参考文献：モニーク・シセイ『数秘術』"},
+"zh": {"title":"数字命理图","subtitle":"基于莫妮克·西赛","lp":"生命路径","ex":"表现","su":"灵魂渴望","pe":"人格","de":"命运",
+"1":"领袖。","2":"外交。","3":"创造。","4":"实用。","5":"自由。","6":"责任。","7":"智慧。","8":"权力。","9":"博爱。","11":"直觉大师。","22":"建设大师。","33":"爱的大师。","letter":"莫妮克·西赛分析：","monique":"参考：《数字命理学》莫妮克·西赛"},
+"ru": {"title":"Нумерологическая карта","subtitle":"По Моник Сиссей","lp":"Путь жизни","ex":"Выражение","su":"Желание души","pe":"Личность","de":"Судьба",
+"1":"Лидер.","2":"Дипломат.","3":"Творец.","4":"Практик.","5":"Свободный.","6":"Ответственный.","7":"Мудрец.","8":"Власть.","9":"Гуманист.","11":"Интуитивный мастер.","22":"Мастер-строитель.","33":"Мастер любви.","letter":"Анализ Моник Сиссей:","monique":"Ссылка: 'Нумерология' Моник Сиссей."},
+"hi": {"title":"अंक ज्योतिष मानचित्र","subtitle":"मोनिक सिसे के कार्य पर","lp":"जीवन पथ","ex":"अभिव्यक्ति","su":"आत्मा की इच्छा","pe":"व्यक्तित्व","de":"भाग्य",
+"1":"नेता।","2":"राजनयिक।","3":"रचनात्मक।","4":"व्यावहारिक।","5":"स्वतंत्र।","6":"जिम्मेदार।","7":"बुद्धिमान।","8":"शक्तिशाली।","9":"मानवतावादी।","11":"सहज ज्ञानी।","22":"निर्माता।","33":"प्रेम का स्वामी।","letter":"मोनिक सिसे विश्लेषण:","monique":"संदर्भ: मोनिक सिसे 'अंक ज्योतिष'"},
+"ar": {"title":"خريطة الأرقام","subtitle":"بناءً على عمل مونيك سيسي","lp":"مسار الحياة","ex":"التعبير","su":"رغبة الروح","pe":"الشخصية","de":"القدر",
+"1":"قائد.","2":"دبلوماسي.","3":"مبدع.","4":"عملي.","5":"حر.","6":"مسؤول.","7":"حكيم.","8":"قوي.","9":"إنساني.","11":"الحدس.","22":"باني.","33":"الحب.","letter":"تحليل مونيك سيسي:","monique":"مرجع: 'علم الأرقام' لمونيك سيسي"},
+"he": {"title":"מפה נומרולוגית","subtitle":"מבוסס על מוניק סיסיי","lp":"נתיב חיים","ex":"ביטוי","su":"דחף הנשמה","pe":"אישיות","de":"גורל",
+"1":"מנהיג.","2":"דיפלומט.","3":"יצירתי.","4":"מעשי.","5":"חופשי.","6":"אחראי.","7":"חכם.","8":"חזק.","9":"הומניטרי.","11":"אינטואיציה.","22":"בונה.","33":"אהבה.","letter":"ניתוח מוניק סיסיי:","monique":"מקור: 'נומרולוגיה' מאת מוניק סיסיי"}
+}
+
+def tr(key, lang="pt"):
+    t = T.get(lang, T["pt"])
+    return t.get(key, T["pt"].get(key, str(key)))
 
 def reduce_to_single(n):
     while n > 9 and n not in (11, 22, 33):
@@ -115,350 +116,181 @@ def reduce_to_single(n):
 
 def calc_numerology(name, birth_date):
     bd = dp.parse(birth_date).date()
-    nums = [bd.day, bd.month, bd.year]
-    life_path = reduce_to_single(sum(nums))
-    name_upper = name.upper().replace(" ", "")
-    table = {c: (i % 9 or 9) for i, c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)}
-    expression = 0
-    vowel_sum = 0
-    consonant_sum = 0
-    for ch in name_upper:
-        v = table.get(ch, 0)
-        expression += v
-        if ch in "AEIOU":
-            vowel_sum += v
-        else:
-            consonant_sum += v
-    expression = reduce_to_single(expression)
-    soul_urge = reduce_to_single(vowel_sum)
-    personality = reduce_to_single(consonant_sum)
-    destiny = reduce_to_single(expression + life_path)
-    return {
-        "life_path": life_path,
-        "expression": expression,
-        "soul_urge": soul_urge,
-        "personality": personality,
-        "destiny": destiny
-    }
+    life_path = reduce_to_single(bd.day + bd.month + bd.year)
+    nu = name.upper().replace(" ", "")
+    tbl = {c: (i % 9 or 9) for i, c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)}
+    exp = 0; vow = 0; cons = 0
+    for ch in nu:
+        v = tbl.get(ch, 0)
+        exp += v
+        if ch in "AEIOU": vow += v
+        else: cons += v
+    return {"life_path": life_path, "expression": reduce_to_single(exp),
+            "soul_urge": reduce_to_single(vow), "personality": reduce_to_single(cons),
+            "destiny": reduce_to_single(reduce_to_single(exp) + life_path)}
 
-# ===== TEXTOS PERSONALIZADOS PARA CADA NÚMERO =====
+def analyze_name_detail(name):
+    tbl = {c: (i % 9 or 9) for i, c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)}
+    return [{"letra": c, "valor": tbl.get(c, 0)} for c in name.upper() if c in tbl]
 
-def get_life_path_text(n):
-    textos = {
-        1: "Você é um líder nato, independente e original. Sua missão é abrir caminhos, inovar e inspirar outros com sua coragem e determinação. O desafio é aprender a equilibrar sua forte vontade com a consideração pelos outros.",
-        2: "Sua missão é construir pontes. Você é um pacificador natural, sensível e diplomático. Seu talento está em unir pessoas e criar harmonia onde há conflito. Confie na sua intuição e na força da cooperação.",
-        3: "Você veio para espalhar alegria e criatividade. Comunicador nato, seu carisma e otimismo inspiram quem está ao seu redor. Use sua expressão artística para iluminar o mundo, mas evite dispersar sua energia.",
-        4: "Sua missão é construir bases sólidas. Trabalhador incansável, você valoriza a disciplina, a honestidade e a tradição. Seu senso de responsabilidade é seu maior presente — e também seu maior desafio quando se torna rigidez.",
-        5: "Você veio para experimentar a liberdade. Aventureiro e versátil, sua missão é explorar o mundo e inspirar outros a saírem da zona de conforto. O equilíbrio está em usar sua liberdade com sabedoria, sem fugir dos compromissos.",
-        6: "Sua missão é o amor e o serviço. Responsável e acolhedor, você é o pilar da família e da comunidade. Seu dom é cuidar, mas lembre-se de cuidar também de si mesmo para não se sobrecarregar.",
-        7: "Você veio para buscar a verdade. Analítico e espiritual, sua missão é mergulhar nos mistérios da vida e compartilhar seu conhecimento. Confie na sua intuição aguçada e no poder do silêncio.",
-        8: "Sua missão é o poder com propósito. Visionário e ambicioso, você tem potencial para grandes realizações materiais. O verdadeiro sucesso vem quando usa seu poder para servir ao bem maior, não apenas ao ego.",
-        9: "Você veio para amar incondicionalmente. Compassivo e generoso, sua missão é servir à humanidade com sabedoria e desapego. Sua visão ampla do mundo é um dom — compartilhe sem se perder.",
-        11: "Mestre da intuição. Você tem uma sensibilidade espiritual elevada e uma conexão profunda com o inconsciente. Sua missão é inspirar outros através da iluminação e da visão além do comum.",
-        22: "Mestre construtor. Você tem a capacidade única de transformar sonhos em realidade concreta. Sua missão é construir algo que sirva à humanidade em grande escala, combinando visão espiritual com ação prática.",
-        33: "Mestre do amor incondicional. Você é um canal de cura e compaixão. Sua missão é elevar a consciência da humanidade através do serviço amoroso e do exemplo."
-    }
-    return textos.get(n, f"Número {n}: energia única e especial a ser descoberta.")
-
-def get_expression_text(n):
-    textos = {
-        1: "Sua expressão natural é de liderança e originalidade. Você se destaca pela iniciativa e pela capacidade de agir de forma independente.",
-        2: "Sua expressão é de cooperação e sensibilidade. Você se comunica com gentileza e tem o dom de criar harmonia nos grupos.",
-        3: "Sua expressão é criativa e comunicativa. Você tem talento para as artes, a escrita e tudo que envolve autoexpressão.",
-        4: "Sua expressão é prática e disciplinada. Você constrói com solidez e confiabilidade, sendo referência em organização.",
-        5: "Sua expressão é versátil e aventureira. Você se adapta rapidamente e inspira outros com sua coragem para mudar.",
-        6: "Sua expressão é de amor e responsabilidade. Você cuida dos outros com dedicação e cria ambientes acolhedores.",
-        7: "Sua expressão é analítica e espiritual. Você busca conhecimento profundo e compartilha sabedoria de forma única.",
-        8: "Sua expressão é de autoridade e realização. Você tem talento para negócios e para criar prosperidade.",
-        9: "Sua expressão é humanitária e generosa. Você toca a vida das pessoas com compaixão e visão ampla.",
-        11: "Sua expressão é iluminada. Você comunica verdades espirituais com clareza e inspira transformação.",
-        22: "Sua expressão é de mestria construtiva. Você realiza o impossível com visão e determinação."
-    }
-    return textos.get(n, f"Número {n}: expressão única.")
-
-def get_soul_urge_text(n):
-    textos = {
-        1: "Seu coração deseja independência e realização pessoal. Você anseia por ser reconhecido por sua singularidade.",
-        2: "Seu coração deseja paz e união. Você anseia por relacionamentos harmoniosos e parcerias verdadeiras.",
-        3: "Seu coração deseja alegria e expressão criativa. Você anseia por compartilhar sua luz com o mundo.",
-        4: "Seu coração deseja segurança e estabilidade. Você anseia por construir algo duradouro e significativo.",
-        5: "Seu coração deseja liberdade e aventura. Você anseia por experimentar tudo que a vida tem a oferecer.",
-        6: "Seu coração deseja amar e ser amado. Você anseia por lar, família e relacionamentos profundos.",
-        7: "Seu coração deseja conhecimento e verdade. Você anseia por compreender os mistérios da existência.",
-        8: "Seu coração deseja sucesso e reconhecimento. Você anseia por realizar grandes feitos e deixar um legado.",
-        9: "Seu coração deseja servir e transformar. Você anseia por fazer a diferença no mundo.",
-        11: "Seu coração deseja iluminação. Você anseia por conectar-se com o divino e inspirar outros."
-    }
-    return textos.get(n, f"Número {n}: desejo interior único.")
-
-def get_personality_text(n):
-    textos = {
-        1: "Os outros veem você como uma pessoa forte, confiante e determinada. Sua presença é marcante e inspiradora.",
-        2: "Os outros veem você como alguém gentil, diplomático e acolhedor. Sua sensibilidade atrai confiança.",
-        3: "Os outros veem você como uma pessoa carismática, alegre e expressiva. Você ilumina os ambientes.",
-        4: "Os outros veem você como alguém confiável, disciplinado e trabalhador. Sua solidez inspira segurança.",
-        5: "Os outros veem você como uma pessoa livre, aventureira e versátil. Sua energia é contagiante.",
-        6: "Os outros veem você como alguém responsável, amoroso e protetor. Você é o porto seguro dos que amam.",
-        7: "Os outros veem você como uma pessoa sábia, reservada e misteriosa. Sua profundidade intelectual fascina.",
-        8: "Os outros veem você como alguém poderoso, bem-sucedido e autoritário. Sua presença impõe respeito.",
-        9: "Os outros veem você como uma pessoa generosa, humanitária e sábia. Sua compaixão toca corações."
-    }
-    return textos.get(n, f"Número {n}: personalidade marcante.")
-
-def get_destiny_text(n):
-    textos = {
-        1: "Seu destino é liderar e inovar. Você está aqui para abrir caminhos e mostrar que é possível ser pioneiro.",
-        2: "Seu destino é unir e harmonizar. Você está aqui para construir pontes e curar divisões.",
-        3: "Seu destino é inspirar e elevar. Você está aqui para usar sua criatividade e alegria como luz para outros.",
-        4: "Seu destino é construir e estabilizar. Você está aqui para criar bases sólidas que sustentarão gerações.",
-        5: "Seu destino é explorar e libertar. Você está aqui para experimentar a vida plenamente e ensinar liberdade.",
-        6: "Seu destino é amar e servir. Você está aqui para cuidar e criar beleza e harmonia onde estiver.",
-        7: "Seu destino é buscar e ensinar a verdade. Você está aqui para mergulhar no conhecimento e compartilhar sabedoria.",
-        8: "Seu destino é realizar e prosperar. Você está aqui para manifestar abundância e usá-la para o bem.",
-        9: "Seu destino é completar e transcender. Você está aqui para perdoar, amar incondicionalmente e servir à humanidade.",
-        11: "Seu destino é inspirar multidões. Você está aqui como um farol espiritual em tempos de transformação.",
-        22: "Seu destino é construir o impossível. Você está aqui para materializar visões que servem à humanidade."
-    }
-    return textos.get(n, f"Número {n}: propósito de vida único.")
-
-def generate_pdf(data, name, birth_date_str):
-    pdf_path = f"/tmp/mapa_{uuid.uuid4().hex[:8]}.pdf"
-    doc = SimpleDocTemplate(pdf_path, pagesize=A4,
-                            leftMargin=40, rightMargin=40,
-                            topMargin=40, bottomMargin=40)
+def generate_pdf(data, name, birth_date, product="pdf", lang="pt"):
+    path = f"/tmp/mapa_{uuid.uuid4().hex[:8]}.pdf"
+    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=40, rightMargin=40, topMargin=40, bottomMargin=40)
     styles = getSampleStyleSheet()
+    st = ParagraphStyle("T", fontSize=22, textColor=colors.HexColor("#C9A94E"), alignment=1, fontName="Helvetica-Bold", spaceAfter=8)
+    sn = ParagraphStyle("N", fontSize=12, alignment=1, spaceAfter=4)
+    ss = ParagraphStyle("S", fontSize=14, textColor=colors.HexColor("#C9A94E"), fontName="Helvetica-Bold", spaceBefore=10, spaceAfter=4)
+    sd = ParagraphStyle("D", fontSize=10, leading=14, spaceAfter=6)
+    sf = ParagraphStyle("F", fontSize=7, textColor=colors.grey, alignment=1)
+    els = []
+    els.append(Paragraph(tr("title", lang), st))
+    els.append(Paragraph(f"<i>{tr('subtitle', lang)}</i>", sn))
+    els.append(Spacer(1, 6))
+    els.append(Paragraph(f"<b>Nome/Name:</b> {name}", sd))
+    els.append(Paragraph(f"<b>Data/Date:</b> {birth_date}", sd))
+    els.append(Spacer(1, 10))
+    hl = [tr("lp",lang), tr("ex",lang), tr("su",lang), tr("pe",lang), tr("de",lang)]
+    tv = [["Número/Number", "Valor/Value"],[hl[0],str(data["life_path"])],[hl[1],str(data["expression"])],[hl[2],str(data["soul_urge"])],[hl[3],str(data["personality"])],[hl[4],str(data["destiny"])]]
+    t = Table(tv, colWidths=[200,100])
+    t.setStyle(TableStyle([("BACKGROUND",(0,0),(-1,0),colors.HexColor("#C9A94E")),("TEXTCOLOR",(0,0),(-1,0),colors.white),("FONTSIZE",(0,0),(-1,-1),10),("GRID",(0,0),(-1,-1),1,colors.grey),("ALIGN",(1,0),(1,-1),"CENTER"),("BACKGROUND",(0,1),(-1,-1),colors.HexColor("#1a1a1a")),("TEXTCOLOR",(0,1),(-1,-1),colors.white)]))
+    els.append(t)
+    els.append(Spacer(1, 12))
+    if product in ("pdf","free","prem","casal"):
+        for k, l in [("life_path",hl[0]),("expression",hl[1]),("soul_urge",hl[2]),("personality",hl[3]),("destiny",hl[4])]:
+            v = data[k]; d = tr(str(v), lang)
+            els.append(Paragraph(f"<b>{l} — {v}</b>", ss))
+            els.append(Paragraph(d, sd))
+    elif product == "emp":
+        els.append(Paragraph("Validação Empresarial / Business Validation", ss))
+        els.append(Paragraph(f"Expressão/Expression: {data['expression']} — {tr(str(data['expression']),lang)}", sd))
+        els.append(Paragraph(f"Caminho de Vida/Life Path: {data['life_path']} — {tr(str(data['life_path']),lang)}", sd))
+        els.append(Paragraph("<i>O nome empresarial ideal vibra na energia 8 — poder e prosperidade.</i>", sd))
+    elif product == "art":
+        els.append(Paragraph("Validação Nome Artístico / Stage Name", ss))
+        els.append(Paragraph(f"Expressão Artística: {data['expression']} — {tr(str(data['expression']),lang)}", sd))
+        els.append(Paragraph("<i>O nome artístico ideal vibra na energia 3 — comunicação.</i>", sd))
+    elif product in ("urna","num"):
+        els.append(Paragraph("Validação Eleitoral / Electoral Validation", ss))
+        els.append(Paragraph(f"Expressão Nome de Urna: {data['expression']} — {tr(str(data['expression']),lang)}", sd))
+        els.append(Paragraph("<i>Nome de urna ideal soma 8. Dep. Federal (4 dígitos), Dep. Estadual (5 dígitos).</i>", sd))
+    elif product == "baby":
+        els.append(Paragraph("Planejamento Nome de Bebê / Baby Name", ss))
+        els.append(Paragraph(f"Expressão: {data['expression']} — {tr(str(data['expression']),lang)}", sd))
+    elif product == "loja":
+        els.append(Paragraph("Nome para Negócio / Business Name", ss))
+        els.append(Paragraph(f"Expressão comercial: {data['expression']} — {tr(str(data['expression']),lang)}", sd))
+    elif product == "imov":
+        els.append(Paragraph("Número de Imóvel / Property Number", ss))
+        els.append(Paragraph(f"Número reduzido: {data['life_path']} — {tr(str(data['life_path']),lang)}", sd))
+    if product in ("pdf","free","emp","art","prem"):
+        els.append(Spacer(1, 10))
+        els.append(Paragraph(tr("letter", lang), ss))
+        det = analyze_name_detail(name)
+        els.append(Paragraph(", ".join([f"{d['letra']}={d['valor']}" for d in det]), sd))
+        els.append(Spacer(1, 4))
+        els.append(Paragraph(f"<i>{tr('monique', lang)}</i>", sf))
+    els.append(Spacer(1, 20))
+    els.append(Paragraph("A1ELOS Assessoria e Consultoria", sf))
+    doc.build(els)
+    return path
 
-    title_style = ParagraphStyle("Title", parent=styles["Title"], fontSize=24,
-                                 spaceAfter=10, textColor=colors.HexColor("#C9A94E"),
-                                 alignment=1, fontName="Helvetica-Bold")
-    name_style = ParagraphStyle("Name", parent=styles["Normal"], fontSize=14,
-                                spaceAfter=4, textColor=colors.white,
-                                alignment=1, fontName="Helvetica")
-    subtitle_style = ParagraphStyle("Subtitle", parent=styles["Normal"], fontSize=10,
-                                    spaceAfter=20, textColor=colors.grey,
-                                    alignment=1, fontName="Helvetica")
-    section_style = ParagraphStyle("Section", parent=styles["Normal"], fontSize=14,
-                                   spaceBefore=14, spaceAfter=6,
-                                   textColor=colors.HexColor("#C9A94E"),
-                                   fontName="Helvetica-Bold")
-    desc_style = ParagraphStyle("Desc", parent=styles["Normal"], fontSize=10,
-                                spaceAfter=10, textColor=colors.white,
-                                fontName="Helvetica", leading=14)
-
-    elements = []
-    elements.append(Paragraph("Mapa Numerológico", title_style))
-    elements.append(Paragraph(f"<b>Nome:</b> {name}", name_style))
-    elements.append(Paragraph(f"<b>Data de Nascimento:</b> {birth_date_str}", subtitle_style))
-    elements.append(Spacer(1, 10))
-
-    # Tabela resumo
-    table_data = [
-        ["Número", "Valor", "Significado"],
-        ["Caminho de Vida", str(data["life_path"]), "Sua missão de vida"],
-        ["Expressão", str(data["expression"]), "Seus talentos"],
-        ["Desejo da Alma", str(data["soul_urge"]), "Seus desejos internos"],
-        ["Personalidade", str(data["personality"]), "Como os outros veem"],
-        ["Destino", str(data["destiny"]), "Seu propósito"]
-    ]
-    t = Table(table_data, colWidths=[140, 60, 240])
-    t.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#C9A94E")),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("FONTSIZE", (0, 0), (-1, -1), 10),
-        ("GRID", (0, 0), (-1, -1), 1, colors.grey),
-        ("ALIGN", (1, 0), (1, -1), "CENTER"),
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("TEXTCOLOR", (0, 1), (-1, -1), colors.white),
-        ("BACKGROUND", (0, 1), (-1, -1), colors.HexColor("#1a1a1a"))
-    ]))
-    elements.append(t)
-    elements.append(Spacer(1, 20))
-
-    # Interpretações personalizadas
-    elements.append(Paragraph("Interpretações Personalizadas", section_style))
-    elements.append(Spacer(1, 6))
-
-    interpretacoes = [
-        ("🌈 Caminho de Vida", data["life_path"], get_life_path_text(data["life_path"])),
-        ("🎯 Expressão", data["expression"], get_expression_text(data["expression"])),
-        ("💖 Desejo da Alma", data["soul_urge"], get_soul_urge_text(data["soul_urge"])),
-        ("👤 Personalidade", data["personality"], get_personality_text(data["personality"])),
-        ("🌟 Destino", data["destiny"], get_destiny_text(data["destiny"]))
-    ]
-
-    for titulo, num, texto in interpretacoes:
-        elements.append(Paragraph(f"<b>{titulo} — Número {num}</b>", section_style))
-        elements.append(Paragraph(texto, desc_style))
-        elements.append(Spacer(1, 4))
-
-    elements.append(Spacer(1, 20))
-    footer_style = ParagraphStyle("Footer", parent=styles["Normal"], fontSize=8,
-                                  textColor=colors.grey, alignment=1, fontName="Helvetica")
-    elements.append(Paragraph("Gerado por A1ELOS Assessoria e Consultoria | Mapa Numerológico Personalizado", footer_style))
-
-    doc.build(elements)
-    return pdf_path
-
-def send_email(to_email, subject, content, attachment_path=None):
-    if not SENDGRID_API_KEY:
-        logger.warning("SendGrid not configured")
-        return False
+def send_email(to, subject, content, attach=None):
+    if not SENDGRID_API_KEY: return False
     try:
         sg = SendGridAPIClient(SENDGRID_API_KEY)
-        mail = Mail(
-            from_email=Email(FROM_EMAIL, "Mapa Numerológico"),
-            to_emails=To(to_email),
-            subject=subject,
-            plain_text_content=Content("text/plain", content)
-        )
-        if attachment_path and os.path.exists(attachment_path):
-            with open(attachment_path, "rb") as f:
-                data = f.read()
-            import base64
-            encoded = base64.b64encode(data).decode()
-            from sendgrid.helpers.mail import Attachment, FileContent, FileName, FileType, Disposition
-            attachment = Attachment(
-                FileContent(encoded),
-                FileName("Mapa_Numerologico.pdf"),
-                FileType("application/pdf"),
-                Disposition("attachment")
-            )
-            mail.attachment = attachment
-        response = sg.send(mail)
-        logger.info(f"SendGrid response: {response.status_code}")
-        return True
+        mail = Mail(from_email=Email(FROM_EMAIL, "Mapa Numerológico A1ELOS"), to_emails=To(to), subject=subject, plain_text_content=Content("text/plain", content))
+        if attach and os.path.exists(attach):
+            with open(attach, "rb") as f:
+                enc = base64.b64encode(f.read()).decode()
+            mail.attachment = Attachment(FileContent(enc), FileName("Mapa_Numerologico.pdf"), FileType("application/pdf"), Disposition("attachment"))
+        sg.send(mail); return True
     except Exception as e:
-        logger.error(f"SendGrid error: {e}")
-        return False
+        logger.error(f"SendGrid: {e}"); return False
 
+# ===== ENDPOINTS =====
 @app.get("/", response_class=HTMLResponse)
 def root():
-    return INDEX_HTML
+    p = os.path.join(os.path.dirname(__file__), "index.html")
+    if os.path.exists(p):
+        with open(p, "r", encoding="utf-8") as f: return HTMLResponse(f.read())
+    return HTMLResponse("<h1>Numerologia API - A1ELOS</h1>")
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "service": "numerologia-api", "version": "1.4.0"}
+    return {"status":"ok","service":"numerologia-api","version":"2.2.0"}
 
 @app.post("/calculate")
-def calculate(req: CalculateRequest):
+def calculate(req: PayRequest):
     db = SessionLocal()
     try:
-        result = calc_numerology(req.name, req.birth_date)
-        calc_id = str(uuid.uuid4())[:8]
-        calc = Calculation(id=calc_id, name=req.name, birth_date=req.birth_date,
-                           email=req.email, **result)
-        db.add(calc)
-        db.commit()
-        return {"id": calc_id, **result}
-    except Exception as e:
-        raise HTTPException(400, str(e))
-    finally:
-        db.close()
-
-@app.post("/checkout")
-def checkout(req: CheckoutRequest):
-    db = SessionLocal()
-    try:
-        order_id = str(uuid.uuid4())[:12]
-        order = Order(id=order_id, email=req.email, product=req.product,
-                      price=req.price, calculation_id=req.calculation_id)
-        db.add(order)
-        db.commit()
-        return {"order_id": order_id, "status": "created"}
-    except Exception as e:
-        raise HTTPException(400, str(e))
-    finally:
-        db.close()
+        res = calc_numerology(req.name, req.birth_date)
+        cid = uuid.uuid4().hex[:8]
+        db.add(Calculation(id=cid, name=req.name, birth_date=req.birth_date, email=req.email, **res))
+        db.commit(); return {"id": cid, **res}
+    except Exception as e: raise HTTPException(400, str(e))
+    finally: db.close()
 
 @app.post("/api/pay/stripe")
-def create_stripe_payment(req: MercadoPagoRequest):
-    if not STRIPE_SECRET_KEY:
-        raise HTTPException(503, "Stripe não configurado")
+def pay_stripe(req: PayRequest):
+    if not STRIPE_SECRET_KEY: raise HTTPException(503, "Stripe não configurado")
     try:
-        checkout = stripe.checkout.Session.create(
-            mode='payment',
-            payment_method_types=['card'],
-            line_items=[{
-                'price_data': {
-                    'currency': 'brl',
-                    'product_data': {'name': req.product},
-                    'unit_amount': int(req.price * 100),
-                },
-                'quantity': 1,
-            }],
-            customer_email=req.email,
-            metadata={
-                "product": req.product,
-                "calculation_id": req.calculation_id or ""
-            },
-            success_url=f"{BASE_URL}/api/pay/success?name={req.name}&birth_date={req.birth_date or ''}&email={req.email}&session_id={{CHECKOUT_SESSION_ID}}",
-            cancel_url=f"{BASE_URL}/api/pay/failure",
-        )
-        return {"payment_url": checkout.url, "id": checkout.id}
-    except Exception as e:
-        logger.error(f"Stripe error: {e}")
-        raise HTTPException(500, str(e))
+        s = stripe.checkout.Session.create(mode='payment', payment_method_types=['card'],
+            line_items=[{'price_data':{'currency':'brl','product_data':{'name':req.product},'unit_amount':int(req.price*100)},'quantity':1}],
+            customer_email=req.email, metadata={"product":req.product, "calculation_id":req.calculation_id or ""},
+            success_url=f"{BASE_URL}/api/pay/success?name={req.name}&birth_date={req.birth_date or ''}&email={req.email}&product={req.product}&lang={req.lang}&session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{BASE_URL}/api/pay/failure")
+        return {"payment_url": s.url, "id": s.id}
+    except Exception as e: raise HTTPException(500, str(e))
+
+@app.post("/api/pay/mercadopago")
+def pay_mp(req: PayRequest):
+    if not sdk_mp: raise HTTPException(503, "Mercado Pago não configurado")
+    try:
+        pref = sdk_mp.preference().create({
+            "items":[{"title":req.product,"quantity":1,"currency_id":"BRL","unit_price":float(req.price)}],
+            "payer":{"email":req.email,"name":req.name.split(" ")[0],"surname":" ".join(req.name.split(" ")[1:]) if " " in req.name else "","identification":{"type":"CPF","number":"12345678909"}},
+            "back_urls":{"success":f"{BASE_URL}/api/pay/success?name={req.name}&birth_date={req.birth_date or ''}&email={req.email}&product={req.product}&lang={req.lang}","failure":f"{BASE_URL}/api/pay/failure","pending":f"{BASE_URL}/api/pay/pending"},
+            "auto_return":"approved","payment_methods":{"installments":12},"notification_url":f"{BASE_URL}/api/webhook/mercadopago"})
+        return {"payment_url": pref["response"]["init_point"], "id": pref["response"]["id"]}
+    except Exception as e: raise HTTPException(500, str(e))
 
 @app.get("/api/pay/success")
 def pay_success(request: Request):
-    name = request.query_params.get("name", "")
-    birth_date = request.query_params.get("birth_date", "")
-    email = request.query_params.get("email", "")
-    session_id = request.query_params.get("session_id", "")
-    processed = False
-
-    if name and birth_date and email:
+    name = request.query_params.get("name","")
+    bd = request.query_params.get("birth_date","")
+    email = request.query_params.get("email","")
+    product = request.query_params.get("product","pdf")
+    lang = request.query_params.get("lang","pt")
+    ok = False
+    if name and email:
         try:
-            data = calc_numerology(name, birth_date)
-            pdf_path = generate_pdf(data, name, birth_date)
-            sent = send_email(email, "Seu Mapa Numerológico está pronto!",
-                              "Segue em anexo seu mapa numerológico completo com interpretações personalizadas.", pdf_path)
-            logger.info(f"Email sent to {email}: {sent}")
-            if os.path.exists(pdf_path):
-                os.remove(pdf_path)
-            processed = True
-        except Exception as e:
-            logger.error(f"Pay success error: {e}")
-
-    if processed:
-        return HTMLResponse(
-            "<html><body style='background:#0a0a0a;color:#C9A94E;"
-            "display:flex;align-items:center;justify-content:center;"
-            "min-height:100vh;font-family:sans-serif'>"
-            "<div style='text-align:center'><h1>✅ Pagamento Confirmado!</h1>"
-            "<p style='color:#aaa'>Seu PDF foi enviado por e-mail em instantes.</p>"
-            "<a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>"
-        )
-    return HTMLResponse(
-        "<html><body style='background:#0a0a0a;color:#e74c3c;"
-        "display:flex;align-items:center;justify-content:center;"
-        "min-height:100vh;font-family:sans-serif'>"
-        "<div style='text-align:center'><h1>❌ Erro ao processar</h1>"
-        "<p style='color:#aaa'>Não foi possível concluir.</p>"
-        "<a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>"
-    )
+            data = calc_numerology(name, bd)
+            pdf = generate_pdf(data, name, bd, product, lang)
+            send_email(email, f"{tr('title',lang)} — {tr('subtitle',lang)}", "Segue em anexo seu mapa numerológico completo.", pdf)
+            if os.path.exists(pdf): os.remove(pdf)
+            ok = True
+        except Exception as e: logger.error(f"Success: {e}")
+    if ok:
+        return HTMLResponse("<html><body style='background:#0a0a0a;color:#C9A94E;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>✅ Pagamento Confirmado!</h1><p style='color:#aaa'>Seu PDF foi enviado por e-mail.</p><a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>")
+    return HTMLResponse("<html><body style='background:#0a0a0a;color:#e74c3c;display:flex;align-items:center;justify-content:center;min-height:100vh'><h1>❌ Erro</h1><a href='/'>Voltar</a></body></html>")
 
 @app.get("/api/pay/failure")
 def pay_failure():
-    return HTMLResponse(
-        "<html><body style='background:#0a0a0a;color:#e74c3c;"
-        "display:flex;align-items:center;justify-content:center;"
-        "min-height:100vh;font-family:sans-serif'>"
-        "<div style='text-align:center'><h1>❌ Pagamento não concluído</h1>"
-        "<p style='color:#aaa'>Tente novamente.</p>"
-        "<a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>"
-    )
+    return HTMLResponse("<html><body style='background:#0a0a0a;color:#e74c3c;display:flex;align-items:center;justify-content:center;min-height:100vh'><h1>❌ Pagamento não concluído</h1><a href='/'>Voltar</a></body></html>")
 
 @app.get("/api/pay/pending")
 def pay_pending():
-    return HTMLResponse(
-        "<html><body style='background:#0a0a0a;color:#f39c12;"
-        "display:flex;align-items:center;justify-content:center;"
-        "min-height:100vh;font-family:sans-serif'>"
-        "<div style='text-align:center'><h1>⏳ Pagamento Pendente</h1>"
-        "<p style='color:#aaa'>Aguardando confirmação.</p>"
-        "<a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>"
-    )
+    return HTMLResponse("<html><body style='background:#0a0a0a;color:#f39c12;display:flex;align-items:center;justify-content:center;min-height:100vh'><h1>⏳ Pendente</h1><a href='/'>Voltar</a></body></html>")
+
+@app.post("/api/consult/name-analysis")
+def consult_name(req: PayRequest):
+    data = calc_numerology(req.name, req.birth_date)
+    return {"name":req.name,"numbers":data,"letter_analysis":analyze_name_detail(req.name)}
+
+@app.post("/api/consult/electoral")
+def consult_electoral(req: PayRequest):
+    data = calc_numerology(req.name, req.birth_date)
+    return {"name":req.name,"expression":data["expression"],"life_path":data["life_path"],"recommendation":"Nome de urna ideal soma 8.","deputy_federal":"4 dígitos","deputy_state":"5 dígitos"}
 
 if __name__ == "__main__":
     import uvicorn
