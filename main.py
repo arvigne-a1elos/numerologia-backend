@@ -71,6 +71,15 @@ class Order(Base):
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Numerologia API")
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 HTML_PATH = os.path.join(os.path.dirname(__file__), "index.html")
 INDEX_HTML = """<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Mapa Numerológico</title></head><body style="background:#0a0a0a;color:#fff;text-align:center;padding:40px;font-family:sans-serif"><h1 style="color:#C9A94E">🔮 Mapa Numerológico</h1><p style="color:#888">Calcule seu mapa numerológico gratuitamente.</p><p style="color:#555;font-size:0.9rem">API ativa.</p></body></html>"""
