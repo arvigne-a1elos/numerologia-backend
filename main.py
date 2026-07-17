@@ -106,6 +106,7 @@ class MercadoPagoRequest(BaseModel):
     product: str
     price: float
     calculation_id: Optional[str] = None
+    birth_date: Optional[str] = None
 
 def reduce_to_single(n):
     while n > 9 and n not in (11, 22, 33):
@@ -140,8 +141,8 @@ def calc_numerology(name, birth_date):
         "destiny": destiny
     }
 
-def generate_pdf(calc, name):
-    pdf_path = f"/tmp/mapa_{calc.id}.pdf"
+def generate_pdf(data, name, birth_date_str):
+    pdf_path = f"/tmp/mapa_{uuid.uuid4().hex[:8]}.pdf"
     doc = SimpleDocTemplate(pdf_path, pagesize=A4)
     styles = getSampleStyleSheet()
     elements = []
@@ -150,17 +151,17 @@ def generate_pdf(calc, name):
     normal_style = ParagraphStyle("Normal", parent=styles["Normal"], fontSize=12, spaceAfter=8)
     elements.append(Paragraph("Mapa Numerológico", title_style))
     elements.append(Paragraph(f"<b>Nome:</b> {name}", normal_style))
-    elements.append(Paragraph(f"<b>Data:</b> {calc.birth_date}", normal_style))
+    elements.append(Paragraph(f"<b>Data:</b> {birth_date_str}", normal_style))
     elements.append(Spacer(1, 20))
-    data = [
+    table_data = [
         ["Número", "Valor"],
-        ["Caminho de Vida", str(calc.life_path)],
-        ["Expressão", str(calc.expression)],
-        ["Desejo da Alma", str(calc.soul_urge)],
-        ["Personalidade", str(calc.personality)],
-        ["Destino", str(calc.destiny)]
+        ["Caminho de Vida", str(data["life_path"])],
+        ["Expressão", str(data["expression"])],
+        ["Desejo da Alma", str(data["soul_urge"])],
+        ["Personalidade", str(data["personality"])],
+        ["Destino", str(data["destiny"])]
     ]
-    t = Table(data, colWidths=[200, 100])
+    t = Table(table_data, colWidths=[200, 100])
     t.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#C9A94E")),
         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
@@ -197,7 +198,8 @@ def send_email(to_email, subject, content, attachment_path=None):
                 Disposition("attachment")
             )
             mail.attachment = attachment
-        sg.send(mail)
+        response = sg.send(mail)
+        logger.info(f"SendGrid response: {response.status_code}")
         return True
     except Exception as e:
         logger.error(f"SendGrid error: {e}")
@@ -209,7 +211,7 @@ def root():
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "service": "numerologia-api", "version": "1.2.0"}
+    return {"status": "ok", "service": "numerologia-api", "version": "1.3.0"}
 
 @app.post("/calculate")
 def calculate(req: CalculateRequest):
@@ -263,7 +265,7 @@ def create_stripe_payment(req: MercadoPagoRequest):
                 "product": req.product,
                 "calculation_id": req.calculation_id or ""
             },
-            success_url=f"{BASE_URL}/api/pay/success?calc_id={req.calculation_id or ''}&email={req.email}&session_id={{CHECKOUT_SESSION_ID}}",
+            success_url=f"{BASE_URL}/api/pay/success?name={req.name}&birth_date={req.birth_date or ''}&email={req.email}&session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=f"{BASE_URL}/api/pay/failure",
         )
         return {"payment_url": checkout.url, "id": checkout.id}
@@ -273,33 +275,24 @@ def create_stripe_payment(req: MercadoPagoRequest):
 
 @app.get("/api/pay/success")
 def pay_success(request: Request):
-    calc_id = request.query_params.get("calc_id", "")
+    name = request.query_params.get("name", "")
+    birth_date = request.query_params.get("birth_date", "")
     email = request.query_params.get("email", "")
     session_id = request.query_params.get("session_id", "")
     processed = False
 
-    if session_id:
-        db = SessionLocal()
+    if name and birth_date and email:
         try:
-            order_id = str(uuid.uuid4())[:12]
-            order = Order(id=order_id, email=email or "unknown", product="Mapa Numerológico",
-                          price=0, calculation_id=calc_id or None,
-                          status="paid", payment_method="stripe", payment_id=session_id)
-            db.add(order)
-            if calc_id:
-                calc = db.query(Calculation).filter(Calculation.id == calc_id).first()
-                if calc and email:
-                    pdf_path = generate_pdf(calc, calc.name)
-                    send_email(email, "Seu Mapa Numerológico está pronto!",
-                               "Segue em anexo seu mapa numerológico completo.", pdf_path)
-                    if os.path.exists(pdf_path):
-                        os.remove(pdf_path)
-            db.commit()
+            data = calc_numerology(name, birth_date)
+            pdf_path = generate_pdf(data, name, birth_date)
+            sent = send_email(email, "Seu Mapa Numerológico está pronto!",
+                              "Segue em anexo seu mapa numerológico completo.", pdf_path)
+            logger.info(f"Email sent to {email}: {sent}")
+            if os.path.exists(pdf_path):
+                os.remove(pdf_path)
             processed = True
         except Exception as e:
             logger.error(f"Pay success error: {e}")
-        finally:
-            db.close()
 
     if processed:
         return HTMLResponse(
