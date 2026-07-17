@@ -1,319 +1,260 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapa Numerológico | A1ELOS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        :root { --gold: #C9A94E; --dark: #0a0a0a; --card-bg: #111; --text-gray: #a0a0a0; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: var(--dark); color: #fff; overflow-x: hidden; line-height: 1.6; }
-        [dir="rtl"] { direction: rtl; text-align: right; }
-        
-        .lang-wrapper { position: fixed; top: 0; width: 100%; z-index: 1000; background: rgba(10,10,10,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #222; padding: 8px 0; }
-        .lang-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: center; align-items: center; gap: 5px; flex-wrap: wrap; padding: 0 10px; }
-        .lang-btn { background: transparent; border: 1px solid #333; color: #aaa; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 11px; transition: all 0.3s ease; display: flex; align-items: center; gap: 4px; }
-        .lang-btn .flag { font-size: 14px; }
-        .lang-btn:hover, .lang-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(201,169,78,0.1); }
-        
-        .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 120px 20px 60px; background: radial-gradient(ellipse at center, #1a1a1a 0%, #0a0a0a 70%); }
-        .logo-img { width: 160px; height: 160px; margin-bottom: 30px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold); }
-        h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.2rem, 7vw, 4.5rem); color: var(--gold); margin-bottom: 8px; letter-spacing: 0.05em; text-transform: uppercase; }
-        .subtitle { font-size: clamp(1rem, 2vw, 1.5rem); color: var(--text-gray); margin-bottom: 25px; font-weight: 300; }
-        .hero-desc { max-width: 650px; margin: 0 auto 35px; color: #888; font-size: 1.05rem; font-weight: 300; }
-        
-        .btn { display: inline-block; padding: 16px 38px; background: linear-gradient(135deg, var(--gold), #b8942e); color: #0a0a0a; text-decoration: none; font-weight: 600; border-radius: 50px; letter-spacing: 0.08em; transition: all 0.3s ease; border: none; font-family: 'Inter', sans-serif; font-size: 0.9rem; text-transform: uppercase; cursor: pointer; }
-        .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(201,169,78,0.3); }
-        .btn-outline { background: transparent; color: var(--gold); border: 2px solid var(--gold); margin-left: 12px; }
-        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-        
-        section { padding: 80px 20px; max-width: 1100px; margin: 0 auto; }
-        .section-header { text-align: center; margin-bottom: 50px; }
-        .section-header h2 { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem, 3vw, 2.5rem); color: var(--gold); margin-bottom: 12px; }
-        .form-section { max-width: 600px; margin: 0 auto; background: #111; padding: 40px; border-radius: 20px; border: 1px solid #222; }
-        .form-group { margin-bottom: 20px; text-align: left; }
-        .form-group label { display: block; color: var(--text-gray); font-size: 0.85rem; margin-bottom: 8px; }
-        .form-group input { width: 100%; padding: 14px; background: #1a1a1a; border: 1px solid #333; border-radius: 10px; color: #fff; outline: none; transition: border 0.3s; font-size: 1rem; }
-        .form-group input:focus { border-color: var(--gold); }
-        
-        .result-card { margin-top: 30px; display: none; animation: fadeIn 0.6s ease; }
-        .result-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; }
-        .num-box { background: #1a1a1a; padding: 25px; border-radius: 15px; border: 1px solid #222; text-align: center; }
-        .num-box .val { font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--gold); font-weight: 700; }
-        .num-box .label { font-size: 0.75rem; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; }
-        .num-box .desc { font-size: 0.8rem; color: #777; margin-top: 8px; }
-        
-        .pricing-section { margin-top: 30px; text-align: center; }
-        .pricing-section h3 { color: var(--gold); font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 20px; }
-        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px; }
-        .pricing-card { background: #1a1a1a; border: 1px solid #333; border-radius: 15px; padding: 30px; text-align: center; transition: border 0.3s; }
-        .pricing-card:hover { border-color: var(--gold); }
-        .pricing-card h4 { color: var(--gold); font-size: 1.1rem; margin-bottom: 10px; }
-        .pricing-card .price { font-family: 'Playfair Display', serif; font-size: 2rem; color: #fff; margin: 15px 0; }
-        .pricing-card .price span { font-size: 1rem; color: #888; }
-        .pricing-card ul { list-style: none; padding: 0; margin: 15px 0; text-align: left; }
-        .pricing-card ul li { color: #aaa; padding: 4px 0; font-size: 0.85rem; }
-        .pricing-card ul li::before { content: "✓ "; color: var(--gold); }
-        .btn-small { padding: 10px 25px; font-size: 0.8rem; }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        footer { text-align: center; padding: 60px 20px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
-        footer a { color: var(--gold); text-decoration: none; }
-        
-        .loading-spinner { display: none; width: 40px; height: 40px; border: 3px solid #333; border-top: 3px solid var(--gold); border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .status-msg { margin-top: 15px; font-size: 0.9rem; color: #aaa; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapa Numerológico | A1ELOS</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#C9A94E;--dark:#0a0a0a;--card-bg:#111;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:var(--dark);color:#fff;overflow-x:hidden;line-height:1.6;}
+[dir="rtl"]{direction:rtl;text-align:right;}
+.lang-wrapper{position:fixed;top:0;width:100%;z-index:1000;background:rgba(10,10,10,0.85);backdrop-filter:blur(12px);border-bottom:1px solid #333;padding:8px 0;}
+.lang-container{max-width:1200px;margin:0 auto;display:flex;justify-content:center;align-items:center;gap:4px;flex-wrap:wrap;padding:0 8px;}
+.lang-btn{background:transparent;border:1px solid #333;color:#aaa;padding:3px 7px;border-radius:5px;cursor:pointer;font-size:10px;transition:all .3s;display:flex;align-items:center;gap:3px;font-family:'Inter',sans-serif;}
+.lang-btn .flag{font-size:13px;}
+.lang-btn:hover,.lang-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(201,169,78,0.1);}
+nav.sections{position:fixed;top:37px;width:100%;z-index:999;background:rgba(10,10,10,0.9);backdrop-filter:blur(12px);border-bottom:1px solid #222;padding:5px 0;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;}
+nav.sections a{color:#888;text-decoration:none;font-size:.65rem;transition:all .3s;padding:3px 8px;border-radius:5px;font-family:'Inter',sans-serif;text-transform:uppercase;letter-spacing:.05em;}
+nav.sections a:hover{color:var(--gold);background:rgba(201,169,78,0.08);}
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:140px 20px 60px;background:radial-gradient(ellipse at center,#1a1a1a 0%,#0a0a0a 70%);}
+.logo-img{width:130px;height:130px;margin-bottom:22px;border-radius:50%;object-fit:cover;}
+h1{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,5.5vw,3.5rem);color:var(--gold);margin-bottom:6px;letter-spacing:.05em;}
+.subtitle{font-size:clamp(.9rem,1.6vw,1.2rem);color:#a0a0a0;margin-bottom:18px;font-weight:300;}
+.hero-desc{max-width:580px;margin:0 auto 25px;color:#888;font-size:.95rem;font-weight:300;}
+.btn{display:inline-block;padding:11px 25px;background:linear-gradient(135deg,var(--gold),#b8942e);color:#0a0a0a;text-decoration:none;font-weight:600;border-radius:50px;letter-spacing:.08em;transition:all .3s;border:none;font-family:'Inter',sans-serif;font-size:.75rem;text-transform:uppercase;cursor:pointer;}
+.btn:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(201,169,78,0.3);}
+.btn-sm{padding:7px 14px;font-size:.65rem;}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;}
+.btn-outline{background:transparent;color:var(--gold);border:2px solid var(--gold);}
+.btn-outline:hover{background:rgba(201,169,78,0.1);box-shadow:none;}
+section{padding:60px 20px;max-width:1100px;margin:0 auto;}
+.section-header{text-align:center;margin-bottom:35px;}
+.section-header h2{font-family:'Playfair Display',serif;font-size:clamp(1.4rem,2.5vw,2rem);color:var(--gold);margin-bottom:8px;}
+.section-header p{color:#888;font-size:.9rem;font-weight:300;}
+.form-section{max-width:540px;margin:0 auto;background:#111;padding:30px;border-radius:18px;border:1px solid #222;}
+.form-group{margin-bottom:16px;text-align:left;}
+.form-group label{display:block;color:#a0a0a0;font-size:.75rem;margin-bottom:5px;}
+.form-group input{width:100%;padding:11px;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;font-size:.9rem;outline:none;transition:border .3s;font-family:'Inter',sans-serif;}
+.form-group input:focus{border-color:var(--gold);}
+.form-row{display:flex;gap:12px;}
+.form-row .form-group{flex:1;}
+@media(max-width:500px){.form-row{flex-direction:column;gap:0;}}
+.result-card{margin-top:22px;display:none;animation:fadeIn .6s ease;}
+.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:12px;}
+.num-box{background:#1a1a1a;padding:14px 8px;border-radius:10px;border:1px solid #222;text-align:center;transition:all .3s;}
+.num-box:hover{border-color:var(--gold);}
+.num-box .val{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--gold);font-weight:700;}
+.num-box .label{font-size:.5rem;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-top:3px;}
+.pricing-table{width:100%;margin-top:20px;border-collapse:collapse;font-size:.75rem;}
+.pricing-table th{color:var(--gold);padding:10px 6px;border-bottom:2px solid var(--gold);text-align:left;font-family:'Playfair Display',serif;font-size:.8rem;letter-spacing:.05em;}
+.pricing-table th:last-child,.pricing-table td:last-child{text-align:center;}
+.pricing-table td{padding:8px 6px;border-bottom:1px solid #222;color:#ccc;vertical-align:middle;}
+.pricing-table tr:hover td{background:rgba(201,169,78,0.03);}
+.pricing-table .price-cell{color:var(--gold);font-weight:600;text-align:center;}
+.pricing-table .free-cell{color:#4caf50;font-weight:600;text-align:center;}
+.pricing-table .num{color:#888;font-size:.65rem;text-align:center;}
+.pricing-table .badge{display:inline-block;background:var(--gold);color:#0a0a0a;padding:1px 7px;border-radius:10px;font-size:.55rem;font-weight:600;}
+.pricing-table .buy-btn{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:2px 10px;border-radius:15px;cursor:pointer;font-size:.6rem;transition:all .3s;font-family:'Inter',sans-serif;}
+.pricing-table .buy-btn:hover{background:var(--gold);color:#0a0a0a;}
+.pricing-table .highlight{border-left:3px solid var(--gold);}
+.pricing-table .row-num{color:#555;text-align:center;font-size:.65rem;}
+.product-desc{font-size:.65rem;color:#888;line-height:1.2;}
+.product-name{font-weight:500;color:#fff;font-size:.75rem;}
+.energy-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:22px;}
+.energy-card{background:#111;border:1px solid #222;border-radius:12px;padding:22px 16px;text-align:center;transition:all .3s;}
+.energy-card:hover{border-color:var(--gold);transform:translateY(-3px);}
+.energy-card .big-num{font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:700;color:var(--gold);margin-bottom:4px;}
+.energy-card .e-name{color:var(--gold);font-weight:600;font-size:.8rem;margin-bottom:3px;}
+.energy-card .e-for{color:#888;font-size:.65rem;line-height:1.4;}
+.energy-card .e-place{background:rgba(201,169,78,0.08);padding:6px;border-radius:6px;margin-top:8px;font-size:.6rem;color:#aaa;}
+.energy-hero{background:linear-gradient(135deg,#1a1a1a 0%,#0a0a0a 50%,#1a1a1a 100%);border:1px solid rgba(201,169,78,0.2);border-radius:18px;padding:30px;margin:22px 0;text-align:center;}
+.energy-hero .big-icon{font-size:2.2rem;margin-bottom:6px;}
+.energy-hero h3{color:var(--gold);font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:6px;}
+.energy-hero p{color:#aaa;font-size:.78rem;line-height:1.5;max-width:650px;margin:0 auto;}
+.legal-note{text-align:center;color:#555;font-size:.6rem;margin-top:8px;font-style:italic;}
+.order-msg{display:none;padding:12px;background:#1a2a1a;border:1px solid var(--gold);border-radius:10px;margin-top:18px;text-align:center;animation:fadeIn .5s;}
+.order-msg h4{color:var(--gold);margin-bottom:4px;font-size:.85rem;}
+.order-msg p{color:#888;font-size:.75rem;}
+#loadingMsg{display:none;padding:12px;background:#1a1a1a;border:1px solid var(--gold);border-radius:10px;margin-top:18px;text-align:center;}
+.guarantee-note{text-align:center;color:#555;font-size:.65rem;margin-top:10px;}
+footer{text-align:center;padding:30px 20px;color:#555;font-size:.75rem;}
+footer a{color:var(--gold);text-decoration:none;}
+.badge-world{display:inline-block;background:var(--gold);color:#0a0a0a;padding:3px 14px;border-radius:16px;font-size:.55rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:600px){nav.sections{top:36px;gap:5px;padding:3px 0;}nav.sections a{font-size:.55rem;padding:2px 5px;}section{padding:45px 14px;}}
+</style>
 </head>
 <body>
-
-<nav class="lang-wrapper">
-    <div class="lang-container" id="langSelector"></div>
+<nav class="lang-wrapper"><div class="lang-container" id="langSelector"></div></nav>
+<nav class="sections">
+<a href="#inicio" data-i18n="n1">🏛 Início</a>
+<a href="#calc" data-i18n="n2">🔮 Mapa</a>
+<a href="#eleitoral" data-i18n="n3">🗳️ Eleitoral</a>
+<a href="#energias" data-i18n="n4">✨ Energias</a>
 </nav>
-
-<section class="hero">
-    <img src="https://generated-images.adapta.one/arvigne%40gmail.com/019f56cb-b9e4-7644-9dd8-5d14c5261d46/2026-07-14T13-27-24-531Z_Original_user_intent_A_premium_minimalist_logo_s.png" class="logo-img" alt="A1ELOS">
-    <h1 data-i18n="h_title">Mapa Numerológico</h1>
-    <p class="subtitle" data-i18n="h_sub">A ciência dos números aplicada ao seu destino</p>
-    <p class="hero-desc" data-i18n="h_desc">Descubra sua missão de vida, talentos ocultos e desafios através da numerologia pitagórica avançada.</p>
-    <button class="btn" onclick="document.getElementById('calc').scrollIntoView({behavior:'smooth'})" data-i18n="h_btn">Começar Agora</button>
+<section id="inicio" class="hero">
+<div class="badge-world" data-i18n="badge">🌍 A PLATAFORMA DE NUMEROLOGIA MAIS COMPLETA DO MUNDO</div>
+<img src="https://generated-images.adapta.one/arvigne%40gmail.com/019f56cb-b9e4-7644-9dd8-5d14c5261d46/2026-07-14T13-27-24-531Z_Original_user_intent_A_premium_minimalist_logo_s.png" class="logo-img" alt="Mapa Numerológico">
+<h1 data-i18n="h1">MAPA NUMEROLÓGICO</h1>
+<p class="subtitle" data-i18n="sub">A plataforma de numerologia mais completa do mundo — em 12 idiomas</p>
+<p class="hero-desc" data-i18n="desc">Mapa pessoal, validação empresarial, nome artístico, soluções eleitorais, planejamento de nomes, energia de imóveis e muito mais.</p>
+<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+<button class="btn" onclick="document.getElementById('calc').scrollIntoView({behavior:'smooth'})" data-i18n="hb">✦ GERAR MEU MAPA GRÁTIS</button>
+<a class="btn btn-outline" href="#eleitoral" data-i18n="hb2">🗳️ CANDIDATOS</a>
+</div>
 </section>
-
 <section id="calc">
-    <div class="section-header">
-        <h2 data-i18n="c_title">Calcule seu Mapa</h2>
-        <p data-i18n="c_sub">Insira seus dados reais para um cálculo preciso</p>
-    </div>
-    <div class="form-section">
-        <form id="nForm" onsubmit="event.preventDefault(); handleCalc();">
-            <div class="form-group">
-                <label data-i18n="f_name">Nome Completo</label>
-                <input type="text" id="name" required placeholder="Ex: João Silva">
-            </div>
-            <div style="display:flex; gap:15px; flex-wrap:wrap;">
-                <div class="form-group" style="flex:1; min-width:200px;">
-                    <label data-i18n="f_date">Data de Nascimento</label>
-                    <input type="date" id="date" required>
-                </div>
-                <div class="form-group" style="flex:1; min-width:200px;">
-                    <label data-i18n="f_email">E-mail (Obrigatório para PDF)</label>
-                    <input type="email" id="email" required placeholder="seu@email.com">
-                </div>
-            </div>
-            <button type="submit" class="btn" id="sBtn" style="width:100%;" data-i18n="f_btn">Calcular Mapa</button>
-        </form>
-
-        <div id="res" class="result-card">
-            <div class="result-grid" id="rGrid"></div>
-            <div class="pricing-section">
-                <h3 data-i18n="p_title">Escolha seu pacote</h3>
-                <div class="pricing-grid">
-                    <div class="pricing-card">
-                        <h4 data-i18n="p_basic_title">Mapa Individual</h4>
-                        <div class="price">R$ 8<span data-i18n="p_once",00</span></div>
-                        <ul>
-                            <li data-i18n="p_basic_1">PDF completo do seu mapa</li>
-                            <li data-i18n="p_basic_2">5 números calculados</li>
-                            <li data-i18n="p_basic_3">Envio por e-mail</li>
-                        </ul>
-                        <button class="btn btn-small" onclick="handlePDF(8.00, 'Mapa Numerológico Individual')" data-i18n="p_buy">Comprar</button>
-                    </div>
-                    <div class="pricing-card">
-                        <h4 data-i18n="p_pro_title">Mapa Completo</h4>
-                        <div class="price">R$ 25<span data-i18n="p_once",00</span></div>
-                        <ul>
-                            <li data-i18n="p_pro_1">PDF completo + interpretação</li>
-                            <li data-i18n="p_pro_2">Análise detalhada de cada número</li>
-                            <li data-i18n="p_pro_3">Guia de autoconhecimento</li>
-                            <li data-i18n="p_pro_4">Envio por e-mail</li>
-                        </ul>
-                        <button class="btn btn-small" onclick="handlePDF(25.00, 'Mapa Numerológico Completo')" data-i18n="p_buy">Comprar</button>
-                    </div>
-                </div>
-            </div>
-            <div class="loading-spinner" id="spinner"></div>
-            <div class="status-msg" id="statusMsg"></div>
-        </div>
-    </div>
+<div class="section-header"><h2 data-i18n="c1">Calcule seu Mapa Numerológico</h2><p data-i18n="c2">Preencha seus dados para um cálculo preciso</p></div>
+<div class="form-section">
+<form id="nForm" onsubmit="event.preventDefault();handleCalc();">
+<div class="form-group"><label data-i18n="f1">Nome Completo</label><input type="text" id="name" required placeholder="Ex: Maria Silva"></div>
+<div class="form-row"><div class="form-group"><label data-i18n="f2">Data de Nascimento</label><input type="date" id="date" required></div><div class="form-group"><label data-i18n="f3">E-mail</label><input type="email" id="email" required placeholder="seu@email.com"></div></div>
+<button type="submit" class="btn" id="sBtn" style="width:100%;margin-top:5px" data-i18n="f4">✦ CALCULAR MEU MAPA GRÁTIS</button>
+</form>
+<div class="result-card" id="res">
+<h3 style="color:var(--gold);text-align:center;font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:4px;" data-i18n="r1">✨ Seus Números</h3>
+<p style="text-align:center;color:#888;font-size:.7rem;margin-bottom:10px;" data-i18n="r2">🔮 Mapa Individual Express — grátis na tela</p>
+<div class="result-grid" id="rGrid"></div>
+<div style="margin-top:30px;padding-top:20px;border-top:1px solid #222;">
+<h3 style="color:var(--gold);text-align:center;font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:10px;" data-i18n="p1">📄 Todos os Produtos</h3>
+<p style="text-align:center;color:#888;font-size:.7rem;margin-bottom:12px;" data-i18n="p2">Preços acessíveis para mercado nacional e internacional.</p>
+<div style="overflow-x:auto;"><table class="pricing-table"><thead><tr><th style="width:22px;">#</th><th data-i18n="t1">Produto / Serviço</th><th data-i18n="t2">O que inclui</th><th style="text-align:center;width:72px;" data-i18n="t3">Valor</th><th style="width:55px;"></th></tr></thead><tbody id="pBody"></tbody></table></div>
+<p class="guarantee-note" data-i18n="g1">✦ Pagamento seguro via Stripe ✦</p></div>
+<div id="orderMsg" class="order-msg"></div>
+<div id="loadingMsg" class="order-msg" style="display:none;border-color:#C9A94E;"><h4 data-i18n="ld">⏳ Redirecionando para pagamento...</h4></div>
+<div style="text-align:center;margin-top:15px;"><button class="btn btn-outline btn-sm" onclick="resetForm();" data-i18n="r3">⟳ NOVO CÁLCULO</button></div>
+</div></div>
 </section>
-
-<footer>
-    <p>&copy; 2026 <a href="https://a1elos.com.br">A1ELOS Assessoria e Consultoria</a>. <span data-i18n="rights">Todos os direitos reservados.</span></p>
-</footer>
-
+<section id="eleitoral">
+<div class="section-header"><h2 data-i18n="e1">🗳️ Soluções Eleitorais</h2><p data-i18n="e2">Nome de urna e número eleitoral com soma 8</p></div>
+<div class="energy-hero"><div class="big-icon">🗳️</div><h3 data-i18n="e3">Eleições a cada 2 anos</h3><p data-i18n="e4">Cientista político em numerologia eleitoral. Validamos nome de urna com soma 8 e calculamos dígitos para Dep. Federal (4) e Estadual (5), respeitando o partido.</p><p class="legal-note" style="margin-top:8px;" data-i18n="e5">† Exemplos genéricos. Partidos substituídos por X/0.</p></div>
+<div style="overflow-x:auto;"><table class="pricing-table"><thead><tr><th style="width:22px;">#</th><th data-i18n="t1">Produto / Serviço</th><th data-i18n="t2">O que inclui</th><th style="text-align:center;width:72px;" data-i18n="t3">Valor</th><th style="width:55px;"></th></tr></thead><tbody id="pBodyElec"></tbody></table></div>
+</section>
+<section id="energias">
+<div class="section-header"><h2 data-i18n="en1">✨ Energias da Vida</h2><p data-i18n="en2">Nomeie pessoas, negócios, produtos e escolha números para imóveis</p></div>
+<div class="energy-hero"><div class="big-icon">🌌</div><h3 data-i18n="en3">Tudo tem uma energia numerológica</h3><p data-i18n="en4">Nome de bebê, empresa, produto, número de casa, salão, templo, escritório — tudo vibra.</p></div>
+<h3 style="color:var(--gold);text-align:center;font-family:'Playfair Display',serif;font-size:1rem;margin:20px 0 15px;" data-i18n="en5">🔢 Tabela de Energias dos Números</h3>
+<div class="energy-grid" id="energyGrid"></div>
+<div style="margin-top:30px;padding-top:20px;border-top:1px solid #222;">
+<h3 style="color:var(--gold);text-align:center;font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:4px;" data-i18n="en6">📄 Serviços</h3>
+<p style="text-align:center;color:#888;font-size:.7rem;margin-bottom:12px;" data-i18n="en7">Análise personalizada para qualquer nome, produto ou imóvel.</p>
+<div style="overflow-x:auto;"><table class="pricing-table"><thead><tr><th style="width:22px;">#</th><th data-i18n="t1">Produto / Serviço</th><th data-i18n="t2">O que inclui</th><th style="text-align:center;width:72px;" data-i18n="t3">Valor</th><th style="width:55px;"></th></tr></thead><tbody id="pBodyEner"></tbody></table></div></div>
+</section>
+<footer><p><a href="https://a1elos.com.br">A1ELOS Assessoria e Consultoria</a> — <span data-i18n="rights">© 2026. Todos os direitos reservados.</span></p></footer>
 <script>
-    const API = "https://numerologia-api-wd2q.onrender.com";
-    let currentId = null;
-    let currentName = "";
-    let currentDate = "";
-    let currentEmail = "";
-
-    const i18n = {
-        pt: {
-            h_title: "Mapa Numerológico", h_sub: "A ciência dos números aplicada ao seu destino",
-            h_desc: "Descubra sua missão de vida, talentos ocultos e desafios através da numerologia pitagórica avançada.",
-            h_btn: "Começar Agora", c_title: "Calcule seu Mapa", c_sub: "Insira seus dados reais para um cálculo preciso",
-            f_name: "Nome Completo", f_date: "Data de Nascimento", f_email: "E-mail (Obrigatório para PDF)",
-            f_btn: "Calcular Mapa",
-            p_title: "Escolha seu pacote", p_once: " à vista",
-            p_basic_title: "Mapa Individual", p_basic_1: "PDF completo do seu mapa", p_basic_2: "5 números calculados", p_basic_3: "Envio por e-mail",
-            p_pro_title: "Mapa Completo", p_pro_1: "PDF completo + interpretação", p_pro_2: "Análise detalhada de cada número", p_pro_3: "Guia de autoconhecimento", p_pro_4: "Envio por e-mail",
-            p_buy: "Comprar", rights: "Todos os direitos reservados.",
-            l_lp: "Caminho de Vida", l_ex: "Expressão", l_su: "Desejo da Alma", l_pe: "Personalidade", l_de: "Destino",
-            loading: "Processando pagamento...", success: "Redirecionando para pagamento..."
-        },
-        en: {
-            h_title: "Numerology Map", h_sub: "The science of numbers applied to your destiny",
-            h_desc: "Discover your life mission, hidden talents, and challenges through advanced Pythagorean numerology.",
-            h_btn: "Start Now", c_title: "Calculate Your Map", c_sub: "Enter your real data for an accurate calculation",
-            f_name: "Full Name", f_date: "Birth Date", f_email: "Email (Required for PDF)",
-            f_btn: "Calculate Map",
-            p_title: "Choose your package", p_once: " once",
-            p_basic_title: "Individual Map", p_basic_1: "Full PDF of your map", p_basic_2: "5 calculated numbers", p_basic_3: "Sent by email",
-            p_pro_title: "Complete Map", p_pro_1: "Full PDF + interpretation", p_pro_2: "Detailed analysis of each number", p_pro_3: "Self-knowledge guide", p_pro_4: "Sent by email",
-            p_buy: "Buy", rights: "All rights reserved.",
-            l_lp: "Life Path", l_ex: "Expression", l_su: "Soul Urge", l_pe: "Personality", l_de: "Destiny",
-            loading: "Processing payment...", success: "Redirecting to payment..."
-        },
-        es: {
-            h_title: "Mapa Numerológico", h_sub: "La ciencia de los números aplicada a tu destino",
-            h_desc: "Descubre tu misión de vida, talentos ocultos y desafíos a través de la numerología pitagórica avanzada.",
-            h_btn: "Empezar Ahora", c_title: "Calcula tu Mapa", c_sub: "Introduce tus datos reales para un cálculo preciso",
-            f_name: "Nombre Completo", f_date: "Fecha de Nacimiento", f_email: "Correo (Obligatorio para PDF)",
-            f_btn: "Calcular Mapa",
-            p_title: "Elige tu paquete", p_once: " único",
-            p_basic_title: "Mapa Individual", p_basic_1: "PDF completo de tu mapa", p_basic_2: "5 números calculados", p_basic_3: "Envío por correo",
-            p_pro_title: "Mapa Completo", p_pro_1: "PDF completo + interpretación", p_pro_2: "Análisis detallado de cada número", p_pro_3: "Guía de autoconocimiento", p_pro_4: "Envío por correo",
-            p_buy: "Comprar", rights: "Todos los derechos reservados.",
-            l_lp: "Camino de Vida", l_ex: "Expresión", l_su: "Deseo del Alma", l_pe: "Personalidad", l_de: "Destino",
-            loading: "Procesando pago...", success: "Redirigiendo al pago..."
-        }
-    };
-
-    const flags = { pt: "🇧🇷", en: "🇺🇸", es: "🇪🇸", fr: "🇫🇷", de: "🇩🇪", it: "🇮🇹", nl: "🇳🇱", ru: "🇷🇺", ja: "🇯🇵", zh: "🇨🇳", ko: "🇰🇷", ar: "🇸🇦" };
-    const langs = ["pt", "en", "es", "fr", "de", "it", "nl", "ru", "ja", "zh", "ko", "ar"];
-    let currentLang = "pt";
-
-    function initLang() {
-        const sel = document.getElementById("langSelector");
-        langs.forEach(l => {
-            const btn = document.createElement("button");
-            btn.className = "lang-btn" + (l === currentLang ? " active" : "");
-            btn.innerHTML = `<span class="flag">${flags[l] || ""}</span> ${l.toUpperCase()}`;
-            btn.onclick = () => setLang(l);
-            sel.appendChild(btn);
-        });
-    }
-
-    function setLang(l) {
-        currentLang = l;
-        document.querySelectorAll(".lang-btn").forEach(b => b.classList.remove("active"));
-        document.querySelectorAll(".lang-btn")[langs.indexOf(l)].classList.add("active");
-        document.documentElement.lang = l === "ar" ? "ar" : (l === "zh" || l === "ja" || l === "ko" ? l : l + (["pt","en","es","fr","de","it","nl","ru"].includes(l) ? "" : ""));
-        document.querySelectorAll("[data-i18n]").forEach(el => {
-            const key = el.getAttribute("data-i18n");
-            if (i18n[l] && i18n[l][key]) {
-                if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") el.placeholder = i18n[l][key];
-                else el.textContent = i18n[l][key];
-            }
-        });
-    }
-
-    initLang();
-
-    async function handleCalc() {
-        const name = document.getElementById("name").value.trim();
-        const birth_date = document.getElementById("date").value;
-        const email = document.getElementById("email").value.trim();
-
-        if (!name || !birth_date) {
-            alert("Por favor, preencha nome e data de nascimento.");
-            return;
-        }
-
-        currentName = name;
-        currentDate = birth_date;
-        currentEmail = email;
-
-        document.getElementById("sBtn").disabled = true;
-        document.getElementById("sBtn").textContent = "Calculando...";
-
-        try {
-            const res = await fetch(API + "/calculate", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, birth_date, email: email || undefined })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.detail || "Erro ao calcular");
-
-            currentId = data.id;
-            const grid = document.getElementById("rGrid");
-            grid.innerHTML = "";
-            const items = [
-                { key: "life_path", label: "l_lp", val: data.life_path, desc: "Sua missão de vida" },
-                { key: "expression", label: "l_ex", val: data.expression, desc: "Seus talentos" },
-                { key: "soul_urge", label: "l_su", val: data.soul_urge, desc: "Seus desejos internos" },
-                { key: "personality", label: "l_pe", val: data.personality, desc: "Como os outros veem" },
-                { key: "destiny", label: "l_de", val: data.destiny, desc: "Seu propósito" }
-            ];
-            items.forEach(item => {
-                const box = document.createElement("div");
-                box.className = "num-box";
-                box.innerHTML = `<div class="val">${item.val}</div><div class="label">${i18n[currentLang][item.label] || item.label}</div><div class="desc">${item.desc}</div>`;
-                grid.appendChild(box);
-            });
-            document.getElementById("res").style.display = "block";
-        } catch (e) {
-            alert("Erro: " + e.message);
-        } finally {
-            document.getElementById("sBtn").disabled = false;
-            document.getElementById("sBtn").textContent = i18n[currentLang].f_btn || "Calcular Mapa";
-        }
-    }
-
-    async function handlePDF(price, product) {
-        const email = currentEmail || document.getElementById("email").value.trim();
-
-        if (!email) {
-            alert("Por favor, informe seu e-mail para receber o PDF.");
-            return;
-        }
-
-        if (!currentId) {
-            alert("Calcule seu mapa primeiro.");
-            return;
-        }
-
-        document.getElementById("spinner").style.display = "block";
-        document.getElementById("statusMsg").textContent = i18n[currentLang].loading;
-
-        try {
-            const res = await fetch(API + "/api/pay/stripe", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    name: currentName,
-                    email: email,
-                    product: product,
-                    price: price,
-                    calculation_id: currentId,
-                    birth_date: currentDate
-                })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.detail || "Erro ao criar pagamento");
-
-            document.getElementById("statusMsg").textContent = i18n[currentLang].success;
-            window.location.href = data.payment_url;
-        } catch (e) {
-            alert("Erro: " + e.message);
-            document.getElementById("spinner").style.display = "none";
-            document.getElementById("statusMsg").textContent = "";
-        }
-    }
+const API='https://numerologia-api-wd2q.onrender.com';
+let currentId=null;let lastEmail=null;let lastData=null;let currentDateVal=null;
+const energyData=[
+{n:1,e:'Início, Liderança, Criação',f:'Iniciar projetos, abrir negócios, lançar produtos',p:'Primeiro andar, sede inicial, startup, sala de partida'},
+{n:2,e:'Cooperação, Sensibilidade, Equilíbrio',f:'Ateliês, artesanato, sala de criação, trabalho em equipe',p:'Atelier, sala de costura, escritório de parcerias'},
+{n:3,e:'Comunicação, Expressão, Alegria',f:'Palcos, estúdios, rádio, TV, teatro, marketing',p:'Teatro, estúdio de música, estúdio de podcast'},
+{n:4,e:'Organização, Disciplina, Praticidade',f:'Trabalhos contínuos, escritórios, fábricas, rotina',p:'Escritório adm., fábrica, RH, sala de arquivos'},
+{n:5,e:'Liberdade, Desejo, Paixão, Amor',f:'Casas de amor, motéis, pousadas românticas, spa',p:'Motel, pousada romântica, casa de casal, spa'},
+{n:6,e:'Família, Espiritualidade, Responsabilidade',f:'Igrejas, templos, centros espíritas, casas',p:'Igreja, terreiro, centro espírita, casa de família'},
+{n:7,e:'Sabedoria, Introspecção, Conhecimento',f:'Bibliotecas, estudos, pesquisa, consultórios',p:'Biblioteca, consultório, sala de meditação'},
+{n:8,e:'Poder, Abundância, Prosperidade, Sucesso',f:'Comércio, administração, empresas, bancos',p:'Loja, banco, escritório executivo, consultoria'},
+{n:9,e:'Compaixão, Humanitarismo, Conclusão',f:'Concluir ciclos, ONGs, projetos sociais',p:'ONG, centro de caridade, memorial'},
+{n:10,e:'1+0=1 — Início com Estabilidade',f:'Começar algo com estabilidade',p:'Casa para recomeçar, primeiro imóvel'},
+{n:19,e:'1+9=10→1 — Início e Fim',f:'Iniciar e concluir no mesmo local',p:'Incubadora, consultoria, espaço versátil'}];
+const prodDefs=[
+{id:'free',n1:'🔮 Mapa Individual Express',d1:'Caminho de Vida + Expressão + Alma + Eu Íntimo (tela)'},
+{id:'pdf',n1:'📄 Mapa Individual Completo (PDF)',d1:'10 páginas + Grade + Ciclos + Desafios + Ano Pessoal'},
+{id:'emp',n1:'💼 Validação Empresarial',d1:'Nome + assinatura profissional + sugestão + PDF'},
+{id:'art',n1:'🎭 Validação Nome Artístico',d1:'Nome + assinatura artística + sugestão + PDF'},
+{id:'urna',n1:'🗳️ Validação Nome de Urna',d1:'Nome de campanha soma 8 + variações'},
+{id:'num',n1:'🔢 Cálculo do Número Eleitoral',d1:'Dígitos Dep. Federal (4) e Estadual (5) + soma 8'},
+{id:'casal',n1:'💞 Mapa do Casal (2 pessoas)',d1:'2 mapas individuais + compatibilidade + PDFs separados'},
+{id:'baby',n1:'👶 Planejamento Nome de Bebê',d1:'Nomes com energia ideal + combinação sobrenome'},
+{id:'loja',n1:'🏪 Nome para Negócio/Produto',d1:'Nome comercial + energia do setor + sugestão'},
+{id:'imov',n1:'🏠 Número de Imóvel',d1:'Energia do número por finalidade + PDF'},
+{id:'prem',n1:'🌟 Mapa Premium (Família)',d1:'Até 4 pessoas + compatibilidades + PDF único'}];
+const pv=[0,8,26,26,35,35,44,26,26,26,197];
+const prices={pt:pv,en:pv,es:pv,it:pv,fr:pv,de:pv,ja:[0,800,2600,2600,3500,3500,4400,2600,2600,2600,19700],zh:[0,80,260,260,350,350,440,260,260,260,1970],ru:[0,800,2600,2600,3500,3500,4400,2600,2600,2600,19700],hi:[0,800,2600,2600,3500,3500,4400,2600,2600,2600,19700],ar:[0,80,260,260,350,350,440,260,260,260,1970],he:[0,80,260,260,350,350,440,260,260,260,1970]};
+const cs={pt:'R$',en:'$',es:'€',it:'€',fr:'€',de:'€',ja:'¥',zh:'¥',ru:'₽',hi:'₹',ar:'SAR',he:'₪'};
+const T={};
+function addLang(c,o){T[c]=o;}
+addLang('pt',{badge:'🌍 A PLATAFORMA DE NUMEROLOGIA MAIS COMPLETA DO MUNDO',n1:'🏛 Início',n2:'🔮 Mapa',n3:'🗳️ Eleitoral',n4:'✨ Energias',h1:'MAPA NUMEROLÓGICO',sub:'A plataforma de numerologia mais completa do mundo',desc:'Mapa pessoal, empresarial, artístico, eleitoral, energia de imóveis e mais.',hb:'✦ GERAR MEU MAPA GRÁTIS',hb2:'🗳️ CANDIDATOS',c1:'Calcule seu Mapa',c2:'Preencha seus dados',f1:'Nome Completo',f2:'Data de Nascimento',f3:'E-mail',f4:'✦ CALCULAR GRÁTIS',r1:'✨ Seus Números',r2:'🔮 Mapa Express grátis',r3:'⟳ NOVO',p1:'📄 Todos os Produtos',p2:'Preços acessíveis para mercado nacional e internacional.',t1:'Produto',t2:'O que inclui',t3:'Valor',g1:'✦ Pagamento seguro via Stripe ✦',buy:'COMPRAR',free:'GRÁTIS',ld:'⏳ Redirecionando...',ok:'Pedido criado!',er:'Erro ao processar pagamento.',rights:'© 2026. A1ELOS.',lp:'CAMINHO DE VIDA',ex:'EXPRESSÃO',su:'MOTIVAÇÃO DA ALMA',pe:'PERSONALIDADE',de:'DESTINO',
+e1:'🗳️ Soluções Eleitorais',e2:'Nome de urna soma 8',e3:'Eleições a cada 2 anos',e4:'Cientista político. Nome de urna soma 8 + dígitos eleitorais.',e5:'† Exemplos genéricos. X/0.',
+en1:'✨ Energias da Vida',en2:'Nomeie pessoas, negócios, imóveis',en3:'Tudo tem energia numerológica',en4:'Nome de bebê, empresa, casa, templo, escritório.',en5:'🔢 Tabela de Energias',en6:'📄 Serviços',en7:'Análise personalizada.',
+ide:'Ideal para:',ond:'Onde aplicar:'});
+addLang('en',{badge:'🌍 THE MOST COMPLETE NUMEROLOGY PLATFORM IN THE WORLD',n1:'🏛 Home',n2:'🔮 Map',n3:'🗳️ Electoral',n4:'✨ Energies',h1:'NUMEROLOGICAL MAP',sub:'The most complete numerology platform in the world',desc:'Personal map, business, stage name, electoral, property energy and more.',hb:'✦ GENERATE MY MAP FREE',hb2:'🗳️ CANDIDATES',c1:'Calculate Your Map',c2:'Fill in your details',f1:'Full Name',f2:'Birth Date',f3:'Email',f4:'✦ CALCULATE FREE',r1:'✨ Your Numbers',r2:'🔮 Free Express Map',r3:'⟳ NEW',p1:'📄 All Products',p2:'Affordable prices for national and international market.',t1:'Product',t2:'Includes',t3:'Price',g1:'✦ Secure payment via Stripe ✦',buy:'BUY',free:'FREE',ld:'⏳ Redirecting...',ok:'Order created!',er:'Payment error.',rights:'© 2026. A1ELOS.',lp:'LIFE PATH',ex:'EXPRESSION',su:'SOUL URGE',pe:'PERSONALITY',de:'DESTINY',
+e1:'🗳️ Electoral Solutions',e2:'Ballot name sum 8',e3:'Elections every 2 years',e4:'Political scientist. Ballot name sum 8 + electoral digits.',e5:'† Generic examples. X/0.',
+en1:'✨ Life Energies',en2:'Name babies, businesses, properties',en3:'Everything has numerological energy',en4:'Baby, company, house, temple, office.',en5:'🔢 Energy Table',en6:'📄 Services',en7:'Personalized analysis.',
+ide:'Ideal for:',ond:'Where to apply:'});
+addLang('es',{badge:'🌍 LA MÁS COMPLETA DEL MUNDO',n1:'🏛 Inicio',n2:'🔮 Mapa',n3:'🗳️ Electoral',n4:'✨ Energías',h1:'MAPA NUMEROLÓGICO',sub:'La plataforma más completa',desc:'Mapa personal, empresarial, artístico, electoral.',hb:'✦ GENERAR MI MAPA GRATIS',hb2:'🗳️ CANDIDATOS',c1:'Calcula tu Mapa',c2:'Completa tus datos',f1:'Nombre Completo',f2:'Fecha de Nacimiento',f3:'Email',f4:'✦ CALCULAR GRATIS',r1:'✨ Tus Números',r2:'🔮 Mapa Express Gratis',r3:'⟳ NUEVO',p1:'📄 Todos los Productos',p2:'Precios accesibles para mercado nacional e internacional.',t1:'Producto',t2:'Incluye',t3:'Valor',g1:'✦ Pago seguro via Stripe ✦',buy:'COMPRAR',free:'GRATIS',ld:'⏳ Redirigiendo...',ok:'Pedido creado!',er:'Error de pago.',rights:'© 2026.',lp:'CAMINO DE VIDA',ex:'EXPRESIÓN',su:'MOTIVACIÓN DEL ALMA',pe:'PERSONALIDAD',de:'DESTINO',
+e1:'🗳️ Soluciones Electorales',e2:'Nombre de urna suma 8',e3:'Elecciones cada 2 años',e4:'Cientista político. Nombre de urna suma 8.',e5:'† Ejemplos genéricos.',
+en1:'✨ Energías de la Vida',en2:'Nombre bebés, negocios, inmuebles',en3:'Todo tiene energía numerológica',en4:'Bebé, empresa, casa, templo.',en5:'🔢 Tabla de Energías',en6:'📄 Servicios',en7:'Análisis personalizado.',
+ide:'Ideal para:',ond:'Dónde aplicar:'});
+[['it','ITALIANO','🇮🇹','Mappa Numerologica','Calcola la tua Mappa','ACQUISTA','GRATIS','NUOVO','✨ I Tuoi Numeri','🔮 Mappa Express Gratis','CALCOLA GRATIS','Nome Completo','Data di Nascita','Email','SENTIERO DI VITA','ESPRESSIONE','ANIMA','PERSONALITÀ','DESTINO','🗳️ Soluzioni Elettorali','Nome elettorale somma 8','✨ Energie della Vita','Nomina bebè, attività, immobili','Tutto ha energia numerologica','🔢 Tabella delle Energie','📄 Servizi','Analisi personalizzata.','Ideale per:','Dove applicare:'],
+['fr','FRANÇAIS','🇫🇷','Carte Numérologique','Calculez votre Carte','ACHETER','GRATUIT','NOUVEAU','✨ Vos Nombres','🔮 Carte Express Gratuite','CALCULER GRATUIT','Nom Complet','Date de Naissance','Email','CHEMIN DE VIE','EXPRESSION','ÉLAN DE L\'ÂME','PERSONNALITÉ','DESTIN','🗳️ Solutions Électorales','Nom d\'urne somme 8','✨ Énergies de la Vie','Nommez bébés, entreprises, biens','Tout a une énergie numérologique','🔢 Tableau des Énergies','📄 Services','Analyse personnalisée.','Idéal pour:','Où appliquer:'],
+['de','DEUTSCH','🇩🇪','Numerologische Karte','Berechnen Sie Ihre Karte','KAUFEN','KOSTENLOS','NEUE','✨ Ihre Zahlen','🔮 Kostenlose Express-Karte','KOSTENLOS BERECHNEN','Name','Geburtsdatum','E-Mail','LEBENSWEG','AUSDRUCK','SEELENDRANG','PERSÖNLICHKEIT','SCHICKSAL','🗳️ Wahl-Lösungen','Wahlname Summe 8','✨ Lebensenergien','Benennen Sie Babys, Unternehmen','Alles hat numerologische Energie','🔢 Energietabelle','📄 Dienste','Personalisierte Analyse.','Ideal für:','Wo anwenden:'],
+['ja','日本語','🇯🇵','数秘術マップ','計算する','購入','無料','再計算','✨ 数字','🔮 エクスプレス無料','無料計算','氏名','生年月日','メール','ライフパス','表現','魂の衝動','人格','運命','🗳️ 選挙ソリューション','選挙名 合計8','✨ 生命のエネルギー','赤ちゃん、企業、物件に命名','すべてに数秘術のエネルギー','🔢 エネルギー表','📄 サービス','パーソナライズ分析。','最適:','適用:'],
+['zh','中文','🇨🇳','数字命理图','计算','购买','免费','重新计算','✨ 数字','🔮 快速免费','免费计算','全名','出生日期','电子邮件','生命路径','表现','灵魂渴望','人格','命运','🗳️ 选举方案','选票名称 总和8','✨ 生命能量','为婴儿、企业、房产命名','一切都有数字能量','🔢 能量表','📄 服务','个性化分析。','适用于:','应用:'],
+['ru','РУССКИЙ','🇷🇺','Нумерологическая карта','Рассчитать','КУПИТЬ','БЕСПЛАТНО','ЗАНОВО','✨ Ваши числа','🔮 Экспресс бесплатно','РАССЧИТАТЬ','Имя','Дата рождения','Email','ПУТЬ ЖИЗНИ','ВЫРАЖЕНИЕ','ЖЕЛАНИЕ ДУШИ','ЛИЧНОСТЬ','СУДЬБА','🗳️ Избирательные решения','Имя в бюллетене сумма 8','✨ Энергии жизни','Называйте детей, бизнес','Всё имеет нумерологическую энергию','🔢 Таблица энергий','📄 Услуги','Индивидуальный анализ.','Идеально для:','Применение:'],
+['hi','हिन्दी','🇮🇳','अंक ज्योतिष मानचित्र','गणना करें','खरीदें','मुफ्त','नई गणना','✨ आपकी संख्याएं','🔮 एक्सप्रेस मुफ्त','मुफ्त गणना','पूरा नाम','जन्म तिथि','ईमेल','जीवन पथ','अभिव्यक्ति','आत्मा की इच्छा','व्यक्तित्व','भाग्य','🗳️ चुनाव समाधान','चुनाव नाम योग 8','✨ जीवन की ऊर्जाएं','बच्चों, व्यवसायों को नाम दें','सबमें अंक ज्योतिष ऊर्जा','🔢 ऊर्जा तालिका','📄 सेवाएं','व्यक्तिगत विश्लेषण।','इसके लिए आदर्श:','कहां लागू करें:'],
+['ar','العربية','🇸🇦','خريطة الأرقام','احسب','اشتر','مجاني','جديد','✨ أرقامك','🔮 سريع مجاني','احسب مجاناً','الاسم','تاريخ الميلاد','البريد','مسار الحياة','التعبير','رغبة الروح','الشخصية','القدر','🗳️ حلول انتخابية','اسم الاقتراع مجموع 8','✨ طاقات الحياة','سمِّ الأطفال والشركات','كل شيء له طاقة عددية','🔢 جدول الطاقات','📄 خدمات','تحليل مخصص.','مثالي لـ:','أين تطبق:'],
+['he','עברית','🇮🇱','מפה נומרולוגית','חשב','קנה','חינם','חישוב חדש','✨ המספרים שלך','🔮 אקספרס חינם','חשב בחינם','שם מלא','תאריך לידה','אימייל','נתיב חיים','ביטוי','דחף הנשמה','אישיות','גורל','🗳️ פתרונות בחירות','שם קלפי סכום 8','✨ אנרגיות החיים','תנו שמות לתינוקות, עסקים','לכל דבר יש אנרגיה נומרולוגית','🔢 טבלת אנרגיות','📄 שירותים','ניתוח מותאם אישית.','אידיאלי ל:','היכן ליישם:']]
+.forEach(function(a){var c=a[0];addLang(c,{badge:'',n1:a[0]==='he'?'🏛 בית':'🏛 '+(a[1]),n2:'🔮 '+(a[0]==='pt'?'Mapa':a[0]==='en'?'Map':'Mappa'),n3:'🗳️ '+(a[0]==='pt'?'Eleitoral':a[0]==='en'?'Electoral':'Elettorale'),n4:'✨ '+(a[0]==='pt'?'Energias':a[0]==='en'?'Energies':'Energie'),h1:a[3],sub:['pt','en','es','it','fr','de'].includes(c)?'A plataforma mais completa':'',desc:'',hb:a[4],hb2:'🗳️ '+(a[0]==='pt'?'CANDIDATOS':'CANDIDATES'),c1:a[3].replace('Mapa','Calcule ').replace('Carte','Calculez ').replace('Mappa','Calcola ').replace('Karte','Berechnen ').replace('Map',''),c2:'',f1:a[9],f2:a[10],f3:a[11],f4:a[8],r1:a[7],r2:a[6],r3:a[5],p1:'📄 '+(a[0]==='he'?'כל המוצרים':a[0]==='ar'?'جميع المنتجات':'All Products'),p2:'',t1:a[0]==='he'?'מוצר':a[0]==='ar'?'المنتج':'Product',t2:a[0]==='he'?'כולל':a[0]==='ar'?'يشمل':'Includes',t3:a[0]==='he'?'מחיר':a[0]==='ar'?'السعر':'Price',g1:'',buy:a[5],free:a[6],ld:a[0]==='he'?'⏳ מפנה...':a[0]==='ar'?'⏳ جارٍ إعادة التوجيه...':'⏳ Redirecting...',ok:a[0]==='he'?'הזמנה נוצרה!':a[0]==='ar'?'تم الطلب!':'Order created!',er:a[0]==='he'?'שגיאה.':a[0]==='ar'?'خطأ.':'Error.',rights:'© 2026.',lp:a[12],ex:a[13],su:a[14],pe:a[15],de:a[16],
+e1:a[17],e2:a[18],e3:a[0]==='pt'?'Eleições a cada 2 anos':'Elections every 2 years',e4:a[0]==='pt'?'Cientista político.':'Political scientist.',e5:'†',
+en1:a[19],en2:a[20],en3:a[21],en4:a[0]==='pt'?'Nome de bebê, empresa, casa.':'Baby, company, house.',en5:a[22],en6:a[23],en7:a[24],
+ide:a[25],ond:a[26]});});
+const langs=[{c:'pt',f:'🇧🇷'},{c:'en',f:'🇺🇸'},{c:'es',f:'🇪🇸'},{c:'it',f:'🇮🇹'},{c:'fr',f:'🇫🇷'},{c:'de',f:'🇩🇪'},{c:'ja',f:'🇯🇵'},{c:'zh',f:'🇨🇳'},{c:'ru',f:'🇷🇺'},{c:'hi',f:'🇮🇳'},{c:'ar',f:'🇸🇦'},{c:'he',f:'🇮🇱'}];
+function setLang(c){
+  localStorage.setItem('lang',c);
+  document.documentElement.lang=c;
+  document.documentElement.dir=['ar','he'].includes(c)?'rtl':'ltr';
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.c===c);});
+  var t=T[c]||T.en;
+  document.querySelectorAll('[data-i18n]').forEach(function(el){var k=el.dataset.i18n;if(t[k])el.innerText=t[k];});
+  renderTables();renderEnergy();if(lastData)renderResults(lastData);
+}
+function fmt(c,i){var v=(prices[c]||prices.en)[i]||0;if(i===0)return(T[c]||T.en).free||'Grátis';return(cs[c]||'$')+' '+v;}
+function renderTable(id,st,en){var lang=localStorage.getItem('lang')||'pt';var t=T[lang]||T.en;var body=document.getElementById(id);if(!body)return;body.innerHTML='';for(var i=st;i<=en;i++){var p=prodDefs[i];if(!p)continue;var tr=document.createElement('tr');if(i>0)tr.style.borderLeft='3px solid var(--gold)';var v=(prices[lang]||prices.en)[i]||0;tr.innerHTML='<td class="row-num">'+(i+1)+'</td><td><span class="product-name">'+p.n1+'</span></td><td><span class="product-desc">'+p.d1+'</span></td><td class="'+(i===0?'free-cell':'price-cell')+'">'+fmt(lang,i)+'</td><td>'+(i===0?'<span class="badge">'+t.free+'</span>':'<button class="buy-btn" onclick="buyP('+i+')">'+t.buy+'</button>')+'</td>';body.appendChild(tr);}}
+function renderTables(){renderTable('pBody',0,10);renderTable('pBodyElec',4,5);renderTable('pBodyEner',6,10);}
+function renderEnergy(){var lang=localStorage.getItem('lang')||'pt';var g=document.getElementById('energyGrid');if(!g)return;var t=T[lang]||T.en;g.innerHTML='';energyData.forEach(function(e){var div=document.createElement('div');div.className='energy-card';div.innerHTML='<div class="big-num">'+e.n+'</div><div class="e-name">'+e.e+'</div><div class="e-for"><strong>'+(t.ide||'Ideal para:')+'</strong><br>'+e.f+'</div><div class="e-place">'+(t.ond||'Onde aplicar:')+'<br>'+e.p+'</div>';g.appendChild(div);});}
+async function handleCalc(){var btn=document.getElementById('sBtn');btn.disabled=true;var orig=btn.innerText;btn.innerText='...';try{var name=document.getElementById('name').value;if(name.length<2){alert('Nome muito curto.');btn.disabled=false;btn.innerText=orig;return;}var date=document.getElementById('date').value;if(!date){alert('Selecione a data.');btn.disabled=false;btn.innerText=orig;return;}currentDateVal=date;lastEmail=document.getElementById('email').value;var res=await fetch(API+'/calculate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,birth_date:date,email:lastEmail||null})});if(!res.ok)throw new Error();var data=await res.json();if(!data||!data.life_path)throw new Error();lastData=data;currentId=data.id;renderResults(data);document.getElementById('res').style.display='block';renderTable('pBody',0,10);document.getElementById('res').scrollIntoView({behavior:'smooth'});}catch(e){alert('Erro ao conectar. Tente novamente.');}btn.disabled=false;btn.innerText=orig;}
+function renderResults(d){var c=localStorage.getItem('lang')||'pt';var g=document.getElementById('rGrid');var t=T[c]||T.en;var keys=['lp','ex','su','pe','de'];var vals=[d.life_path,d.expression,d.soul_urge,d.personality,d.destiny];g.innerHTML='';keys.forEach(function(k,i){g.innerHTML+='<div class="num-box"><div class="val">'+vals[i]+'</div><div class="label">'+(t[k]||k)+'</div></div>';});}
+async function buyP(idx){
+  if(idx===0)return;
+  var t=T[localStorage.getItem('lang')||'pt']||T.en;
+  var btns=document.querySelectorAll('.buy-btn');
+  btns.forEach(function(b){b.disabled=true;});
+  try{
+    var email=lastEmail||document.getElementById('email').value;
+    if(!email||!email.includes('@')){alert('Informe um e-mail válido.');btns.forEach(function(b){b.disabled=false;});return;}
+    var amt=(prices[localStorage.getItem('lang')||'pt']||prices.en)[idx]||0;
+    if(amt<=0){alert('Gratuito!');btns.forEach(function(b){b.disabled=false;});return;}
+    if(!currentId){alert('Calcule o mapa primeiro!');btns.forEach(function(b){b.disabled=false;});return;}
+    document.getElementById('loadingMsg').style.display='block';
+    document.getElementById('orderMsg').style.display='none';
+    var res=await fetch(API+'/api/pay/stripe',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        name:document.getElementById('name').value||'',
+        email:email,
+        product:prodDefs[idx].id,
+        price:amt,
+        calculation_id:currentId,
+        birth_date:currentDateVal || document.getElementById('date').value
+      })
+    });
+    if(!res.ok)throw new Error();
+    var data=await res.json();
+    if(data.payment_url){window.location.href=data.payment_url;}
+    else{throw new Error('Sem URL');}
+  }catch(e){
+    document.getElementById('loadingMsg').style.display='none';
+    var msg=document.getElementById('orderMsg');
+    msg.style.display='block';
+    msg.innerHTML='<p style="color:#e74c3c;">'+t.er+'</p>';
+  }
+  btns.forEach(function(b){b.disabled=false;});
+}
+function resetForm(){document.getElementById('nForm').reset();document.getElementById('res').style.display='none';document.getElementById('orderMsg').style.display='none';document.getElementById('loadingMsg').style.display='none';currentId=null;lastData=null;}
+window.onload=function(){var c=document.getElementById('langSelector');langs.forEach(function(l){var b=document.createElement('button');b.className='lang-btn';b.dataset.c=l.c;b.innerHTML='<span class="flag">'+l.f+'</span> '+l.c.toUpperCase();b.onclick=function(){setLang(l.c);};c.appendChild(b);});setLang(localStorage.getItem('lang')||'pt');if(window.location.hash){setTimeout(function(){var el=document.querySelector(window.location.hash);if(el)el.scrollIntoView({behavior:'smooth'});},500);}};
 </script>
-
 </body>
 </html>
