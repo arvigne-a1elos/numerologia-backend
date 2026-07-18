@@ -235,7 +235,7 @@ const energyData = [
 ];
 
 /* ═══════════════════════════════════
-   TRADUÇÕES — 12 idiomas completos
+   TRADUÇÕES — 12 idiomas
    ═══════════════════════════════════ */
 const T = {};
 function addLang(c,o){T[c]=o;}
@@ -320,10 +320,10 @@ mp_title:'💞 Mapa de Pareja',mp_desc:'Datos de la pareja.',mp_p1:'Persona 1',m
 buy_now:'COMPRAR AHORA',close:'Cerrar'
 });
 
-function addLangSimple(c, flag, title){
+function addLangSimple(c, flag, t){
 addLang(c,{
 n1:'🏛 HOME',n2:'🔮 MAP',n3:'🗳️ ELECTORAL',n4:'✨ ENERGIES',
-badge:'',h1:title,sub:'',desc:'',
+badge:'',h1:t,sub:'',desc:'',
 hb:'✦ GENERATE MAP',hb2:'🗳️ CANDIDATES',
 c1:'Calculate Your Map',c2:'',
 f1:'Full Name',f2:'Birth Date',f3:'Email',f4:'✦ CALCULATE FREE',
@@ -375,14 +375,14 @@ body.innerHTML='';
 for(var i=st;i<=en;i++){
 var p=prodDefs[i];
 if(!p)continue;
-var tr=document.createElement('tr');
-if(i>0)tr.style.borderLeft='3px solid var(--gold)';
-tr.innerHTML='<td class="num-cell">'+(i+1)+'</td>'+
+var row=document.createElement('tr');      // ← CORRIGIDO: 'tr' → 'row'
+if(i>0)row.style.borderLeft='3px solid var(--gold)';
+row.innerHTML='<td class="num-cell">'+(i+1)+'</td>'+
 '<td><span class="prod-name">'+p.n1+'</span></td>'+
 '<td><span class="prod-desc">'+p.d1+'</span></td>'+
 '<td class="'+(i===0?'free-cell':'price-cell')+'">'+fmt(i)+'</td>'+
 '<td>'+(i===0?'<span class="badge">'+tr('free')+'</span>':'<button class="buy-btn" onclick="openProductModal('+i+')">'+tr('buy')+'</button>')+'</td>';
-body.appendChild(tr);
+body.appendChild(row);                     // ← CORRIGIDO: 'tr' → 'row'
 }
 }
 function renderTables(){renderTable('pBody',0,10);renderTable('pBodyElec',4,5);renderTable('pBodyEner',7,10);}
@@ -400,7 +400,7 @@ g.appendChild(div);
 }
 
 /* ═══════════════════════════════════
-   CÁLCULO — com retry para Render free tier
+   CÁLCULO
    ═══════════════════════════════════ */
 async function handleCalc(){
 var btn=document.getElementById('sBtn');
@@ -413,29 +413,17 @@ if(name.length<2){alert('Nome muito curto.');btn.disabled=false;btn.innerText=or
 var date=document.getElementById('date').value;
 if(!date){alert('Selecione a data.');btn.disabled=false;btn.innerText=orig;return;}
 lastEmail=document.getElementById('email').value;
-
-// Retry para Render free tier (pode dormir e demorar 50s+)
-var res = null;
-for(var attempt = 0; attempt < 3; attempt++){
+var res=null;
+for(var attempt=0;attempt<3;attempt++){
 try{
-res = await Promise.race([
-fetch(API+'/calculate',{
-method:'POST',headers:{'Content-Type':'application/json'},
-body:JSON.stringify({name:name,birth_date:date,email:lastEmail||null})
-}),
+res=await Promise.race([
+fetch(API+'/calculate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,birth_date:date,email:lastEmail||null})}),
 new Promise(function(_,reject){setTimeout(function(){reject(new Error('timeout'));},60000);})
 ]);
-if(res.ok) break;
-}catch(e){
-if(attempt===2) throw e;
-await new Promise(function(r){setTimeout(r,3000);});
+if(res.ok)break;
+}catch(e){if(attempt===2)throw e;await new Promise(function(r){setTimeout(r,3000);});}
 }
-}
-if(!res||!res.ok){
-var errText=await res.text();
-console.error('API erro:',res.status,errText);
-throw new Error('HTTP '+res.status);
-}
+if(!res||!res.ok){var errText=await res.text();console.error('API erro:',res.status,errText);throw new Error('HTTP '+res.status);}
 var data=await res.json();
 if(!data||!data.life_path)throw new Error('Resposta inválida');
 lastData=data;
@@ -542,24 +530,12 @@ if(!currentId){alert('Calcule o mapa primeiro!');return;}
 document.getElementById('loadingMsg').style.display='block';
 document.getElementById('orderMsg').style.display='none';
 try{
-var res=await fetch(API+'/api/pay/stripe',{
-method:'POST',headers:{'Content-Type':'application/json'},
-body:JSON.stringify({
-name:names[0]||'',email:email,product:p.id,price:amt/100,
-calculation_id:currentId,birth_date:dates[0]||'',
-lang:localStorage.getItem('lang')||'pt'
-})
-});
+var res=await fetch(API+'/api/pay/stripe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:names[0]||'',email:email,product:p.id,price:amt/100,calculation_id:currentId,birth_date:dates[0]||'',lang:localStorage.getItem('lang')||'pt'})});
 if(!res.ok)throw new Error('HTTP '+res.status);
 var data=await res.json();
 if(data.payment_url)window.location.href=data.payment_url;
 else throw new Error('Sem URL');
-}catch(e){
-console.error('Erro compra:',e);
-document.getElementById('loadingMsg').style.display='none';
-document.getElementById('orderMsg').style.display='block';
-document.getElementById('orderMsg').innerHTML='<p style="color:#e74c3c;">'+tr('er')+'</p>';
-}
+}catch(e){console.error('Erro compra:',e);document.getElementById('loadingMsg').style.display='none';document.getElementById('orderMsg').style.display='block';document.getElementById('orderMsg').innerHTML='<p style="color:#e74c3c;">'+tr('er')+'</p>';}
 }
 
 function resetForm(){
@@ -581,10 +557,7 @@ b.onclick=function(){setLang(l.c);};c.appendChild(b);
 });
 setLang(localStorage.getItem('lang')||'pt');
 if(window.location.hash){
-setTimeout(function(){
-var el=document.querySelector(window.location.hash);
-if(el)el.scrollIntoView({behavior:'smooth'});
-},500);
+setTimeout(function(){var el=document.querySelector(window.location.hash);if(el)el.scrollIntoView({behavior:'smooth'});},500);
 }
 document.getElementById('productOverlay').onclick=function(e){if(e.target===this)closeProductModal();};
 };
