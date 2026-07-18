@@ -23,15 +23,19 @@ import dateutil.parser as dp
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# ═══════════════════════════
+# ═══════════════════════════════
 # CONFIG
-# ═══════════════════════════
+# ═══════════════════════════════
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
 SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "")
 FROM_EMAIL = os.getenv("FROM_EMAIL", "arvigne@gmail.com")
 FROM_NAME = os.getenv("FROM_NAME", "Mapa Numerologico | A1ELOS")
 BASE_URL = os.getenv("BASE_URL", "https://numerologia-api-wd2q.onrender.com")
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./numerologia.db")
+
+logger.info(f"STRIPE_SECRET_KEY configurada: {bool(STRIPE_SECRET_KEY)}")
+logger.info(f"SENDGRID_API_KEY configurada: {bool(SENDGRID_API_KEY)}")
+logger.info(f"BASE_URL: {BASE_URL}")
 
 if STRIPE_SECRET_KEY:
     stripe.api_key = STRIPE_SECRET_KEY
@@ -159,9 +163,9 @@ def generate_pdf(data, name, birth_date_str):
     doc.build(elements)
     return pdf_path
 
-# ═══════════════════════════
+# ═══════════════════════════════
 # ROTAS
-# ═══════════════════════════
+# ═══════════════════════════════
 
 @app.get("/", response_class=HTMLResponse)
 def root():
@@ -211,9 +215,17 @@ def pay_stripe(req: PayRequest):
             mode='payment', payment_method_types=['card'],
             line_items=[{'price_data': {'currency': 'brl', 'product_data': {'name': req.product}, 'unit_amount': int(req.price * 100)}, 'quantity': 1}],
             customer_email=req.email,
-            metadata={"product": req.product, "calculation_id": req.calculation_id or "", "name": req.name, "birth_date": req.birth_date or "", "lang": req.lang},
+            metadata={
+                "product": req.product,
+                "calculation_id": req.calculation_id or "",
+                "name": req.name,
+                "birth_date": req.birth_date or "",
+                "lang": req.lang,
+                "customer_email": req.email
+            },
             success_url=f"{BASE_URL}/api/pay/success?session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=f"{BASE_URL}/api/pay/cancel")
+        logger.info(f"Sessao Stripe criada: {checkout.id}")
         return {"payment_url": checkout.url, "id": checkout.id}
     except Exception as e:
         logger.error(f"Stripe erro: {e}")
@@ -222,41 +234,75 @@ def pay_stripe(req: PayRequest):
 @app.get("/api/pay/success")
 def pay_success(request: Request):
     session_id = request.query_params.get("session_id", "")
+    logger.info(f"Pay success called. session_id: {session_id}")
+    
     if not session_id:
-        return HTMLResponse("<html><body style='background:#0a0a0a;color:#e74c3c;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>❌ Sessao nao informada</h1><a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>")
+        logger.error("session_id vazio")
+        return HTMLResponse(ERROR_HTML.format(msg="Sessao nao informada"))
+    
+    # Recupera dados da sessao Stripe
     try:
         session = stripe.checkout.Session.retrieve(session_id)
-        meta = session.get("metadata", {})
-        name = meta.get("name", "Cliente")
-        email = meta.get("email") or session.get("customer_email", "")
-        product = meta.get("product", "pdf")
-        birth_date = meta.get("birth_date", "")
-        lang = meta.get("lang", "pt")
+        logger.info(f"Sessao Stripe recuperada. Payment status: {session.payment_status}")
+        
+        # Extrai dados - Stripe retorna objeto com atributos, nao dict
+        meta = getattr(session, 'metadata', {}) or {}
+        if hasattr(meta, 'to_dict'):
+            meta = meta.to_dict()
+        
+        name = meta.get('name', 'Cliente')
+        email = meta.get('customer_email', '') or getattr(session, 'customer_email', '')
+        product = meta.get('product', 'pdf')
+        birth_date = meta.get('birth_date', '')
+        lang = meta.get('lang', 'pt')
+        
+        logger.info(f"Dados extraidos: name={name}, email={email}, product={product}, birth_date={birth_date}")
+        
     except Exception as e:
         logger.error(f"Erro ao recuperar sessao Stripe: {e}")
-        return HTMLResponse("<html><body style='background:#0a0a0a;color:#e74c3c;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>❌ Erro ao confirmar pagamento</h1><a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>")
+        return HTMLResponse(ERROR_HTML.format(msg="Falha ao recuperar dados do pagamento"))
+    
     if not email:
-        return HTMLResponse("<html><body style='background:#0a0a0a;color:#e74c3c;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>❌ Email nao encontrado</h1><a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>")
+        logger.error("Email nao encontrado na sessao")
+        return HTMLResponse(ERROR_HTML.format(msg="Email nao encontrado"))
+    
+    # Gera PDF e envia por email
     pdf_sent = False
+    error_msg = ""
     try:
         data = calc_numerology(name, birth_date or "2000-01-01")
         pdf_path = generate_pdf(data, name, birth_date or "")
+        logger.info(f"PDF gerado: {pdf_path}")
+        
         subject = "Seu Mapa Numerologico esta pronto!"
         content = f"Ola {name},\n\nSeu mapa numerologico foi gerado com sucesso!\n\nCaminho de Vida: {data['life_path']}\nExpressao: {data['expression']}\nMotivacao da Alma: {data['soul_urge']}\nPersonalidade: {data['personality']}\nDestino: {data['destiny']}\n\nO PDF completo esta em anexo.\n\nAtenciosamente,\nA1ELOS Assessoria e Consultoria"
+        
         sent = send_email(email, subject, content, pdf_path)
         if sent:
             pdf_sent = True
+            logger.info(f"Email enviado para {email}")
+        
         if os.path.exists(pdf_path):
             os.remove(pdf_path)
+            
     except Exception as e:
+        error_msg = str(e)
         logger.error(f"Erro ao gerar/enviar PDF: {e}")
+    
     if pdf_sent:
-        return HTMLResponse("<html><body style='background:#0a0a0a;color:#C9A94E;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>✅ Pagamento Confirmado!</h1><p style='color:#aaa'>Seu PDF foi enviado por e-mail.</p><a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>")
-    return HTMLResponse("<html><body style='background:#0a0a0a;color:#e74c3c;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>❌ Erro ao processar</h1><p style='color:#aaa'>Pagamento confirmado mas houve erro ao enviar o e-mail.</p><a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>")
+        return HTMLResponse(SUCCESS_HTML)
+    
+    return HTMLResponse(ERROR_HTML.format(msg=f"Pagamento confirmado, mas falha no envio. {error_msg}"))
 
 @app.get("/api/pay/cancel")
 def pay_cancel():
-    return HTMLResponse("<html><body style='background:#0a0a0a;color:#e67e22;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>⏸️ Pagamento nao concluido</h1><p style='color:#aaa'>Tente novamente quando quiser.</p><a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>")
+    return HTMLResponse(CANCEL_HTML)
+
+SUCCESS_HTML = """<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Pagamento Confirmado | Mapa Numerologico</title><style>body{background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}.container{text-align:center;max-width:500px;padding:40px}h1{color:#C9A94E;font-size:2rem;margin-bottom:10px}p{color:#aaa;line-height:1.6;margin-bottom:20px}.btn{display:inline-block;padding:12px 30px;background:#C9A94E;color:#0a0a0a;text-decoration:none;border-radius:50px;font-weight:700}.gold{color:#C9A94E}</style></head><body><div class="container"><h1>✅ Pagamento Confirmado!</h1><p>Seu <span class="gold">Mapa Numerologico</span> foi gerado e sera enviado para o seu e-mail em instantes.</p><p style="font-size:0.85rem;color:#777">Verifique sua caixa de entrada e a pasta de spam.</p><a href="/" class="btn">Voltar ao Site</a></div></body></html>"""
+
+ERROR_HTML = """<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Erro | Mapa Numerologico</title><style>body{background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}.container{text-align:center;max-width:500px;padding:40px}h1{color:#e74c3c;font-size:1.8rem;margin-bottom:10px}p{color:#aaa;line-height:1.6;margin-bottom:20px}.btn{display:inline-block;padding:12px 30px;background:#C9A94E;color:#0a0a0a;text-decoration:none;border-radius:50px;font-weight:700}</style></head><body><div class="container"><h1>❌ {msg}</h1><p>Entre em contato: <strong style="color:#C9A94E">arvigne@gmail.com</strong></p><a href="/" class="btn">Voltar</a></div></body></html>"""
+
+CANCEL_HTML = """<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Pagamento Cancelado | Mapa Numerologico</title><style>body{background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}.container{text-align:center;max-width:500px;padding:40px}h1{color:#e67e22;font-size:1.8rem;margin-bottom:10px}p{color:#aaa;line-height:1.6;margin-bottom:20px}.btn{display:inline-block;padding:12px 30px;background:#C9A94E;color:#0a0a0a;text-decoration:none;border-radius:50px;font-weight:700}</style></head><body><div class="container"><h1>⏸️ Pagamento nao concluido</h1><p>Caso queira, tente novamente.</p><a href="/" class="btn">Voltar ao Site</a></div></body></html>"""
 
 if __name__ == "__main__":
     import uvicorn
