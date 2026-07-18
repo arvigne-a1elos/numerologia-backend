@@ -105,8 +105,8 @@ DARK = colors.HexColor("#222")
 GRAY = colors.HexColor("#777")
 
 SIG = {
-    1: ("Individualidade", "Original, criativo, lider nato, independente. Sua energia e do comeco, do impulso criador. Pessoas com este numero sao visionarias que nao tem medo de trilhar caminhos novos.", "Egoista, arrogante, dominador. Tende a centralizar decisoes.", "Desenvolver humildade e trabalho em equipe."),
-    2: ("Associacao", "Diplomatico, sensivel, cooperativo, pacificador. Sua presenca harmoniza ambientes. Tem o dom de unir pessoas.", "Indeciso, carente, submisso.", "Desenvolver autoconfianca."),
+    1: ("Individualidade", "Original, criativo, lider nato, independente. Sua energia e do comeco, do impulso criador. Pessoas com este numero sao visionarias que nao tem medo de trilhar caminhos novos.", "Egoista, arrogante, dominador.", "Desenvolver humildade e trabalho em equipe."),
+    2: ("Associacao", "Diplomatico, sensivel, cooperativo, pacificador. Sua presenca harmoniza ambientes.", "Indeciso, carente, submisso.", "Desenvolver autoconfianca."),
     3: ("Criacao", "Criativo, comunicativo, otimista, carismatico. Ilumina ambientes.", "Superficial, disperso.", "Desenvolver foco."),
     4: ("Trabalho", "Pratico, disciplinado, confiavel, leal. E o alicerce de equipes.", "Rigido, teimoso.", "Desenvolver flexibilidade."),
     5: ("Liberdade", "Livre, versatil, aventureiro, inteligente. Sede de vida.", "Impulsivo, irresponsavel.", "Equilibrar liberdade e responsabilidade."),
@@ -117,8 +117,23 @@ SIG = {
     11: ("Mestre Inspirador", "Intuitivo, iluminado, inspirador.", "Ansioso.", "Equilibrar espiritual e material."),
     22: ("Mestre Construtor", "Realizador, visionario pratico.", "Ambicioso.", "Construir sem se escravizar.")
 }
-CAM = {1: ("Realizacao", "Sua missao e abrir caminhos, liderar e inovar."), 2: ("Paz", "Cooperar e servir como ponte."), 3: ("Alegria", "Comunicar e inspirar alegria."), 4: ("Acao", "Construir com disciplina."), 5: ("Evolucao", "Experimentar e evoluir."), 6: ("Conciliacao", "Servir e harmonizar."), 7: ("Sabedoria", "Buscar a verdade."), 8: ("Justica", "Manifestar abundancia."), 9: ("Humanitarismo", "Servir a humanidade."), 11: ("Inspiracao", "Iluminar consciencias."), 22: ("Construcao", "Realizar grandes obras.")}
+
+CAM = {
+    1: ("Realizacao", "Sua missao e abrir caminhos, liderar e inovar."),
+    2: ("Paz", "Cooperar e servir como ponte."),
+    3: ("Alegria", "Comunicar e inspirar alegria."),
+    4: ("Acao", "Construir com disciplina."),
+    5: ("Evolucao", "Experimentar e evoluir."),
+    6: ("Conciliacao", "Servir e harmonizar."),
+    7: ("Sabedoria", "Buscar a verdade."),
+    8: ("Justica", "Manifestar abundancia."),
+    9: ("Humanitarismo", "Servir a humanidade."),
+    11: ("Inspiracao", "Iluminar consciencias."),
+    22: ("Construcao", "Realizar grandes obras.")
+}
+
 DES = {0: "Equilibrio.", 1: "Superar egoismo.", 2: "Vencer timidez.", 3: "Foco.", 4: "Flexibilidade.", 5: "Responsabilidade.", 6: "Confiar.", 7: "Compartilhar.", 8: "Etica.", 9: "Concluir."}
+
 VIB = {1: "Lider nato, pioneiro.", 2: "Sensivel, diplomatico.", 3: "Criativo, comunicador.", 4: "Trabalhador, pratico.", 5: "Livre, aventureiro.", 6: "Amoroso, familiar.", 7: "Sabio, espiritual.", 8: "Realizador, prospero.", 9: "Humanitario, generoso."}
 
 def pdf8(data, name, bd):
@@ -151,7 +166,7 @@ def pdf17(data, name, bd_str):
     kw, desc_cam = CAM.get(lp, ("", ""))
     nome_p = name.split()[0] if " " in name else name
 
-    # Pag 1
+    # Pagina 1
     e.append(Spacer(1,40))
     e.append(Paragraph("MAPA NUMEROLOGICO", ParagraphStyle("TT", fontSize=26, textColor=GOLD, alignment=1, fontName="Helvetica-Bold", spaceAfter=4)))
     e.append(Paragraph("COMPLETO", ParagraphStyle("SU", fontSize=14, textColor=GOLD, alignment=1, fontName="Helvetica", spaceAfter=20)))
@@ -164,16 +179,16 @@ def pdf17(data, name, bd_str):
     e.append(tbl)
 
     e.append(Spacer(1,15))
-    e.append(Paragraph(f"<b>SEU PERFIL</b> — {nome_p}, Caminho de Vida {lp} ({kw}). Expressao {data['expression']}, Motivacao da Alma {data['soul_urge']}, Personalidade {data['personality']}, Destino {data['destiny']}.", ParagraphStyle("TX", fontSize=9.5, spaceAfter=6, leading=15, textColor=DARK)))
+    e.append(Paragraph(f"<b>SEU PERFIL</b> - {nome_p}, Caminho de Vida {lp} ({kw}). Expressao {data['expression']}, Motivacao da Alma {data['soul_urge']}, Personalidade {data['personality']}, Destino {data['destiny']}.", ParagraphStyle("TX", fontSize=9.5, spaceAfter=6, leading=15, textColor=DARK)))
     e.append(Paragraph(f"<b>Caminho da Vida:</b> {desc_cam}", ParagraphStyle("TX", fontSize=9.5, spaceAfter=6, leading=15, textColor=DARK)))
     e.append(PageBreak())
 
-    # Pag 2: Analise
+    # Pagina 2 - Analise
     e.append(Paragraph("<b>ANALISE DETALHADA</b>", ParagraphStyle("SE", fontSize=13, textColor=GOLD, fontName="Helvetica-Bold", spaceBefore=8, spaceAfter=10)))
     for k,l in [("life_path","Caminho de Vida"),("expression","Expressao"),("soul_urge","Motivacao da Alma"),("personality","Personalidade"),("destiny","Destino")]:
         v = data[k]
         nm, pos, neg, licao = SIG.get(v, ("", "", "", ""))
-        e.append(Paragraph(f"<b>{l} — {v} ({nm})</b>", ParagraphStyle("BB", fontSize=10, spaceAfter=3, textColor=DARK, fontName="Helvetica-Bold")))
+        e.append(Paragraph(f"<b>{l} - {v} ({nm})</b>", ParagraphStyle("BB", fontSize=10, spaceAfter=3, textColor=DARK, fontName="Helvetica-Bold")))
         e.append(Paragraph(f"<b>Positivo:</b> {pos}", ParagraphStyle("TX", fontSize=9, spaceAfter=2, leading=13, textColor=DARK)))
         e.append(Paragraph(f"<b>Negativo:</b> {neg}", ParagraphStyle("TX", fontSize=9, spaceAfter=2, leading=13, textColor=DARK)))
         e.append(Paragraph(f"<b>Licao:</b> {licao}", ParagraphStyle("TX", fontSize=9, spaceAfter=6, leading=13, textColor=DARK)))
@@ -183,12 +198,12 @@ def pdf17(data, name, bd_str):
     c2n = r1(data["expression"]+data["soul_urge"])
     c3n = r1(data["soul_urge"]+data["personality"])
     e.append(Paragraph("<b>CICLOS DA VIDA</b>", ParagraphStyle("SE", fontSize=13, textColor=GOLD, fontName="Helvetica-Bold", spaceBefore=8, spaceAfter=8)))
-    e.append(Paragraph(f"<b>1 Formativo (0-{fe}a) Reg {c1n}:</b> Aprendizado.", ParagraphStyle("TX", fontSize=9.5, spaceAfter=4, leading=14, textColor=DARK)))
+    e.append(Paragraph(f"<b>1 Formativo (0-{fe}a) Reg {c1n}:</b> Aprendizado e desenvolvimento.", ParagraphStyle("TX", fontSize=9.5, spaceAfter=4, leading=14, textColor=DARK)))
     e.append(Paragraph(f"<b>2 Produtivo ({fe+1}-{fe+27}a) Reg {c2n}:</b> Realizacao profissional.", ParagraphStyle("TX", fontSize=9.5, spaceAfter=4, leading=14, textColor=DARK)))
-    e.append(Paragraph(f"<b>3 Colheita ({fe+28}+a) Reg {c3n}:</b> Sabedoria.", ParagraphStyle("TX", fontSize=9.5, spaceAfter=4, leading=14, textColor=DARK)))
+    e.append(Paragraph(f"<b>3 Colheita ({fe+28}+a) Reg {c3n}:</b> Sabedoria e legado.", ParagraphStyle("TX", fontSize=9.5, spaceAfter=4, leading=14, textColor=DARK)))
     e.append(PageBreak())
 
-    # Pag 3: Desafios e Realizacoes
+    # Pagina 3 - Desafios e Realizacoes
     bb = dp.parse(bd_str.split(" ")[0] if " " in bd_str else bd_str).date()
     d,m,aa = bb.day, bb.month, bb.year
     d1=r1(abs(d-m))
@@ -208,7 +223,7 @@ def pdf17(data, name, bd_str):
     e.append(Paragraph(f"<b>4 ({r4v}):</b> Legado.", ParagraphStyle("TX", fontSize=9.5, spaceAfter=4, leading=14, textColor=DARK)))
     e.append(PageBreak())
 
-    # Pag 4: Vibracao + Grade + Final
+    # Pagina 4 - Vibracao, Grade e Final
     vib = r1(d)
     e.append(Paragraph("<b>VIBRACAO DO NASCIMENTO</b>", ParagraphStyle("SE", fontSize=13, textColor=GOLD, fontName="Helvetica-Bold", spaceBefore=8, spaceAfter=8)))
     e.append(Paragraph(f"Dia {bb.day}, vibracao {vib}. {VIB.get(vib,'')}", ParagraphStyle("TX", fontSize=9.5, spaceAfter=10, textColor=DARK)))
@@ -221,7 +236,7 @@ def pdf17(data, name, bd_str):
     e.append(Paragraph(f"<b>Carencias:</b> {', '.join(ausentes) if ausentes else 'nenhum'}", ParagraphStyle("TX", fontSize=9.5, spaceAfter=10, textColor=DARK)))
 
     e.append(Paragraph("<b>NOTA FINAL</b>", ParagraphStyle("SE", fontSize=13, textColor=GOLD, fontName="Helvetica-Bold", spaceBefore=8, spaceAfter=8)))
-    e.append(Paragraph("A numerologia ilumina caminhos e revela potencialidades. Os numeros mostram tendencias, mas o livre arbitrio e sempre seu maior poder. Use este conhecimento para fazer escolhas mais conscientes.", ParagraphStyle("TX", fontSize=9.5, spaceAfter=15, textColor=DARK)))
+    e.append(Paragraph("A numerologia ilumina caminhos e revela potencialidades. Os numeros mostram tendencias, mas o livre arbitrio e sempre seu maior poder.", ParagraphStyle("TX", fontSize=9.5, spaceAfter=15, textColor=DARK)))
     e.append(Paragraph("© A1ELOS Assessoria e Consultoria", ParagraphStyle("FF", fontSize=7, textColor=GRAY, alignment=1)))
 
     doc.build(e)
@@ -229,6 +244,7 @@ def pdf17(data, name, bd_str):
 
 def send_email(to, subj, body, attach=None):
     if not SENDGRID_KEY:
+        logger.error("SendGrid nao configurado!")
         return False
     try:
         sg = SendGridAPIClient(SENDGRID_KEY)
@@ -237,7 +253,7 @@ def send_email(to, subj, body, attach=None):
             with open(attach, "rb") as f:
                 encoded = base64.b64encode(f.read()).decode()
             mail.attachment = Attachment(FileContent(encoded), FileName("Mapa_Numerologico.pdf"), FileType("application/pdf"), Disposition("attachment"))
-        sg.send(mail)
+        response = sg.send(mail)
         logger.info(f"Email enviado p/ {to}")
         return True
     except Exception as e:
@@ -310,7 +326,7 @@ def pay_stripe(req: PayReq):
         return {"payment_url":cs.url,"id":cs.id,"methods":['card']}
     except Exception as e:
         logger.error(f"Stripe: {e}")
-        raise HTTPException(500,f"Erro Stripe: {str(e)}")
+        raise HTTPException(500,f"Erro: {str(e)}")
 
 @app.get("/api/pay/success")
 def pay_success(request: Request):
@@ -328,16 +344,17 @@ def pay_success(request: Request):
         prod_meta = meta.get('product','')
         if not bd:
             bd = '2000-01-01'
-        total = getattr(s,'amount_total',None)
-        if total is None:
-            total = getattr(s,'amount_subtotal',0) or 0
+        total_cents = getattr(s,'amount_total',None)
+        if total_cents is None:
+            total_cents = getattr(s,'amount_subtotal',0) or 0
+        logger.info(f"Session: product_meta={prod_meta} total_cents={total_cents}")
+        if prod_meta == 'pdf17' or int(total_cents or 0) >= 1200:
+            product = 'pdf17'
         else:
-            total = int(total)
-        logger.info(f"Meta: product={prod_meta} total_cents={total}")
-        product = 'pdf17' if (prod_meta == 'pdf17' or total >= 1200) else 'pdf8'
-        logger.info(f"Produto detectado: {product}")
+            product = 'pdf8'
+        logger.info(f"Produto: {product}")
     except Exception as e:
-        logger.error(f"Erro sessao: {e}")
+        logger.error(f"Erro: {e}")
         return HTMLResponse(ERR.format(msg="Falha pagamento"))
     if not email:
         return HTMLResponse(ERR.format(msg="Email nao encontrado"))
@@ -345,11 +362,11 @@ def pay_success(request: Request):
     try:
         data = calc(name, bd)
         if product == 'pdf17':
-            logger.info(f"Gerando PDF COMPLETO p/ {name}")
+            logger.info("Gerando PDF COMPLETO")
             pf = pdf17(data, name, bd)
             subj = "Seu Mapa Numerologico Completo!"
         else:
-            logger.info(f"Gerando PDF EXPRESS p/ {name}")
+            logger.info("Gerando PDF EXPRESS")
             pf = pdf8(data, name, bd)
             subj = "Seu Mapa Numerologico!"
         body = f"Ola {name},\n\nDocumento anexo.\nVerifique o spam.\n\nA1ELOS"
