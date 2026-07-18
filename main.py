@@ -23,22 +23,19 @@ import dateutil.parser as dp
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# ═══════════════════════════════════════════════
-# CONFIGURAÇÕES — Variáveis de Ambiente (Render)
-# ═══════════════════════════════════════════════
+# ═══════════════════════════
+# CONFIG
+# ═══════════════════════════
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
 SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "")
 FROM_EMAIL = os.getenv("FROM_EMAIL", "arvigne@gmail.com")
-FROM_NAME = os.getenv("FROM_NAME", "Mapa Numerológico | A1ELOS")
+FROM_NAME = os.getenv("FROM_NAME", "Mapa Numerologico | A1ELOS")
 BASE_URL = os.getenv("BASE_URL", "https://numerologia-api-wd2q.onrender.com")
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./numerologia.db")
 
 if STRIPE_SECRET_KEY:
     stripe.api_key = STRIPE_SECRET_KEY
 
-# ═══════════════════════════════════════════════
-# BANCO DE DADOS (SQLite → PostgreSQL futuramente)
-# ═══════════════════════════════════════════════
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 Base = declarative_base()
 SessionLocal = sessionmaker(bind=engine)
@@ -68,15 +65,9 @@ class Order(Base):
 
 Base.metadata.create_all(bind=engine)
 
-# ═══════════════════════════════════════════════
-# FASTAPI APP
-# ═══════════════════════════════════════════════
 app = FastAPI(title="Numerologia API | A1ELOS")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
-# ═══════════════════════════════════════════════
-# MODELOS
-# ═══════════════════════════════════════════════
 class PayRequest(BaseModel):
     name: str
     email: str
@@ -86,9 +77,6 @@ class PayRequest(BaseModel):
     birth_date: Optional[str] = None
     lang: Optional[str] = "pt"
 
-# ═══════════════════════════════════════════════
-# FUNÇÕES DE CÁLCULO NUMEROLÓGICO
-# ═══════════════════════════════════════════════
 def reduce_to_single(n):
     while n > 9 and n not in (11, 22, 33):
         n = sum(int(d) for d in str(n))
@@ -113,202 +101,119 @@ def calc_numerology(name, birth_date):
         "destiny": reduce_to_single(reduce_to_single(exp) + life_path)
     }
 
-# ═══════════════════════════════════════════════
-# FUNÇÃO DE ENVIO DE E-MAIL VIA SENDGRID
-# ═══════════════════════════════════════════════
 def send_email(to_email, subject, content, attachment_path=None):
-    """Envia e-mail com SendGrid — com ou sem anexo PDF."""
     if not SENDGRID_API_KEY:
-        logger.warning("SendGrid não configurado — SENDGRID_API_KEY ausente")
+        logger.warning("SendGrid nao configurado")
         return False
     try:
         sg = SendGridAPIClient(SENDGRID_API_KEY)
-        mail = Mail(
-            from_email=Email(FROM_EMAIL, FROM_NAME),
-            to_emails=To(to_email),
-            subject=subject,
-            plain_text_content=Content("text/plain", content)
-        )
+        mail = Mail(from_email=Email(FROM_EMAIL, FROM_NAME), to_emails=To(to_email), subject=subject, plain_text_content=Content("text/plain", content))
         if attachment_path and os.path.exists(attachment_path):
             with open(attachment_path, "rb") as f:
                 encoded = base64.b64encode(f.read()).decode()
-            mail.attachment = Attachment(
-                FileContent(encoded),
-                FileName("Mapa_Numerologico.pdf"),
-                FileType("application/pdf"),
-                Disposition("attachment")
-            )
-        response = sg.send(mail)
-        logger.info(f"Email enviado via SendGrid para {to_email} — status {response.status_code}")
+            mail.attachment = Attachment(FileContent(encoded), FileName("Mapa_Numerologico.pdf"), FileType("application/pdf"), Disposition("attachment"))
+        sg.send(mail)
+        logger.info(f"Email enviado via SendGrid para {to_email}")
         return True
     except Exception as e:
-        logger.error(f"SendGrid erro ao enviar para {to_email}: {e}")
+        logger.error(f"SendGrid erro: {e}")
         return False
 
-# ═══════════════════════════════════════════════
-# FUNÇÃO DE GERAÇÃO DE PDF
-# ═══════════════════════════════════════════════
 def generate_pdf(data, name, birth_date_str):
-    """Gera PDF do mapa numerológico usando ReportLab."""
     pdf_path = f"/tmp/mapa_{uuid.uuid4().hex[:8]}.pdf"
     doc = SimpleDocTemplate(pdf_path, pagesize=A4, leftMargin=40, rightMargin=40, topMargin=40, bottomMargin=40)
-    
     title_style = ParagraphStyle("Title", fontSize=24, textColor=colors.HexColor("#C9A94E"), alignment=1, fontName="Helvetica-Bold", spaceAfter=10)
     name_style = ParagraphStyle("Name", fontSize=14, alignment=1, spaceAfter=4)
     section_style = ParagraphStyle("Section", fontSize=14, textColor=colors.HexColor("#C9A94E"), fontName="Helvetica-Bold", spaceBefore=14, spaceAfter=6)
     desc_style = ParagraphStyle("Desc", fontSize=10, spaceAfter=10, leading=14)
-    
     textos = {
-        1: "Líder nato, pioneiro, independente. Sua missão é inovar e abrir caminhos.",
-        2: "Diplomata, sensível, cooperativo. Sua missão é criar harmonia e unir pessoas.",
-        3: "Criativo, comunicador, otimista. Sua missão é espalhar alegria e inspirar.",
-        4: "Prático, disciplinado, confiável. Sua missão é construir bases sólidas.",
-        5: "Livre, versátil, aventureiro. Sua missão é explorar e inspirar liberdade.",
-        6: "Responsável, amoroso, protetor. Sua missão é servir e cuidar.",
-        7: "Sábio, analítico, espiritual. Sua missão é buscar a verdade.",
-        8: "Poderoso, realizador, próspero. Sua missão é manifestar abundância.",
-        9: "Humanitário, generoso, compassivo. Sua missão é servir à humanidade.",
-        11: "Mestre intuitivo. Inspira outros com sua visão espiritual elevada.",
+        1: "Lider nato, pioneiro, independente. Sua missao e inovar e abrir caminhos.",
+        2: "Diplomata, sensivel, cooperativo. Sua missao e criar harmonia e unir pessoas.",
+        3: "Criativo, comunicador, otimista. Sua missao e espalhar alegria e inspirar.",
+        4: "Pratico, disciplinado, confiavel. Sua missao e construir bases solidas.",
+        5: "Livre, versatil, aventureiro. Sua missao e explorar e inspirar liberdade.",
+        6: "Responsavel, amoroso, protetor. Sua missao e servir e cuidar.",
+        7: "Sabio, analitico, espiritual. Sua missao e buscar a verdade.",
+        8: "Poderoso, realizador, prospero. Sua missao e manifestar abundancia.",
+        9: "Humanitario, generoso, compassivo. Sua missao e servir a humanidade.",
+        11: "Mestre intuitivo. Inspira outros com sua visao espiritual elevada.",
         22: "Mestre construtor. Transforma sonhos em realidade concreta.",
-        33: "Mestre do amor incondicional. Canal de cura e compaixão."
+        33: "Mestre do amor incondicional. Canal de cura e compaixao."
     }
-    
     elements = []
-    elements.append(Paragraph("MAPA NUMEROLÓGICO", title_style))
+    elements.append(Paragraph("MAPA NUMEROLOGICO", title_style))
     elements.append(Paragraph(f"<b>Nome:</b> {name}", name_style))
     elements.append(Paragraph(f"<b>Data:</b> {birth_date_str}", name_style))
     elements.append(Spacer(1, 15))
-    
-    table_data = [
-        ["Número", "Valor"],
-        ["Caminho de Vida", str(data["life_path"])],
-        ["Expressão", str(data["expression"])],
-        ["Motivação da Alma", str(data["soul_urge"])],
-        ["Personalidade", str(data["personality"])],
-        ["Destino", str(data["destiny"])],
-    ]
+    table_data = [["Numero", "Valor"],["Caminho de Vida", str(data["life_path"])],["Expressao", str(data["expression"])],["Motivacao da Alma", str(data["soul_urge"])],["Personalidade", str(data["personality"])],["Destino", str(data["destiny"])]]
     t = Table(table_data, colWidths=[200, 100])
-    t.setStyle(TableStyle([
-        ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#C9A94E")),
-        ("TEXTCOLOR", (0,0), (-1,0), colors.white),
-        ("FONTSIZE", (0,0), (-1,-1), 10),
-        ("GRID", (0,0), (-1,-1), 1, colors.grey),
-        ("ALIGN", (1,0), (1,-1), "CENTER"),
-        ("BACKGROUND", (0,1), (-1,-1), colors.HexColor("#1a1a1a")),
-        ("TEXTCOLOR", (0,1), (-1,-1), colors.white),
-    ]))
+    t.setStyle(TableStyle([("BACKGROUND",(0,0),(-1,0),colors.HexColor("#C9A94E")),("TEXTCOLOR",(0,0),(-1,0),colors.white),("FONTSIZE",(0,0),(-1,-1),10),("GRID",(0,0),(-1,-1),1,colors.grey),("ALIGN",(1,0),(1,-1),"CENTER"),("BACKGROUND",(0,1),(-1,-1),colors.HexColor("#1a1a1a")),("TEXTCOLOR",(0,1),(-1,-1),colors.white)]))
     elements.append(t)
     elements.append(Spacer(1, 20))
-    
-    for key, label in [("life_path", "Caminho de Vida"), ("expression", "Expressão"),
-                        ("soul_urge", "Motivação da Alma"), ("personality", "Personalidade"),
-                        ("destiny", "Destino")]:
+    for key, label in [("life_path","Caminho de Vida"),("expression","Expressao"),("soul_urge","Motivacao da Alma"),("personality","Personalidade"),("destiny","Destino")]:
         v = data[key]
         elements.append(Paragraph(f"<b>{label} — {v}</b>", section_style))
-        elements.append(Paragraph(textos.get(v, "Energia única e especial."), desc_style))
-    
+        elements.append(Paragraph(textos.get(v, "Energia unica e especial."), desc_style))
     elements.append(Spacer(1, 25))
     elements.append(Paragraph("© A1ELOS Assessoria e Consultoria", ParagraphStyle("Footer", fontSize=8, textColor=colors.grey, alignment=1)))
-    
     doc.build(elements)
     return pdf_path
 
-# ═══════════════════════════════════════════════
-# ROTAS DA API
-# ═══════════════════════════════════════════════
-
-# Rota raiz — serve o index.html
-INDEX_PATH = os.path.join(os.path.dirname(__file__), "index.html")
+# ═══════════════════════════
+# ROTAS
+# ═══════════════════════════
 
 @app.get("/", response_class=HTMLResponse)
 def root():
     try:
-        if os.path.exists(INDEX_PATH):
-            with open(INDEX_PATH, "r", encoding="utf-8") as f:
+        path = os.path.join(os.path.dirname(__file__), "index.html")
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
                 return HTMLResponse(f.read())
     except Exception as e:
         logger.error(f"Erro ao ler index.html: {e}")
-    return HTMLResponse("""
-    <html><body style="background:#0a0a0a;color:#C9A94E;
-    display:flex;align-items:center;justify-content:center;
-    min-height:100vh;font-family:sans-serif">
-    <div style="text-align:center">
-    <h1>🔮 Mapa Numerológico | A1ELOS</h1>
-    <p style="color:#aaa">API ativa — versão 2.0</p>
-    </div></body></html>
-    """)
+    return HTMLResponse("<html><body style='background:#0a0a0a;color:#C9A94E;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>🔮 Mapa Numerologico | A1ELOS</h1><p style='color:#aaa'>API ativa</p></div></body></html>")
 
 @app.get("/api/health")
 def health():
-    return {
-        "status": "ok",
-        "service": "numerologia-api",
-        "version": "2.0.0",
-        "sendgrid": bool(SENDGRID_API_KEY),
-        "stripe": bool(STRIPE_SECRET_KEY)
-    }
+    return {"status": "ok", "service": "numerologia-api", "version": "2.0.0", "sendgrid": bool(SENDGRID_API_KEY), "stripe": bool(STRIPE_SECRET_KEY)}
 
 @app.post("/calculate")
 def calculate(req: PayRequest):
-    """Cálculo gratuito do mapa numerológico."""
     db = SessionLocal()
     try:
         if not req.name or len(req.name.strip()) < 2:
             raise HTTPException(400, "Nome muito curto")
         if not req.birth_date:
-            raise HTTPException(400, "Data de nascimento obrigatória")
-        
+            raise HTTPException(400, "Data de nascimento obrigatoria")
         result = calc_numerology(req.name, req.birth_date)
         calc_id = uuid.uuid4().hex[:8]
-        calc = Calculation(
-            id=calc_id, name=req.name, birth_date=req.birth_date,
-            email=req.email, **result
-        )
+        calc = Calculation(id=calc_id, name=req.name, birth_date=req.birth_date, email=req.email, **result)
         db.add(calc)
         db.commit()
         return {"id": calc_id, **result}
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Erro no cálculo: {e}")
-        raise HTTPException(500, "Erro interno no cálculo")
+        logger.error(f"Erro no calculo: {e}")
+        raise HTTPException(500, "Erro interno no calculo")
     finally:
         db.close()
 
 @app.post("/api/pay/stripe")
 def pay_stripe(req: PayRequest):
-    """Cria sessão de checkout no Stripe com lang para redirecionamento."""
     if not STRIPE_SECRET_KEY:
-        raise HTTPException(503, "Stripe não configurado — chave ausente")
+        raise HTTPException(503, "Stripe nao configurado")
     if not req.price or req.price <= 0:
-        raise HTTPException(400, "Preço inválido")
-    
+        raise HTTPException(400, "Preco invalido")
     try:
         checkout = stripe.checkout.Session.create(
-            mode='payment',
-            payment_method_types=['card'],
-            line_items=[{
-                'price_data': {
-                    'currency': 'brl',
-                    'product_data': {
-                        'name': f"Mapa Numerológico - {req.product}",
-                        'description': f"Produto: {req.product}"
-                    },
-                    'unit_amount': int(req.price * 100),
-                },
-                'quantity': 1,
-            }],
+            mode='payment', payment_method_types=['card'],
+            line_items=[{'price_data': {'currency': 'brl', 'product_data': {'name': req.product}, 'unit_amount': int(req.price * 100)}, 'quantity': 1}],
             customer_email=req.email,
-            metadata={
-                "product": req.product,
-                "calculation_id": req.calculation_id or "",
-                "name": req.name,
-                "birth_date": req.birth_date or "",
-                "lang": req.lang
-            },
+            metadata={"product": req.product, "calculation_id": req.calculation_id or "", "name": req.name, "birth_date": req.birth_date or "", "lang": req.lang},
             success_url=f"{BASE_URL}/api/pay/success?session_id={{CHECKOUT_SESSION_ID}}",
-            cancel_url=f"{BASE_URL}/api/pay/cancel"
-        )
+            cancel_url=f"{BASE_URL}/api/pay/cancel")
         return {"payment_url": checkout.url, "id": checkout.id}
     except Exception as e:
         logger.error(f"Stripe erro: {e}")
@@ -316,11 +221,9 @@ def pay_stripe(req: PayRequest):
 
 @app.get("/api/pay/success")
 def pay_success(request: Request):
-    """Processa pagamento aprovado e envia PDF por e-mail via SendGrid."""
     session_id = request.query_params.get("session_id", "")
     if not session_id:
-        return HTMLResponse(ERROR_HTML.format(msg="Sessão não informada"), status_code=400)
-    
+        return HTMLResponse("<html><body style='background:#0a0a0a;color:#e74c3c;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>❌ Sessao nao informada</h1><a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>")
     try:
         session = stripe.checkout.Session.retrieve(session_id)
         meta = session.get("metadata", {})
@@ -330,118 +233,31 @@ def pay_success(request: Request):
         birth_date = meta.get("birth_date", "")
         lang = meta.get("lang", "pt")
     except Exception as e:
-        logger.error(f"Erro ao recuperar sessão Stripe: {e}")
-        return HTMLResponse(ERROR_HTML.format(msg="Erro ao confirmar pagamento"), status_code=400)
-    
+        logger.error(f"Erro ao recuperar sessao Stripe: {e}")
+        return HTMLResponse("<html><body style='background:#0a0a0a;color:#e74c3c;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>❌ Erro ao confirmar pagamento</h1><a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>")
     if not email:
-        return HTMLResponse(ERROR_HTML.format(msg="Email não encontrado na sessão"), status_code=400)
-    
-    # Gera o mapa e envia o PDF por email
+        return HTMLResponse("<html><body style='background:#0a0a0a;color:#e74c3c;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>❌ Email nao encontrado</h1><a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>")
     pdf_sent = False
     try:
         data = calc_numerology(name, birth_date or "2000-01-01")
         pdf_path = generate_pdf(data, name, birth_date or "")
-        
-        subject = "✅ Seu Mapa Numerológico está pronto!"
-        content = f"""
-Olá {name},
-
-Seu mapa numerológico foi gerado com sucesso!
-
-📊 Seus Números:
-- Caminho de Vida: {data['life_path']}
-- Expressão: {data['expression']}
-- Motivação da Alma: {data['soul_urge']}
-- Personalidade: {data['personality']}
-- Destino: {data['destiny']}
-
-O PDF completo está anexo a este e-mail.
-
-Atenciosamente,
-A1ELOS Assessoria e Consultoria
-https://a1elos.com.br
-        """
-        
+        subject = "Seu Mapa Numerologico esta pronto!"
+        content = f"Ola {name},\n\nSeu mapa numerologico foi gerado com sucesso!\n\nCaminho de Vida: {data['life_path']}\nExpressao: {data['expression']}\nMotivacao da Alma: {data['soul_urge']}\nPersonalidade: {data['personality']}\nDestino: {data['destiny']}\n\nO PDF completo esta em anexo.\n\nAtenciosamente,\nA1ELOS Assessoria e Consultoria"
         sent = send_email(email, subject, content, pdf_path)
         if sent:
             pdf_sent = True
-            logger.info(f"PDF enviado com sucesso para {email}")
-        
         if os.path.exists(pdf_path):
             os.remove(pdf_path)
-            
     except Exception as e:
         logger.error(f"Erro ao gerar/enviar PDF: {e}")
-    
     if pdf_sent:
-        return HTMLResponse(SUCCESS_HTML)
-    else:
-        return HTMLResponse(ERROR_HTML.format(msg="Pagamento confirmado, mas houve erro ao enviar o e-mail. Entraremos em contato."))
+        return HTMLResponse("<html><body style='background:#0a0a0a;color:#C9A94E;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>✅ Pagamento Confirmado!</h1><p style='color:#aaa'>Seu PDF foi enviado por e-mail.</p><a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>")
+    return HTMLResponse("<html><body style='background:#0a0a0a;color:#e74c3c;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>❌ Erro ao processar</h1><p style='color:#aaa'>Pagamento confirmado mas houve erro ao enviar o e-mail.</p><a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>")
 
 @app.get("/api/pay/cancel")
 def pay_cancel():
-    """Página exibida quando o usuário cancela o pagamento."""
-    return HTMLResponse(CANCEL_HTML)
+    return HTMLResponse("<html><body style='background:#0a0a0a;color:#e67e22;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif'><div style='text-align:center'><h1>⏸️ Pagamento nao concluido</h1><p style='color:#aaa'>Tente novamente quando quiser.</p><a href='/' style='color:#C9A94E'>Voltar</a></div></body></html>")
 
-# ═══════════════════════════════════════════════
-# HTML DAS PÁGINAS DE RESPOSTA (SUCCESS / ERROR / CANCEL)
-# ═══════════════════════════════════════════════
-SUCCESS_HTML = """<!DOCTYPE html>
-<html lang="pt-BR">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pagamento Confirmado | Mapa Numerológico</title>
-<style>body{background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
-.container{text-align:center;max-width:500px;padding:40px}
-h1{color:#C9A94E;font-size:2rem;margin-bottom:10px}
-p{color:#aaa;line-height:1.6;margin-bottom:20px}
-.btn{display:inline-block;padding:12px 30px;background:#C9A94E;color:#0a0a0a;text-decoration:none;border-radius:50px;font-weight:700}
-.gold{color:#C9A94E}
-</style></head>
-<body>
-<div class="container">
-<h1>✅ Pagamento Confirmado!</h1>
-<p>Seu <span class="gold">Mapa Numerológico</span> foi gerado e será enviado para o seu e-mail em instantes.</p>
-<p style="font-size:0.85rem;color:#777">Verifique sua caixa de entrada e a pasta de spam.</p>
-<a href="/" class="btn">Voltar ao Site</a>
-</div></body></html>"""
-
-ERROR_HTML = """<!DOCTYPE html>
-<html lang="pt-BR">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Erro | Mapa Numerológico</title>
-<style>body{background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
-.container{text-align:center;max-width:500px;padding:40px}
-h1{color:#e74c3c;font-size:1.8rem;margin-bottom:10px}
-p{color:#aaa;line-height:1.6;margin-bottom:20px}
-.btn{display:inline-block;padding:12px 30px;background:#C9A94E;color:#0a0a0a;text-decoration:none;border-radius:50px;font-weight:700}
-</style></head>
-<body>
-<div class="container">
-<h1>❌ {msg}</h1>
-<p>Entre em contato pelo e-mail <strong style="color:#C9A94E">arvigne@gmail.com</strong> para resolvermos.</p>
-<a href="/" class="btn">Voltar ao Site</a>
-</div></body></html>"""
-
-CANCEL_HTML = """<!DOCTYPE html>
-<html lang="pt-BR">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pagamento Cancelado | Mapa Numerológico</title>
-<style>body{background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
-.container{text-align:center;max-width:500px;padding:40px}
-h1{color:#e67e22;font-size:1.8rem;margin-bottom:10px}
-p{color:#aaa;line-height:1.6;margin-bottom:20px}
-.btn{display:inline-block;padding:12px 30px;background:#C9A94E;color:#0a0a0a;text-decoration:none;border-radius:50px;font-weight:700}
-</style></head>
-<body>
-<div class="container">
-<h1>⏸️ Pagamento não concluído</h1>
-<p>Seu pedido foi cancelado ou não foi processado. Se desejar, tente novamente.</p>
-<a href="/" class="btn">Voltar ao Site</a>
-</div></body></html>"""
-
-# ═══════════════════════════════════════════════
-# INICIALIZAÇÃO
-# ═══════════════════════════════════════════════
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", "10000"))
