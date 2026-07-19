@@ -99,15 +99,12 @@ CARGO_INFO = {
 }
 
 ENERGIA_INFO = {
-    1: "Lideranca, independencia, originalidade. O numero do comeco, do pioneiro, do lider nato.",
-    2: "Cooperacao, diplomacia, sensibilidade. O numero da parceria e da harmonia.",
-    3: "Criatividade, comunicacao, alegria. O numero da expressao artistica e do carisma.",
-    4: "Trabalho, disciplina, estabilidade. O numero da construcao solida.",
-    5: "Liberdade, aventura, versatilidade. O numero da mudanca e da adaptacao.",
-    6: "Familia, amor, responsabilidade. O numero do cuidado e da harmonia.",
-    7: "Sabedoria, espiritualidade, analise. O numero do conhecimento profundo.",
-    8: "Poder, prosperidade, realizacao material. IDEAL para politicos, lideres e candidatos a cargos eletivos. Representa autoridade, sucesso e capacidade de realizar grandes obras.",
-    9: "Humanitarismo, comp放松ao, generosidade. O numero da sabedoria universal."
+    1: "Lideranca, independencia, originalidade.", 2: "Cooperacao, diplomacia, sensibilidade.",
+    3: "Criatividade, comunicacao, alegria.", 4: "Trabalho, disciplina, estabilidade.",
+    5: "Liberdade, aventura, versatilidade.", 6: "Familia, amor, responsabilidade.",
+    7: "Sabedoria, espiritualidade, analise.",
+    8: "Poder, prosperidade, realizacao material. IDEAL para politicos.",
+    9: "Humanitarismo, comp放松ao, generosidade."
 }
 
 def suggest_with_cargo(nome, cargo_key, max_sug=3):
@@ -141,13 +138,9 @@ def validar_nomes_urna(nomes, cargo_key):
         energia = r1(soma_total)
         explicacao_base = ENERGIA_INFO.get(energia, f"Energia {energia}.")
         if energia == 8:
-            explicacao = f"O nome '{nome.strip().title()}' atingiu ENERGIA 8! {explicacao_base} Por isso, este nome e o ideal para sua candidatura."
+            explicacao = f"O nome '{nome.strip().title()}' atingiu ENERGIA 8! {explicacao_base} Este nome e o ideal para sua candidatura."
         else:
-            diff = abs(8 - energia)
-            if diff <= 2:
-                explicacao = f"O nome '{nome.strip().title()}' tem energia {energia}, proxima do 8 mas nao a ideal. {explicacao_base} Para campanhas eleitorais, o numero 8 (Poder e Prosperidade) e o mais indicado."
-            else:
-                explicacao = f"O nome '{nome.strip().title()}' tem energia {energia}. {explicacao_base} Esta energia nao e a ideal para candidaturas politicas."
+            explicacao = f"O nome '{nome.strip().title()}' tem energia {energia}. {explicacao_base} O numero 8 (Poder e Prosperidade) e o mais indicado."
         results.append({'nome': nome.strip().title(), 'energia': energia, 'soma': soma_total, 'eh_ideal': energia == 8, 'explicacao': explicacao, 'letras': letras})
     ideal = any(r['eh_ideal'] for r in results)
     sugestoes = []
@@ -194,18 +187,7 @@ FONTE = "Helvetica"; FONTE_NEGRITO = "Helvetica-Bold"
 TAM_TITULO = 20; TAM_SUBTITULO = 18; TAM_CORPO = 14
 ESPACO_LINHA = TAM_CORPO * 1.5; ESPACO_TITULO_TEXTO = TAM_TITULO * 2.0
 
-SIG = {
-1:("Individualidade","Simbolo:Circulo.Sol.Fogo.Amarelo.Coracao.Original,criativo,lider nato.","Egoista,arrogante,dominador.","Desenvolver humildade."),
-2:("Associacao","Simbolo:Semicirculo.Lua.Agua.Verde.Diplomatico,sensivel.","Indeciso,carente,submisso.","Desenvolver autoconfianca."),
-3:("Criacao","Simbolo:Triangulo.Jupiter.Ar.Violeta.Criativo,comunicativo.","Superficial,disperso.","Desenvolver foco."),
-4:("Trabalho","Simbolo:Quadrado.Urano.Terra.Azul.Pratico,disciplinado.","Rigido,teimoso.","Desenvolver flexibilidade."),
-5:("Liberdade","Simbolo:Estrela.Mercurio.Ar.Laranja.Livre,versatil.","Impulsivo,irresponsavel.","Equilibrar liberdade e responsabilidade."),
-6:("Familia","Simbolo:Hexagono.Venus.Terra.Rosa.Amoroso,protetor.","Superprotetor,intrometido.","Amar sem controlar."),
-7:("Sabedoria","Simbolo:Heptagono.Netuno.Agua.Indigo.Sabio,analitico.","Frio,sarcastico.","Equilibrar razao e emocao."),
-8:("Poder","Simbolo:Octogono.Saturno.Terra.Vermelho.Realizador,prospero.","Materialista,autoritario.","Usar o poder com integridade."),
-9:("Humanidade","Simbolo:Nonagono.Marte.Fogo.Carmim.Humanitario,generoso.","Melancolico,disperso.","Perdoar e deixar ir."),
-11:("Mestre Inspirador","Intuitivo,iluminado.","Ansioso,distante.","Equilibrar espiritual e material."),
-22:("Mestre Construtor","Realizador pratico.","Ambicioso excessivo.","Construir sem se escravizar.")}
+SIG = {1:("Individualidade","Original,criativo,lider nato.","Egoista,arrogante.","Humildade."),2:("Associacao","Diplomatico,sensivel.","Indeciso,carente.","Autoconfianca."),3:("Criacao","Criativo,comunicativo.","Superficial,disperso.","Foco."),4:("Trabalho","Pratico,disciplinado.","Rigido,teimoso.","Flexibilidade."),5:("Liberdade","Livre,versatil.","Impulsivo.","Responsabilidade."),6:("Familia","Amoroso,protetor.","Superprotetor.","Confiar."),7:("Sabedoria","Sabio,analitico.","Frio,sarcastico.","Compartilhar."),8:("Poder","Realizador,prospero.","Materialista.","Integridade."),9:("Humanidade","Humanitario,generoso.","Melancolico.","Perdoar."),11:("Mestre Inspirador","Intuitivo.","Ansioso.","Equilibrar."),22:("Mestre Construtor","Realizador.","Ambicioso.","Equilibrar.")}
 CAM = {1:("Realizacao","Sua missao e abrir caminhos."),2:("Paz","Cooperar."),3:("Alegria","Comunicar."),4:("Acao","Construir."),5:("Evolucao","Experimentar."),6:("Conciliacao","Servir."),7:("Sabedoria","Buscar a verdade."),8:("Justica","Prosperar."),9:("Humanitarismo","Servir."),11:("Inspiracao","Iluminar."),22:("Construcao","Realizar.")}
 DES = {0:"Equilibrio.",1:"Superar egoismo.",2:"Vencer timidez.",3:"Foco.",4:"Flexibilidade.",5:"Responsabilidade.",6:"Confiar.",7:"Compartilhar.",8:"Etica.",9:"Concluir."}
 VIB = {1:"Lider nato.",2:"Sensivel.",3:"Criativo.",4:"Trabalhador.",5:"Livre.",6:"Amoroso.",7:"Sabio.",8:"Realizador.",9:"Humanitario."}
@@ -257,8 +239,7 @@ def pdf17(data, name, bd_str):
     e.append(Paragraph("<b>Analise Detalhada</b>", SEC))
     for k,l in [("life_path","Caminho de Vida"),("expression","Expressao"),("soul_urge","Motivacao da Alma"),("personality","Personalidade"),("destiny","Destino")]:
         v = data[k]; nm, pos, neg, licao = SIG.get(v, ("", "", "", ""))
-        e.append(Paragraph(f"<b>{l} {v} - {nm}</b>", BOLD))
-        e.append(Paragraph(pos, JUST_PEQ))
+        e.append(Paragraph(f"<b>{l} {v} - {nm}</b>", BOLD)); e.append(Paragraph(pos, JUST_PEQ))
         e.append(Paragraph(f"<b>Negativo:</b> {neg}", JUST_PEQ)); e.append(Paragraph(f"<b>Licao:</b> {licao}", JUST_PEQ))
     fe = max(36-min(lp,36),25); c1n = r1(lp+data["expression"]); c2n = r1(data["expression"]+data["soul_urge"]); c3n = r1(data["soul_urge"]+data["personality"])
     e.append(Paragraph("<b>Ciclos da Vida</b>", SEC))
@@ -305,33 +286,23 @@ def pdf_urna_validation(nome_completo, cargo_label, resultados, sugestoes):
     e.append(Paragraph(nome_pessoa, ParagraphStyle("NM",fontName=FONTE_NEGRITO,fontSize=TAM_CORPO+2,alignment=TA_CENTER,textColor=DARK,spaceAfter=4)))
     e.append(Paragraph(f"Cargo: {cargo_label}", ParagraphStyle("DT",fontName=FONTE,fontSize=TAM_CORPO-2,alignment=TA_CENTER,textColor=GRAY,spaceAfter=ESPACO_LINHA)))
     e.append(Paragraph("<b>Por que a energia 8?</b>", SEC))
-    e.append(Paragraph("Na numerologia, o numero 8 e o numero do Poder, da Prosperidade e da Realizacao material. Para candidatos politicos, o 8 e a energia ideal porque vibra na frequencia da conquista, da influencia e da capacidade de realizar grandes obras.", JUST))
-    e.append(Paragraph("<b>Calculo numerologico:</b> Cada letra possui um valor de 1 a 9. Somamos todos os valores do nome e reduzimos a um digito.", JUST))
+    e.append(Paragraph("Na numerologia, o numero 8 e o numero do Poder, da Prosperidade e da Realizacao. Para candidatos politicos, o 8 e ideal porque vibra na frequencia da conquista e da influencia.", JUST))
     if tem_ideal:
         e.append(Paragraph("ENERGIA 8 ALCANCADA!", VERDE))
         ideal = next(r for r in resultados if r['eh_ideal'])
         e.append(Paragraph(f"<b>Nome Ideal: {ideal['nome']}</b>", ParagraphStyle("NM2",fontName=FONTE_NEGRITO,fontSize=TAM_CORPO+2,alignment=TA_CENTER,textColor=GOLD,spaceAfter=ESPACO_LINHA)))
-    else:
-        e.append(Paragraph("<b>Nenhum nome atingiu a energia 8 ideal.</b>", ParagraphStyle("TX",fontName=FONTE_NEGRITO,fontSize=TAM_CORPO,textColor=colors.HexColor("#e67e22"),alignment=TA_LEFT,spaceAfter=ESPACO_LINHA*0.5)))
     e.append(Paragraph("Analise dos Nomes", SEC))
     for r in resultados:
-        icone = "S" if r['eh_ideal'] else "X"
-        cor = "#4CAF50" if r['eh_ideal'] else "#e74c3c"
+        icone = "S" if r['eh_ideal'] else "X"; cor = "#4CAF50" if r['eh_ideal'] else "#e74c3c"
         e.append(Paragraph(f"{icone} <b>{r['nome']}</b> - Energia <font color='{cor}'><b>{r['energia']}</b></font> (soma = {r['soma']})", BOLD))
         if r['letras']:
             letras_str = ", ".join([f'{l["letra"]}={l["valor"]}' for l in r['letras']])
             e.append(Paragraph(f"<i>Calculo: {letras_str} -> soma {r['soma']} -> {r['energia']}</i>", ParagraphStyle("TC",fontName=FONTE,fontSize=TAM_CORPO-2,leading=ESPACO_LINHA*0.7,textColor=GRAY,spaceAfter=ESPACO_LINHA*0.2)))
         e.append(Paragraph(r['explicacao'], JUST))
     if sugestoes:
-        e.append(Spacer(1,ESPACO_LINHA*0.5))
         e.append(Paragraph("Sugestoes com Cargo", SEC))
         for s in sugestoes[:3]:
-            texto = f'<b>{s["nome"]}</b> - Energia {s["energia"]}'
-            if s['eh_ideal']: texto += ' S IDEAL'
-            e.append(Paragraph(texto, ParagraphStyle("TX3",fontName=FONTE,fontSize=TAM_CORPO,leading=ESPACO_LINHA,textColor=DARK,spaceAfter=ESPACO_LINHA*0.3)))
-            if s['eh_ideal']:
-                e.append(Paragraph("A combinacao do cargo com o nome atingiu energia 8!", JUST))
-    e.append(Spacer(1,ESPACO_LINHA))
+            e.append(Paragraph(f'<b>{s["nome"]}</b> - Energia {s["energia"]}', ParagraphStyle("TX3",fontName=FONTE,fontSize=TAM_CORPO,leading=ESPACO_LINHA,textColor=DARK,spaceAfter=ESPACO_LINHA*0.3)))
     e.append(Paragraph("(c) A1ELOS - Numerologia aplicada ao sucesso eleitoral", ParagraphStyle("FF",fontName=FONTE,fontSize=8,textColor=GRAY,alignment=TA_CENTER)))
     doc.build(e); return path
 
@@ -346,13 +317,11 @@ def pdf_eleitoral_validation(sigla_str, cargo_label, sugestoes, numero_existente
     energias_info = {8:"Poder e Prosperidade (ideal)",7:"Sabedoria",3:"Criacao e Brilho",1:"Lideranca",9:"Humanitarismo",5:"Liberdade",6:"Familia",4:"Trabalho",2:"Associacao"}
     e.append(Spacer(1,25))
     e.append(Paragraph("NUMERO ELEITORAL - SUGESTOES", TIT))
-    e.append(Paragraph(f"Cargo: {cargo_label}", ParagraphStyle("DT",fontName=FONTE,fontSize=TAM_CORPO-2,alignment=TA_CENTER,textColor=GRAY,spaceAfter=ESPACO_LINHA*0.3)))
-    e.append(Paragraph(f"Sigla: {sigla_str}", ParagraphStyle("DT2",fontName=FONTE,fontSize=TAM_CORPO-2,alignment=TA_CENTER,textColor=GRAY,spaceAfter=ESPACO_LINHA)))
+    e.append(Paragraph(f"Cargo: {cargo_label} | Sigla: {sigla_str}", ParagraphStyle("DT",fontName=FONTE,fontSize=TAM_CORPO-2,alignment=TA_CENTER,textColor=GRAY,spaceAfter=ESPACO_LINHA)))
     e.append(Paragraph("<b>Por que a energia 8?</b>", SEC))
-    e.append(Paragraph("Na numerologia, o numero 8 e o numero do Poder, da Prosperidade e da Realizacao. Para numeros eleitorais, o 8 e ideal porque representa autoridade, capacidade de execucao e sucesso nas urnas. Um numero com energia 8 potencializa a campanha e atrai vibracoes positivas de conquista e lideranca.", JUST))
+    e.append(Paragraph("Na numerologia, o numero 8 e o numero do Poder, da Prosperidade e da Realizacao. Para numeros eleitorais, o 8 e ideal porque representa autoridade, capacidade de execucao e sucesso nas urnas.", JUST))
     e.append(Paragraph("Sugestoes de Numeros", SEC))
-    ideals = [s for s in sugestoes if s.get('ideal')]
-    fallbacks = [s for s in sugestoes if not s.get('ideal')]
+    ideals = [s for s in sugestoes if s.get('ideal')]; fallbacks = [s for s in sugestoes if not s.get('ideal')]
     if ideals:
         e.append(Paragraph("<b>Opcoes com Energia 8 (Ideal):</b>", BOLD))
         for s in ideals:
@@ -364,11 +333,9 @@ def pdf_eleitoral_validation(sigla_str, cargo_label, sugestoes, numero_existente
             info = energias_info.get(s['energia'], f"Energia {s['energia']}")
             e.append(Paragraph(f"{s['numero']} - Energia {s['energia']} - {info}", ParagraphStyle("TX2",fontName=FONTE,fontSize=TAM_CORPO-1,leading=ESPACO_LINHA*0.9,textColor=DARK,spaceAfter=ESPACO_LINHA*0.3)))
     if numero_existente:
-        e.append(Spacer(1,ESPACO_LINHA))
         e.append(Paragraph("Analise do Numero Existente", SEC))
         e.append(Paragraph(f"Numero: {numero_existente['numero']} - Energia {numero_existente['energia']} - {numero_existente['interpretacao']}", ParagraphStyle("TX3",fontName=FONTE,fontSize=TAM_CORPO,leading=ESPACO_LINHA,textColor=DARK,spaceAfter=ESPACO_LINHA*0.5)))
-    e.append(Spacer(1,ESPACO_LINHA))
-    e.append(Paragraph("Atencao: Verifique a disponibilidade do numero com seu partido antes de escolher. A prioridade de uso e de quem ja concorreu com aquele numero por antiguidade na sigla.", ParagraphStyle("AV",fontName=FONTE,fontSize=TAM_CORPO-2,leading=ESPACO_LINHA*0.7,textColor=GRAY,spaceAfter=ESPACO_LINHA)))
+    e.append(Paragraph("Atencao: Verifique a disponibilidade do numero com seu partido.", ParagraphStyle("AV",fontName=FONTE,fontSize=TAM_CORPO-2,leading=ESPACO_LINHA*0.7,textColor=GRAY,spaceAfter=ESPACO_LINHA)))
     e.append(Paragraph("(c) A1ELOS - Numerologia aplicada ao sucesso eleitoral", ParagraphStyle("FF",fontName=FONTE,fontSize=8,textColor=GRAY,alignment=TA_CENTER)))
     doc.build(e); return path
 
@@ -383,6 +350,7 @@ def send_email(to, subj, body, attach=None):
         sg.send(mail); logger.info(f"Email p/ {to}"); return True
     except Exception as e: logger.error(f"Falha email: {e}"); return False
 
+# ───── URNA ─────
 @app.post("/api/pay/urna-session")
 def pay_urna_session(req: UrnaPayReq):
     if not STRIPE_KEY: raise HTTPException(503,"Stripe nao configurado")
@@ -414,7 +382,7 @@ def pay_urna_success(request: Request):
         email = meta.get('email','') or getattr(s,'customer_email','')
         nomes = [meta.get(f'nome{i}','') for i in range(1,6) if meta.get(f'nome{i}','')]
         if not nomes: return HTMLResponse(ERR.format(msg="Dados nao encontrados"))
-    except Exception as e: logger.error(f"Erro: {e}"); return HTMLResponse(ERR.format(msg="Falha ao processar"))
+    except: return HTMLResponse(ERR.format(msg="Falha ao processar"))
     try:
         resultados, ideal, sugestoes = validar_nomes_urna(nomes, cargo)
         cargo_label = CARGO_INFO.get(cargo, {}).get('label', cargo)
@@ -426,8 +394,9 @@ def pay_urna_success(request: Request):
         if pf and os.path.exists(pf): os.remove(pf)
         if enviado: return HTMLResponse(URNA_OK)
         return HTMLResponse(URNA_ERR)
-    except Exception as e: logger.error(f"ERRO: {e}"); import traceback; logger.error(traceback.format_exc()); return HTMLResponse(ERR.format(msg="Erro. Contate arvigne@gmail.com"))
+    except: import traceback; logger.error(traceback.format_exc()); return HTMLResponse(ERR.format(msg="Erro. Contate arvigne@gmail.com"))
 
+# ───── ELEITORAL ─────
 @app.post("/api/pay/eleitoral-session")
 def pay_eleitoral_session(req: EleitoralPayReq):
     if not STRIPE_KEY: raise HTTPException(503,"Stripe nao configurado")
@@ -444,7 +413,7 @@ def pay_eleitoral_session(req: EleitoralPayReq):
             'cancel_url':f"{BASE_URL}/api/pay/cancel"}
         cs = stripe.checkout.Session.create(**params)
         return {"payment_url":cs.url,"id":cs.id}
-    except Exception as e: logger.error(f"Stripe: {e}"); raise HTTPException(500,"Erro")
+    except: raise HTTPException(500,"Erro")
 
 @app.get("/api/pay/eleitoral-success")
 def pay_eleitoral_success(request: Request):
@@ -456,41 +425,40 @@ def pay_eleitoral_success(request: Request):
         if hasattr(meta,'to_dict'): meta = meta.to_dict()
         sigla = int(meta.get('sigla','0')); cargo = meta.get('cargo','vereador')
         email = meta.get('email','') or getattr(s,'customer_email','')
-        numero_existente_str = meta.get('numero_existente','')
         if not email: return HTMLResponse(ERR.format(msg="Email nao encontrado"))
-    except Exception as e: logger.error(f"Erro: {e}"); return HTMLResponse(ERR.format(msg="Falha ao processar"))
+        ne_str = meta.get('numero_existente','')
+    except: return HTMLResponse(ERR.format(msg="Falha ao processar"))
     try:
         sigla_str = str(sigla).zfill(2)
-        cargos_label = {'vereador':'Vereador','dep_estadual':'Deputado Estadual','dep_federal':'Deputado Federal','senador':'Senador'}
-        cargo_label = cargos_label.get(cargo, cargo)
+        cl = {'vereador':'Vereador','dep_estadual':'Deputado Estadual','dep_federal':'Deputado Federal','senador':'Senador'}
+        cargo_label = cl.get(cargo, cargo)
         sugestoes = gerar_numeros_eleitorais(sigla, cargo)
-        energias_info = {8:"Poder e Prosperidade (ideal)",7:"Sabedoria",3:"Criacao e Brilho",1:"Lideranca",9:"Humanitarismo",5:"Liberdade",6:"Familia",4:"Trabalho",2:"Associacao"}
-        numero_info = None
-        if numero_existente_str and len(numero_existente_str) >= 3:
+        ei = {8:"Poder e Prosperidade (ideal)",7:"Sabedoria",3:"Criacao e Brilho",1:"Lideranca",9:"Humanitarismo",5:"Liberdade",6:"Familia",4:"Trabalho",2:"Associacao"}
+        ni = None
+        if ne_str and len(ne_str) >= 3:
             try:
-                energia = r1(sum(int(d) for d in numero_existente_str))
-                numero_info = {"numero":numero_existente_str,"energia":energia,"interpretacao":energias_info.get(energia,"Energia unica")}
+                en = r1(sum(int(d) for d in ne_str))
+                ni = {"numero":ne_str,"energia":en,"interpretacao":ei.get(en,"Energia unica")}
             except: pass
-        pf = pdf_eleitoral_validation(sigla_str, cargo_label, sugestoes, numero_info)
+        pf = pdf_eleitoral_validation(sigla_str, cargo_label, sugestoes, ni)
         subj = "Calculo de Numero Eleitoral - A1ELOS"
         body = f"Ola,\n\nSua consulta foi concluida. PDF anexo com sugestoes para {cargo_label}.\nVerifique o spam.\n\nA1ELOS"
         enviado = send_email(email, subj, body, pf)
         if pf and os.path.exists(pf): os.remove(pf)
         if enviado: return HTMLResponse(ELET_OK)
         return HTMLResponse(ELET_ERR)
-    except Exception as e: logger.error(f"ERRO: {e}"); import traceback; logger.error(traceback.format_exc()); return HTMLResponse(ERR.format(msg="Erro. Contate arvigne@gmail.com"))
+    except: import traceback; logger.error(traceback.format_exc()); return HTMLResponse(ERR.format(msg="Erro. Contate arvigne@gmail.com"))
 
 URNA_OK = "<html><body style='background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh'><div style='text-align:center'><h1 style='color:#C9A94E'>Confirmado!</h1><p>Documento enviado para seu email.</p><p>Verifique o spam.</p><a href='/' style='display:inline-block;padding:12px 30px;background:#C9A94E;color:#000;text-decoration:none;border-radius:50px'>Voltar</a></div></body></html>"
 URNA_ERR = "<html><body style='background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh'><div style='text-align:center'><h1 style='color:#e74c3c'>Pagamento OK, erro no envio.</h1><p>Contate: arvigne@gmail.com</p><a href='/' style='display:inline-block;padding:12px 30px;background:#C9A94E;color:#000;text-decoration:none;border-radius:50px'>Voltar</a></div></body></html>"
 ELET_OK = "<html><body style='background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh'><div style='text-align:center'><h1 style='color:#C9A94E'>Confirmado!</h1><p>Documento com sugestoes de numero eleitoral enviado para seu email.</p><p>Verifique o spam.</p><a href='/' style='display:inline-block;padding:12px 30px;background:#C9A94E;color:#000;text-decoration:none;border-radius:50px'>Voltar</a></div></body></html>"
 ELET_ERR = "<html><body style='background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh'><div style='text-align:center'><h1 style='color:#e74c3c'>Pagamento OK, erro no envio.</h1><p>Contate: arvigne@gmail.com</p><a href='/' style='display:inline-block;padding:12px 30px;background:#C9A94E;color:#000;text-decoration:none;border-radius:50px'>Voltar</a></div></body></html>"
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/")
 def root():
     try:
         p = os.path.join(os.path.dirname(__file__), "index.html")
-        if os.path.exists(p):
-            with open(p, "r", encoding="utf-8") as f: return HTMLResponse(f.read())
+        if os.path.exists(p): return HTMLResponse(open(p,"r",encoding="utf-8").read())
     except: pass
     return HTMLResponse("<h1>API ativa</h1>")
 
@@ -501,12 +469,11 @@ def health(): return {"status":"ok","stripe":bool(STRIPE_KEY),"sendgrid":bool(SE
 def calculate(req: PayReq):
     db = Session()
     try:
-        if not req.name or len(req.name.strip())<2: raise HTTPException(400,"Nome curto")
+        if len(req.name.strip())<2: raise HTTPException(400,"Nome curto")
         if not req.birth_date: raise HTTPException(400,"Data obrigatoria")
         res = calc(req.name, req.birth_date)
         cid = uuid.uuid4().hex[:8]
-        c = Calc(id=cid, name=req.name, birth_date=req.birth_date, email=req.email, **res)
-        db.add(c); db.commit()
+        db.add(Calc(id=cid, name=req.name, birth_date=req.birth_date, email=req.email, **res)); db.commit()
         if req.email:
             try:
                 pf = pdf8(res, req.name, req.birth_date)
@@ -515,7 +482,7 @@ def calculate(req: PayReq):
             except: pass
         return {"id":cid, **res, "email_sent":True}
     except HTTPException: raise
-    except Exception as e: logger.error(f"Calc: {e}"); raise HTTPException(500,"Erro")
+    except: logger.error("Calc erro"); raise HTTPException(500,"Erro")
     finally: db.close()
 
 @app.post("/api/pay/stripe")
@@ -533,7 +500,7 @@ def pay_stripe(req: PayReq):
         params['payment_method_options']={'card':{'installments':{'enabled':True}}}
         cs = stripe.checkout.Session.create(**params)
         return {"payment_url":cs.url,"id":cs.id,"methods":['card']}
-    except Exception as e: logger.error(f"Stripe: {e}"); raise HTTPException(500,"Erro")
+    except: raise HTTPException(500,"Erro")
 
 @app.get("/api/pay/success")
 def pay_success(request: Request):
