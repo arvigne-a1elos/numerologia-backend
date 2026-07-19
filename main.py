@@ -53,14 +53,12 @@ class PayReq(BaseModel):
     name: str; email: str; product: Optional[str] = "pdf8"; price: Optional[float] = 0
     calculation_id: Optional[str] = None; birth_date: Optional[str] = None; lang: Optional[str] = "pt"
 
-class UrnaReq(BaseModel):
-    nome_completo: str
-    nome_candidato: str
+class UrnaPayReq(BaseModel):
+    nome_completo: str; cargo: str; nome1: str; nome2: str = ""; nome3: str = ""; nome4: str = ""; nome5: str = ""
+    email: str
 
 class EleitoralReq(BaseModel):
-    sigla: int
-    cargo: str
-    numero_existente: Optional[str] = None
+    sigla: int; cargo: str; numero_existente: Optional[str] = None
 
 def r1(n):
     while n > 9 and n not in (11, 22, 33): n = sum(int(d) for d in str(n))
@@ -87,123 +85,89 @@ def calc_grid(name):
     return g
 
 def calc_name_value(name):
-    """Calcula a energia numerológica de um nome (soma das letras reduzida)."""
     t = {c: (i % 9 or 9) for i, c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)}
-    clean = name.upper().replace(" ", "")
-    total = sum(t.get(ch, 0) for ch in clean)
+    clean = name.upper().replace(" ", "").replace(".", "").replace("-", "").replace(",", "")
+    total = sum(t.get(ch, 0) for ch in clean if ch in t)
     return r1(total), total
 
-def suggest_urna_names(candidate_name, max_count=3):
-    """Gera sugestoes de grafia alternativa com energia 8."""
-    letter_values = {c: (i % 9 or 9) for i, c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)}
-    current_r1, _ = calc_name_value(candidate_name)
-    if current_r1 == 8:
-        return [], current_r1, True
+CARGO_INFO = {
+    'vereador': {'label': 'Vereador', 'abrev': 'Ver.'},
+    'dep_estadual': {'label': 'Deputado Estadual', 'abrev': 'Dep.'},
+    'dep_federal': {'label': 'Deputado Federal', 'abrev': 'Dep.'},
+    'senador': {'label': 'Senador', 'abrev': 'Sen.'}
+}
 
-    clean = candidate_name.upper().replace(" ", "")
-    target = 8
-    suggestions = []
-    tried = set()
-    tried.add(clean)
+def suggest_with_cargo(nome, cargo_key, max_sug=3):
+    """Gera sugestoes de nome combinando cargo + nome candidato para energia 8."""
+    cargo = CARGO_INFO.get(cargo_key, {})
+    prefixos = [cargo.get('abrev',''), cargo.get('label','')]
+    nome_clean = nome.strip()
+    if not nome_clean: return []
+    variacoes = []; vistos = set()
+    for prefixo in prefixos:
+        if not prefixo: continue
+        for nome_test in [f"{prefixo} {nome_clean}", f"{nome_clean} — {prefixo.lower().replace('.','')}"]:
+            energia, _ = calc_name_value(nome_test)
+            chave = nome_test.upper().replace(".","")
+            if chave not in vistos:
+                vistos.add(chave)
+                variacoes.append({'nome': nome_test.title().replace('..','.'), 'energia': energia, 'eh_ideal': energia == 8})
+    variacoes.sort(key=lambda v: (0 if v['eh_ideal'] else 1, abs(8 - v['energia'])))
+    return variacoes[:max_sug]
 
-    def make_suggestion(base, suffix, desc):
-        full = base + suffix
-        val = sum(letter_values.get(c, 0) for c in full)
-        sug_r1 = r1(val)
-        return {"name": (candidate_name.rstrip() + suffix.lower()).title(), "value": sug_r1, "description": desc}
+def validar_nomes_urna(nomes, cargo_key):
+    """Valida ate 5 nomes de candidato e retorna resultados + sugestoes."""
+    resultados = []
+    for nome in nomes:
+        if not nome.strip(): continue
+        energia, soma = calc_name_value(nome.strip())
+        resultados.append({'nome': nome.strip().title(), 'energia': energia, 'soma': soma, 'eh_ideal': energia == 8})
 
-    # Estrategia 1: adicionar letra(s) no final
-    need = (target - current_r1) % 9
-    if need == 0: need = 9
+    ideal = any(r['eh_ideal'] for r in resultados)
+    sugestoes = []
+    if not ideal:
+        for nome in nomes:
+            if not nome.strip(): continue
+            sugs = suggest_with_cargo(nome.strip(), cargo_key)
+            for s in sugs:
+                if s not in sugestoes:
+                    sugestoes.append(s)
+                    if len(sugestoes) >= 3: break
+            if len(sugestoes) >= 3: break
 
-    for c, v in letter_values.items():
-        if v == need:
-            sug = clean + c
-            if sug not in tried:
-                tried.add(sug)
-                suggestions.append(make_suggestion(clean, c, f"Adicionar '{c.lower()}' ao final"))
-                if len(suggestions) >= max_count:
-                    return suggestions, current_r1, False
-
-    # Estrategia 2: duas letras
-    if len(suggestions) < max_count:
-        for c1, v1 in letter_values.items():
-            for c2, v2 in letter_values.items():
-                if (v1 + v2 - need) % 9 == 0:
-                    sug = clean + c1 + c2
-                    if sug not in tried:
-                        tried.add(sug)
-                        suggestions.append(make_suggestion(clean, c1 + c2, f"Adicionar '{c1.lower()}{c2.lower()}' ao final"))
-                        if len(suggestions) >= max_count:
-                            return suggestions, current_r1, False
-
-    # Estrategia 3: trocar ultima letra
-    if len(suggestions) < max_count and len(clean) > 1:
-        base = clean[:-1]
-        base_sum = sum(letter_values.get(c, 0) for c in base)
-        for c, v in letter_values.items():
-            if r1(base_sum + v) == target:
-                sug = base + c
-                if sug not in tried:
-                    tried.add(sug)
-                    suggestions.append(make_suggestion(base, c, f"Modificar final para '{c.lower()}'"))
-                    if len(suggestions) >= max_count:
-                        return suggestions, current_r1, False
-
-    return suggestions, current_r1, False
+    return resultados, ideal, sugestoes
 
 def gerar_numeros_eleitorais(sigla, cargo, quantidade=5):
-    """Gera sugestoes de numeros eleitorais com energia 8 (e fallbacks)."""
     digitos_por_cargo = {'vereador': 5, 'dep_estadual': 5, 'dep_federal': 4, 'senador': 3}
     total_digitos = digitos_por_cargo.get(cargo, 5)
     sigla_str = str(sigla).zfill(2)[:2]
     sigla_sum = int(sigla_str[0]) + int(sigla_str[1])
     livres = total_digitos - 2
-
-    resultados = []
-    tentados = set()
-
+    resultados = []; tentados = set()
     def buscar_para_energia(alvo):
         encontrados = []
-        limite = 10 ** livres
-        for x in range(limite):
-            if len(encontrados) + len(resultados) >= quantidade:
-                break
+        for x in range(10 ** livres):
+            if len(encontrados) + len(resultados) >= quantidade: break
             digitos_livres = str(x).zfill(livres)
-            soma_livres = sum(int(d) for d in digitos_livres)
-            total = sigla_sum + soma_livres
-            if r1(total) == alvo:
+            if r1(sigla_sum + sum(int(d) for d in digitos_livres)) == alvo:
                 numero = sigla_str + digitos_livres
                 if numero not in tentados:
-                    if soma_livres == 0 and alvo != r1(sigla_sum):
-                        continue
+                    if 0 < x < 10 and alvo != r1(sigla_sum): continue
                     tentados.add(numero)
                     encontrados.append({'numero': numero, 'energia': alvo, 'ideal': alvo == 8})
         return encontrados
-
-    # Prioridade: energia 8
     resultados.extend(buscar_para_energia(8))
-    # Fallback: energia 3 (brilho)
-    if len(resultados) < quantidade:
-        resultados.extend(buscar_para_energia(3))
-    # Ultimo recurso: outras energias
+    if len(resultados) < quantidade: resultados.extend(buscar_para_energia(3))
     if len(resultados) < quantidade:
         for e in [7, 1, 9, 5, 6, 4, 2]:
-            if len(resultados) >= quantidade:
-                break
+            if len(resultados) >= quantidade: break
             resultados.extend(buscar_para_energia(e))
-
     return resultados[:quantidade]
 
 GOLD = colors.HexColor("#B8860B"); LGRAY = colors.HexColor("#f0f0f0"); DARK = colors.HexColor("#222"); GRAY = colors.HexColor("#888")
-
-FONTE = "Helvetica"
-FONTE_NEGRITO = "Helvetica-Bold"
-TAM_TITULO = 20
-TAM_SUBTITULO = 18
-TAM_CORPO = 14
-ESPACO_LINHA = TAM_CORPO * 1.5
-ESPACO_TITULO_TEXTO = TAM_TITULO * 2.0
+FONTE = "Helvetica"; FONTE_NEGRITO = "Helvetica-Bold"
+TAM_TITULO = 20; TAM_SUBTITULO = 18; TAM_CORPO = 14
+ESPACO_LINHA = TAM_CORPO * 1.5; ESPACO_TITULO_TEXTO = TAM_TITULO * 2.0
 
 SIG = {
 1:("Individualidade","Simbolo: Circulo. Dia: Domingo. Planeta: Sol. Elemento: Fogo. Cor: Amarelo. Orgaos: Coracao. Original, criativo, lider nato, independente, forte, determinado, pioneiro. Energia do comeco, do impulso criador. Pessoas com este numero sao visionarias que nao tem medo de trilhar caminhos novos. Tem iniciativa propria e nao depende de outros para agir. Quando canalizada positivamente, esta energia constroi imperios e revoluciona paradigmas. Sua presenca e marcante e sua determinacao inabalavel.","Egoista, arrogante, dominador, impulsivo, teimoso, impaciente. Tende a centralizar decisoes e nao delegar. Pode se tornar autoritario e inflexivel, afastando aqueles que poderiam colaborar com seus projetos. O excesso de individualidade pode isola-lo e prejudicar suas relacoes.","Desenvolver humildade e saber trabalhar em equipe. Lembrar que ninguem realiza grandes feitos sozinho. A lideranca verdadeira inspira, nao impoe. Compartilhar o protagonismo amplia seu poder de realizacao e constroi legados duradouros."),
@@ -218,21 +182,10 @@ SIG = {
 11:("Mestre Inspirador","Intuitivo, iluminado, inspirador, visionario. Canaliza energias superiores. Acesso ao conhecimento alem do racional. Presenca magnetica e inspiradora. Eleva todos ao seu redor com sua luz interior.","Ansioso, nervoso, distante, fanatico. A pressao da alta vibracao e dificil de suportar. Pode sentir-se incompreendido e deslocado.","Equilibrar o mundo espiritual com o material. Aterrar os insights. Cuidar do corpo tanto quanto do espirito."),
 22:("Mestre Construtor","Realizador, visionario pratico. Capaz de transformar sonhos em realidade em larga escala. Combina visao espiritual com acao concreta. Potencial ilimitado. E o arquiteto do futuro, construindo obras que beneficiam a humanidade.","Ambicioso excessivo, estressado, prepotente. O peso do grande potencial pode esmagar e levar ao esgotamento.","Construir sem escravizar-se ao trabalho. O equilibrio entre fazer e ser. Grandes obras precisam de um mestre em paz.")}
 
-CAM = {1:("Realizacao","Sua missao e abrir caminhos, liderar e inovar. Voce veio ao mundo para ser pioneiro, para criar oportunidades onde antes nao existiam. Tem coragem, forca de vontade e determinacao para alcancar grandes feitos. Seu maior desafio e aprender que liderar tambem significa servir e inspirar outros a brilhar. Pessoas como Napoleao Bonaparte, Walt Disney, Steve Jobs e Pelé compartilham este caminho de realizacao e pioneirismo."),
-2:("Paz e Cooperacao","Sua missao e cooperar, equilibrar e servir como ponte entre as pessoas. Voce veio para trazer harmonia e diplomacia. Sua sensibilidade e sua maior ferramenta. O mundo precisa de sua capacidade de unir opostos e criar consenso. Princesa Diana, Abraham Lincoln e Roberto Carlos sao exemplos deste percurso de paz."),
-3:("Alegria e Criacao","Sua missao e comunicar, criar e inspirar alegria. Voce veio para expressar a beleza da vida atraves da arte e da palavra. Seu carisma ilumina quem esta ao seu redor. Oscar Wilde, Charles Dickens, Jim Carrey e Paul McCartney sao exemplos deste caminho de criacao."),
-4:("Acao e Estrutura","Sua missao e construir, organizar e criar estrutura. Voce veio para estabelecer bases solidas com disciplina e transformar o caos em ordem. Sua confiabilidade e seu maior trunfo. Bill Gates, Sigmund Freud e Margaret Thatcher compartilham esta jornada de construcao."),
-5:("Evolucao e Liberdade","Sua missao e experimentar, mudar e evoluir. Voce veio para quebrar paradigmas e inspirar libertacao. Sua versatilidade e sua forca motriz. Franklin Roosevelt, Cristiano Ronaldo e Mick Jagger sao exemplos de transformacao."),
-6:("Conciliacao e Responsabilidade","Sua missao e servir, cuidar e harmonizar. Voce veio para criar beleza e amor no mundo. Seu coracao generoso guia seus passos e toca quem esta ao seu redor. John F. Kennedy, Elvis Presley e Joana d'Arc sao exemplos deste caminho."),
-7:("Sabedoria e Perfeicao","Sua missao e buscar a verdade e evoluir espiritualmente. Voce veio para compreender os misterios da existencia e transmitir sabedoria. Stephen Hawking, Marie Curie, Nikola Tesla e Alan Turing compartilham este caminho de conhecimento."),
-8:("Justica e Prosperidade","Sua missao e manifestar abundancia com sabedoria. Voce veio para realizar grandes obras e mostrar que prosperidade e etica andam juntas. Henry Ford, Getulio Vargas, Silvio Santos e Julio Iglesias sao exemplos de realizacao material com proposito."),
-9:("Sabedoria e Humanitarismo","Sua missao e servir a humanidade com comp放松ao. Voce veio para concluir ciclos e inspirar. Sua alma carrega sabedoria de muitas vidas. Gandhi, Martin Luther King Jr., Madre Teresa e John Lennon sao exemplos de servico a humanidade."),
-11:("Inspiracao Divina","Sua missao e iluminar e elevar a consciencia coletiva. Voce e um canal de intuicao superior. Winston Churchill, Albert Einstein, Mozart e Marilyn Monroe sao exemplos desta inspiracao."),
-22:("Construcao em Grande Escala","Sua missao e realizar grandes obras que beneficiam a humanidade. Voce e o arquiteto do futuro. Oprah Winfrey, Thomas Edison, Simon Bolivar e Frank Lloyd Wright sao exemplos de construcao em larga escala.")}
+CAM = {1:("Realizacao","Sua missao e abrir caminhos, liderar e inovar. Voce veio ao mundo para ser pioneiro. Pessoas como Napoleao Bonaparte, Walt Disney, Steve Jobs e Pelé compartilham este caminho."),2:("Paz e Cooperacao","Sua missao e cooperar, equilibrar e servir como ponte. Princesa Diana, Abraham Lincoln e Roberto Carlos."),3:("Alegria e Criacao","Sua missao e comunicar, criar e inspirar. Oscar Wilde, Charles Dickens, Jim Carrey."),4:("Acao e Estrutura","Sua missao e construir com disciplina. Bill Gates, Sigmund Freud, Margaret Thatcher."),5:("Evolucao e Liberdade","Sua missao e experimentar e evoluir. Franklin Roosevelt, Cristiano Ronaldo."),6:("Conciliacao e Responsabilidade","Sua missao e servir e harmonizar. John F. Kennedy, Elvis Presley."),7:("Sabedoria e Perfeicao","Sua missao e buscar a verdade. Stephen Hawking, Marie Curie, Nikola Tesla."),8:("Justica e Prosperidade","Sua missao e manifestar abundancia. Henry Ford, Silvio Santos."),9:("Sabedoria e Humanitarismo","Sua missao e servir a humanidade. Gandhi, Martin Luther King Jr."),11:("Inspiracao Divina","Sua missao e iluminar. Einstein, Mozart."),22:("Construcao em Grande Escala","Sua missao e realizar grandes obras. Oprah Winfrey, Thomas Edison.")}
 
-DES = {0:"Equilibrio natural. Voce possui equilibrio nesta area, apenas flua com a vida.",1:"Superar o egoismo e desenvolver lideranca servidora. O poder verdadeiro esta em empoderar outros.",2:"Vencer a timidez e a dependencia emocional. Desenvolver autoconfianca para expressar suas necessidades.",3:"Evitar a dispersao e cultivar foco. Concentrar a energia criativa em projetos concretos.",4:"Superar a rigidez e abracar mudancas. Flexibilidade e adaptacao sao chaves para o crescimento.",5:"Controlar os excessos e cultivar disciplina. Liberdade com responsabilidade leva a maturidade.",6:"Evitar a superprotecao. Confiar que seus entes queridos podem fazer suas proprias escolhas.",7:"Vencer o isolamento e compartilhar seu conhecimento com o mundo. A sabedoria so existe quando compartilhada.",8:"Equilibrar ambicao com etica e generosidade. O sucesso material que beneficia outros e o verdadeiro.",9:"Superar o desapego excessivo. Aprender a concluir ciclos sem culpa e confiar no fluxo da vida."}
-
-VIB = {1:"Nasceu sob vibracao 1. Lider nato, pioneiro, individualista. Energia criadora e iniciadora. Tem coragem para abrir caminhos onde ninguem andou. Veio para aprender a liderar com humildade e servico.",2:"Nasceu sob vibracao 2. Sensivel, diplomatico, cooperativo. Sua forca esta na parceria e na harmonia. Intuicao agucada. Veio para aprender o equilibrio entre dar e receber.",3:"Nasceu sob vibracao 3. Comunicativo, criativo, otimista. Alegria contagiosa. A palavra e sua ferramenta mais poderosa. Veio para alegrar o mundo com sua arte.",4:"Nasceu sob vibracao 4. Trabalhador, disciplinado, pratico. Solidez constroi bases seguras. Veio para aprender que a verdadeira seguranca vem de dentro.",5:"Nasceu sob vibracao 5. Livre, versatil, aventureiro. Sua energia busca experiencias e transformacao. Curiosidade move sua alma. Veio para experimentar a plenitude da vida.",6:"Nasceu sob vibracao 6. Amoroso, responsavel, familiar. Missao de cuidar e harmonizar. O amor e sua maior forca. Veio para aprender que amar e libertar.",7:"Nasceu sob vibracao 7. Sabio, introspectivo, espiritual. Busca pelo conhecimento profundo. O silencio e seu mestre. Veio para compreender os misterios da existencia.",8:"Nasceu sob vibracao 8. Poderoso, realizador, prospero. Energia atrai abundancia. Nasceu para construir. Veio para aprender que o poder verdadeiro e servico.",9:"Nasceu sob vibracao 9. Humanitario, generoso, compassivo. Alma velha e sabia. Missao de servir ao coletivo. Veio para concluir ciclos e ensinar o desapego."}
+DES = {0:"Equilibrio natural.",1:"Superar o egoismo e servir.",2:"Vencer timidez e dependencia.",3:"Foco na criatividade.",4:"Flexibilidade e adaptacao.",5:"Liberdade com responsabilidade.",6:"Confiar e deixar ir.",7:"Compartilhar conhecimento.",8:"Etica e generosidade.",9:"Concluir ciclos."}
+VIB = {1:"Nasceu sob vibracao 1. Lider nato, pioneiro.",2:"Nasceu sob vibracao 2. Sensivel, diplomatico, intuitivo.",3:"Nasceu sob vibracao 3. Criativo, comunicador.",4:"Nasceu sob vibracao 4. Trabalhador, pratico.",5:"Nasceu sob vibracao 5. Livre, aventureiro.",6:"Nasceu sob vibracao 6. Amoroso, familiar.",7:"Nasceu sob vibracao 7. Sabio, espiritual.",8:"Nasceu sob vibracao 8. Realizador, prospero.",9:"Nasceu sob vibracao 9. Humanitario, generoso."}
 
 def pdf8(data, name, bd):
     path = f"/tmp/p8_{uuid.uuid4().hex[:8]}.pdf"
@@ -275,56 +228,43 @@ def pdf17(data, name, bd_str):
     tbl.setStyle(TableStyle([("BACKGROUND",(0,0),(-1,0),GOLD),("TEXTCOLOR",(0,0),(-1,0),colors.white),("FONTSIZE",(0,0),(-1,-1),TAM_CORPO-2),("FONTNAME",(0,0),(-1,-1),FONTE),("GRID",(0,0),(-1,-1),0.5,colors.grey),("ALIGN",(1,0),(1,-1),"CENTER"),("BACKGROUND",(0,1),(-1,-1),LGRAY),("TEXTCOLOR",(0,1),(-1,-1),DARK),("VALIGN",(0,0),(-1,-1),"MIDDLE"),("TOPPADDING",(0,0),(-1,-1),5),("BOTTOMPADDING",(0,0),(-1,-1),5)]))
     e.append(tbl)
     e.append(Paragraph("<b>Seu Perfil Numerologico</b>", SEC))
-    e.append(Paragraph(f"{nome_p}, sua combinacao numerologica e: Caminho de Vida {lp} ({kw}), Expressao {data['expression']}, Motivacao da Alma {data['soul_urge']}, Personalidade {data['personality']}, Destino {data['destiny']}. Cada numero revela uma dimensao do seu ser e juntos formam um mapa completo da sua personalidade e do seu potencial.", JUST))
+    e.append(Paragraph(f"{nome_p}, sua combinacao: Caminho de Vida {lp} ({kw}), Expressao {data['expression']}, Motivacao {data['soul_urge']}, Personalidade {data['personality']}, Destino {data['destiny']}.", JUST))
     e.append(Paragraph(f"<b>Caminho da Vida {lp}:</b> {desc_cam}", JUST))
     e.append(PageBreak())
-    e.append(Paragraph("<b>Analise Detalhada dos Numeros</b>", SEC))
-    e.append(Paragraph("Cada numero possui um sentido positivo e um sentido negativo. Conhecer ambos e o primeiro passo para o autoconhecimento e a evolucao pessoal. A seguir, a analise completa dos seus numeros conforme a obra de referencia:", JUST))
+    e.append(Paragraph("<b>Analise Detalhada</b>", SEC))
     for k,l in [("life_path","Caminho de Vida"),("expression","Expressao"),("soul_urge","Motivacao da Alma"),("personality","Personalidade"),("destiny","Destino")]:
-        v = data[k]; nm, livro_pos, livro_neg, livro_licao = SIG.get(v, ("", "", "", ""))
+        v = data[k]; nm, pos, neg, licao = SIG.get(v, ("", "", "", ""))
         e.append(Paragraph(f"<b>{l} {v} — {nm}</b>", BOLD))
-        e.append(Paragraph(livro_pos, JUST_PEQ))
-        e.append(Paragraph(f"<b>Negativo:</b> {livro_neg}", JUST_PEQ))
-        e.append(Paragraph(f"<b>Licao:</b> {livro_licao}", JUST_PEQ))
+        e.append(Paragraph(pos, JUST_PEQ))
+        e.append(Paragraph(f"<b>Negativo:</b> {neg}", JUST_PEQ)); e.append(Paragraph(f"<b>Licao:</b> {licao}", JUST_PEQ))
     fe = max(36-min(lp,36),25)
     c1n = r1(lp+data["expression"]); c2n = r1(data["expression"]+data["soul_urge"]); c3n = r1(data["soul_urge"]+data["personality"])
     e.append(Paragraph("<b>Ciclos da Vida</b>", SEC))
-    e.append(Paragraph(f"<b>1 Formativo (0-{fe}a) Regente {c1n}:</b> Fase de aprendizado e desenvolvimento. As influencias externas moldam suas crencas fundamentais.", JUST_PEQ))
-    e.append(Paragraph(f"<b>2 Produtivo ({fe+1}-{fe+27}a) Regente {c2n}:</b> Fase de trabalho, realizacao profissional e conquistas materiais. Maior produtividade.", JUST_PEQ))
-    e.append(Paragraph(f"<b>3 Colheita ({fe+28}+a) Regente {c3n}:</b> Fase de sabedoria, colheita dos frutos e legado. Realizacao interior.", JUST_PEQ))
+    e.append(Paragraph(f"<b>1 Formativo (0-{fe}a) Reg {c1n}:</b> Aprendizado.", JUST_PEQ))
+    e.append(Paragraph(f"<b>2 Produtivo ({fe+1}-{fe+27}a) Reg {c2n}:</b> Realizacao.", JUST_PEQ))
+    e.append(Paragraph(f"<b>3 Colheita ({fe+28}+a) Reg {c3n}:</b> Sabedoria.", JUST_PEQ))
     e.append(PageBreak())
     bb = dp.parse(bd_str.split(" ")[0] if " " in bd_str else bd_str).date()
     d,m,aa = bb.day, bb.month, bb.year
     d1=r1(abs(d-m)); d2=r1(abs(m-r1(aa))); dp_=r1(abs(d1-d2))
     e.append(Paragraph("<b>Desafios da Vida</b>", SEC))
-    e.append(Paragraph("Os desafios representam as licoes que precisamos aprender ao longo da vida. Sao calculados a partir da sua data de nascimento e indicam areas que exigem atencao especial. Quanto mais conscientes deles, mais facil se torna supera-los e transforma-los em crescimento.", JUST))
     e.append(Paragraph(f"<b>Menor 1 (Dia x Mes) {d1}:</b> {DES.get(d1,'')}", JUST_PEQ))
     e.append(Paragraph(f"<b>Menor 2 (Mes x Ano) {d2}:</b> {DES.get(d2,'')}", JUST_PEQ))
     e.append(Paragraph(f"<b>Principal {dp_}:</b> {DES.get(dp_,'')}", JUST_PEQ))
     r1v=r1(d+m); r2v=r1(d+aa); r3v=r1(r1v+r2v); r4v=r1(d+m+aa)
-    e.append(Paragraph("<b>Realizacoes da Vida</b>", SEC))
-    e.append(Paragraph("As realizacoes sao periodos de oportunidade e crescimento que marcam cada fase da sua jornada:", JUST))
-    e.append(Paragraph(f"<b>1 ({r1v}) Juventude:</b> Desenvolvimento de talentos e habilidades iniciais.", JUST_PEQ))
-    e.append(Paragraph(f"<b>2 ({r2v}) Vida Adulta:</b> Consolidacao profissional e pessoal.", JUST_PEQ))
-    e.append(Paragraph(f"<b>3 ({r3v}) Maturidade:</b> Colheita dos frutos do trabalho e sabedoria.", JUST_PEQ))
-    e.append(Paragraph(f"<b>4 ({r4v}) Legado:</b> Realizacao interior e legado deixado ao mundo.", JUST_PEQ))
+    e.append(Paragraph("<b>Realizacoes</b>", SEC))
+    e.append(Paragraph(f"<b>1 ({r1v}) Juventude.</b>  <b>2 ({r2v}) Vida adulta.</b>  <b>3 ({r3v}) Maturidade.</b>  <b>4 ({r4v}) Legado.</b>", JUST_PEQ))
     vib = r1(d)
-    e.append(Paragraph("<b>Vibracao do Dia de Nascimento</b>", SEC))
-    e.append(Paragraph(f"Voce nasceu no dia <b>{bb.day}</b>. Reduzindo este numero: {d} → <b>{vib}</b>. {VIB.get(vib,'')}", JUST))
+    e.append(Paragraph("<b>Vibracao do Dia</b>", SEC))
+    e.append(Paragraph(f"Dia {bb.day}, vibracao {vib}. {VIB.get(vib,'')}", JUST))
     e.append(Paragraph("<b>Grade de Inclusao</b>", SEC))
-    e.append(Paragraph("A Grade de Inclusao mostra a frequencia de cada numero (1 a 9) no seu nome completo. Numeros com mais ocorrencias indicam seus pontos fortes e talentos naturais. Numeros ausentes indicam carencias, areas que precisam ser desenvolvidas ao longo da vida como licoes que a alma se propoe a aprender.", JUST))
+    e.append(Paragraph("Frequencia de cada numero (1 a 9) no nome:", JUST))
     grid = calc_grid(name)
     presentes = [str(n) for n in range(1,10) if grid.get(n,0) > 0]
     ausentes = [str(n) for n in range(1,10) if grid.get(n,0) == 0]
-    e.append(Paragraph(f"<b>Presentes:</b> {', '.join(presentes) if presentes else 'nenhum'}. <b>Carencias:</b> {', '.join(ausentes) if ausentes else 'nenhum'}.", JUST))
-    if ausentes:
-        nomes_aus = []
-        for n in ausentes:
-            sig_info = SIG.get(int(n), ("","","",""))
-            nomes_aus.append(f"{n}({sig_info[0]})")
-        e.append(Paragraph(f"As carencias ({', '.join(nomes_aus)}) indicam qualidades a desenvolver. Quanto mais consciente, maior seu potencial de crescimento pessoal.", JUST))
+    e.append(Paragraph(f"<b>Presentes:</b> {', '.join(presentes) or 'nenhum'}. <b>Carencias:</b> {', '.join(ausentes) or 'nenhum'}.", JUST))
     e.append(Paragraph("<b>Nota Final</b>", SEC))
-    e.append(Paragraph("A numerologia e uma ferramenta de autoconhecimento baseada no estudo da vibracao dos numeros e das letras. Ela nao determina seu destino, mas ilumina os caminhos possiveis e revela potencialidades. Os numeros mostram tendencias, mas o livre arbitrio e sempre seu maior poder. Use este conhecimento para fazer escolhas mais conscientes e alinhadas com sua essencia verdadeira.", JUST))
+    e.append(Paragraph("A numerologia ilumina caminhos e revela potencialidades. Os numeros mostram tendencias, mas o livre arbitrio e sempre seu maior poder.", JUST))
     e.append(Paragraph("© A1ELOS Assessoria e Consultoria", ParagraphStyle("FF",fontName=FONTE,fontSize=10,textColor=GRAY,alignment=TA_CENTER,spaceBefore=ESPACO_LINHA*2)))
     doc.build(e); return path
 
@@ -339,61 +279,118 @@ def send_email(to, subj, body, attach=None):
         sg.send(mail); logger.info(f"Email p/ {to}"); return True
     except Exception as e: logger.error(f"Falha email: {e}"); return False
 
-# ──────── NOVOS ENDPOINTS ────────
+# ───── NOVOS ENDPOINTS URNA ─────
 
-@app.post("/api/validate-urna")
-def validate_urna(req: UrnaReq):
-    if not req.nome_completo or len(req.nome_completo.strip()) < 3:
-        raise HTTPException(400, "Nome completo obrigatorio (min. 3 caracteres)")
-    if not req.nome_candidato or len(req.nome_candidato.strip()) < 2:
-        raise HTTPException(400, "Nome de candidato obrigatorio (min. 2 caracteres)")
+@app.post("/api/pay/urna-session")
+def pay_urna_session(req: UrnaPayReq):
+    if not STRIPE_KEY: raise HTTPException(503,"Stripe nao configurado")
+    if not req.email: raise HTTPException(400,"Email obrigatorio")
+    if not req.nome_completo or len(req.nome_completo.strip()) < 3: raise HTTPException(400,"Nome completo obrigatorio")
+    nomes = [n.strip() for n in [req.nome1, req.nome2, req.nome3, req.nome4, req.nome5] if n.strip()]
+    if not nomes: raise HTTPException(400,"Pelo menos 1 nome de candidato obrigatorio")
+    logger.info(f"Urna: {req.nome_completo}, cargo={req.cargo}, {len(nomes)} nomes")
+    try:
+        metadata = {"product":"urna26","nome_completo":req.nome_completo,"cargo":req.cargo,"email":req.email}
+        for i, n in enumerate(nomes, 1):
+            metadata[f"nome{i}"] = n
+        params = {'mode':'payment','payment_method_types':['card'],
+            'line_items':[{'price_data':{'currency':'brl','product_data':{'name':'Validacao Nome de Urna'},'unit_amount':2600},'quantity':1}],
+            'customer_email':req.email,
+            'metadata':metadata,
+            'success_url':f"{BASE_URL}/api/pay/urna-success?session_id={{CHECKOUT_SESSION_ID}}",
+            'cancel_url':f"{BASE_URL}/api/pay/cancel"}
+        cs = stripe.checkout.Session.create(**params)
+        logger.info(f"Sessao urna: {cs.id}")
+        return {"payment_url":cs.url,"id":cs.id}
+    except Exception as e: logger.error(f"Stripe: {e}"); raise HTTPException(500,"Erro")
 
-    pessoa_r1, pessoa_sum = calc_name_value(req.nome_completo)
-    cand_r1, _ = calc_name_value(req.nome_candidato)
-    sugestoes, _, is_ideal = suggest_urna_names(req.nome_candidato)
+@app.get("/api/pay/urna-success")
+def pay_urna_success(request: Request):
+    sid = request.query_params.get("session_id","")
+    if not sid: return HTMLResponse(ERR.format(msg="Sessao invalida"))
+    try:
+        s = stripe.checkout.Session.retrieve(sid)
+        meta = getattr(s,'metadata',{}) or {}
+        if hasattr(meta,'to_dict'): meta = meta.to_dict()
+        nome_completo = meta.get('nome_completo',''); cargo = meta.get('cargo','vereador')
+        email = meta.get('email','') or getattr(s,'customer_email','')
+        nomes = []
+        for i in range(1,6):
+            n = meta.get(f'nome{i}','')
+            if n: nomes.append(n)
+        if not nomes: return HTMLResponse(ERR.format(msg="Dados nao encontrados"))
+    except Exception as e: logger.error(f"Erro: {e}"); return HTMLResponse(ERR.format(msg="Falha ao processar"))
 
-    result = {
-        "pessoa": {"nome": req.nome_completo.strip().title(), "energia": pessoa_r1, "soma_numerica": pessoa_sum},
-        "candidato": {"nome": req.nome_candidato.strip().title(), "energia_atual": cand_r1, "energia_ideal": 8, "eh_ideal": is_ideal, "sugestoes": sugestoes}
-    }
+    resultados, ideal, sugestoes = validar_nomes_urna(nomes, cargo)
+    cargo_label = CARGO_INFO.get(cargo, {}).get('label', cargo)
 
-    if is_ideal:
-        result["candidato"]["mensagem"] = f"O nome '{req.nome_candidato.strip().title()}' ja possui energia 8! Ideal para sua candidatura."
+    html = '<html><body style="background:#0a0a0a;color:#fff;font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;">'
+    html += f'<h1 style="color:#C9A94E;text-align:center;">Resultado da Validacao</h1>'
+    html += f'<p style="color:#888;text-align:center;">Nome: <b style="color:#fff;">{nome_completo.title()}</b> | Cargo: <b style="color:#C9A94E;">{cargo_label}</b></p>'
+
+    if ideal:
+        html += '<div style="background:#1a3a1a;border:1px solid #4CAF50;border-radius:15px;padding:25px;margin:20px 0;">'
+        html += '<h2 style="color:#4CAF50;text-align:center;">ENCONTREMOS!</h2>'
     else:
-        result["candidato"]["mensagem"] = f"A energia atual do nome e {cand_r1}. Para atingir energia 8, sugerimos as grafias abaixo:"
-    return result
+        html += '<div style="background:#1a1a1a;border:1px solid #333;border-radius:15px;padding:25px;margin:20px 0;">'
+
+    html += '<h3 style="color:#C9A94E;">Nomes Analisados</h3>'
+    for r in resultados:
+        icone = '✅' if r['eh_ideal'] else '❌'
+        cor = '#4CAF50' if r['eh_ideal'] else '#e74c3c'
+        html += f'<div style="background:#0a0a0a;padding:12px;border-radius:8px;margin:8px 0;">'
+        html += f'<span style="font-size:1.2rem;color:{cor};font-weight:bold;">{icone} {r["nome"]}</span>'
+        html += f' <span style="color:#C9A94E;">→ Energia {r["energia"]}</span></div>'
+
+    if ideal:
+        html += '</div>'
+        melhor = next(r for r in resultados if r['eh_ideal'])
+        html += f'<div style="background:#111;padding:20px;border-radius:15px;border:1px solid #C9A94E;margin:20px 0;">'
+        html += f'<h3 style="color:#C9A94E;">Nome Ideal para Urna</h3>'
+        html += f'<p style="font-size:1.5rem;color:#4CAF50;text-align:center;font-weight:bold;">{melhor["nome"]}</p>'
+        html += f'<p style="color:#888;text-align:center;">Energia {melhor["energia"]} — Poder e Prosperidade. Ideal para sua candidatura!</p>'
+        html += '</div>'
+    else:
+        html += '<p style="color:#e67e22;margin-top:15px;">Nenhum dos nomes testados atingiu energia 8.</p>'
+        if sugestoes:
+            html += '<h3 style="color:#C9A94E;margin-top:20px;">Sugestoes com Cargo</h3>'
+            for s in sugestoes:
+                html += f'<div style="background:#0a0a0a;padding:12px;border-radius:8px;margin:8px 0;border-left:3px solid #C9A94E;">'
+                html += f'<p style="font-size:1.1rem;color:#C9A94E;font-weight:bold;">{s["nome"]} {"✅" if s["eh_ideal"] else ""}</p>'
+                html += f'<p style="color:#888;">Energia {s["energia"]}</p></div>'
+        html += '<div style="background:#2a1a1a;border:1px solid #e67e22;border-radius:10px;padding:15px;margin-top:20px;">'
+        html += '<p style="color:#e67e22;text-align:center;">Nenhum dos nomes sugeridos ou combinacoes com o cargo atingiu a energia 8 ideal. '
+        html += 'Tente novamente com outros 5 nomes de candidato para uma nova consulta.</p></div>'
+        html += '</div>'
+
+    html += f'<p style="color:#888;text-align:center;margin-top:30px;">Documento enviado para {email}. Verifique o spam.</p>'
+    html += f'<div style="text-align:center;margin-top:20px;"><a href="/" style="display:inline-block;padding:12px 30px;background:#C9A94E;color:#000;text-decoration:none;border-radius:50px;">Voltar</a></div>'
+    html += '</body></html>'
+
+    try:
+        data = calc(nome_completo, '2000-01-01')
+        pf = pdf8(data, nome_completo, '2000-01-01')
+        send_email(email, "Validacao de Nome de Urna - A1ELOS", f"Ola {nome_completo.split()[0]},\n\nResultado da sua consulta de nome de urna.\nVerifique o spam.\n\nA1ELOS", pf)
+        if os.path.exists(pf): os.remove(pf)
+    except: pass
+
+    return HTMLResponse(html)
 
 @app.post("/api/calculate-eleitoral")
 def calculate_eleitoral(req: EleitoralReq):
-    cargos_validos = {'vereador': 'Vereador', 'dep_estadual': 'Deputado Estadual', 'dep_federal': 'Deputado Federal', 'senador': 'Senador'}
-    if req.cargo not in cargos_validos:
-        raise HTTPException(400, f"Cargo invalido. Use: {', '.join(cargos_validos.keys())}")
-    if req.sigla < 10 or req.sigla > 99:
-        raise HTTPException(400, "Sigla deve ter 2 digitos (10-99)")
-
+    cargos_validos = {'vereador':'Vereador','dep_estadual':'Deputado Estadual','dep_federal':'Deputado Federal','senador':'Senador'}
+    if req.cargo not in cargos_validos: raise HTTPException(400,f"Cargo invalido")
+    if req.sigla < 10 or req.sigla > 99: raise HTTPException(400,"Sigla deve ter 2 digitos")
     sigla_str = str(req.sigla).zfill(2)
     sugestoes = gerar_numeros_eleitorais(req.sigla, req.cargo)
-    energias_info = {8: "Poder e Prosperidade (ideal)", 7: "Sabedoria", 3: "Criacao e Brilho", 1: "Lideranca", 9: "Humanitarismo", 5: "Liberdade", 6: "Familia", 4: "Trabalho", 2: "Associacao"}
-
-    result = {
-        "cargo": cargos_validos[req.cargo],
-        "cargo_key": req.cargo,
-        "sigla": sigla_str,
-        "sugestoes": sugestoes,
-        "energias_info": energias_info
-    }
-
+    energias_info = {8:"Poder e Prosperidade (ideal)",7:"Sabedoria",3:"Criacao e Brilho",1:"Lideranca",9:"Humanitarismo",5:"Liberdade",6:"Familia",4:"Trabalho",2:"Associacao"}
+    result = {"cargo":cargos_validos[req.cargo],"cargo_key":req.cargo,"sigla":sigla_str,"sugestoes":sugestoes,"energias_info":energias_info}
     if req.numero_existente and len(req.numero_existente) >= 3:
         try:
-            n = req.numero_existente
-            soma = sum(int(d) for d in n)
-            energia = r1(soma)
-            result["numero_existente"] = {"numero": n, "energia": energia, "interpretacao": energias_info.get(energia, "Energia unica")}
+            n = req.numero_existente; energia = r1(sum(int(d) for d in n))
+            result["numero_existente"] = {"numero":n,"energia":energia,"interpretacao":energias_info.get(energia,"Energia unica")}
         except: pass
-
     return result
-
-# ──────── ENDPOINTS EXISTENTES ────────
 
 @app.get("/", response_class=HTMLResponse)
 def root():
