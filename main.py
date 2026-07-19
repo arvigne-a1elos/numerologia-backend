@@ -98,7 +98,6 @@ CARGO_INFO = {
 }
 
 def suggest_with_cargo(nome, cargo_key, max_sug=3):
-    """Gera sugestoes de nome combinando cargo + nome candidato para energia 8."""
     cargo = CARGO_INFO.get(cargo_key, {})
     prefixos = [cargo.get('abrev',''), cargo.get('label','')]
     nome_clean = nome.strip()
@@ -116,13 +115,11 @@ def suggest_with_cargo(nome, cargo_key, max_sug=3):
     return variacoes[:max_sug]
 
 def validar_nomes_urna(nomes, cargo_key):
-    """Valida ate 5 nomes de candidato e retorna resultados + sugestoes."""
     resultados = []
     for nome in nomes:
         if not nome.strip(): continue
         energia, soma = calc_name_value(nome.strip())
         resultados.append({'nome': nome.strip().title(), 'energia': energia, 'soma': soma, 'eh_ideal': energia == 8})
-
     ideal = any(r['eh_ideal'] for r in resultados)
     sugestoes = []
     if not ideal:
@@ -134,7 +131,6 @@ def validar_nomes_urna(nomes, cargo_key):
                     sugestoes.append(s)
                     if len(sugestoes) >= 3: break
             if len(sugestoes) >= 3: break
-
     return resultados, ideal, sugestoes
 
 def gerar_numeros_eleitorais(sigla, cargo, quantidade=5):
@@ -182,7 +178,7 @@ SIG = {
 11:("Mestre Inspirador","Intuitivo, iluminado, inspirador, visionario. Canaliza energias superiores. Acesso ao conhecimento alem do racional. Presenca magnetica e inspiradora. Eleva todos ao seu redor com sua luz interior.","Ansioso, nervoso, distante, fanatico. A pressao da alta vibracao e dificil de suportar. Pode sentir-se incompreendido e deslocado.","Equilibrar o mundo espiritual com o material. Aterrar os insights. Cuidar do corpo tanto quanto do espirito."),
 22:("Mestre Construtor","Realizador, visionario pratico. Capaz de transformar sonhos em realidade em larga escala. Combina visao espiritual com acao concreta. Potencial ilimitado. E o arquiteto do futuro, construindo obras que beneficiam a humanidade.","Ambicioso excessivo, estressado, prepotente. O peso do grande potencial pode esmagar e levar ao esgotamento.","Construir sem escravizar-se ao trabalho. O equilibrio entre fazer e ser. Grandes obras precisam de um mestre em paz.")}
 
-CAM = {1:("Realizacao","Sua missao e abrir caminhos, liderar e inovar. Voce veio ao mundo para ser pioneiro. Pessoas como Napoleao Bonaparte, Walt Disney, Steve Jobs e Pelé compartilham este caminho."),2:("Paz e Cooperacao","Sua missao e cooperar, equilibrar e servir como ponte. Princesa Diana, Abraham Lincoln e Roberto Carlos."),3:("Alegria e Criacao","Sua missao e comunicar, criar e inspirar. Oscar Wilde, Charles Dickens, Jim Carrey."),4:("Acao e Estrutura","Sua missao e construir com disciplina. Bill Gates, Sigmund Freud, Margaret Thatcher."),5:("Evolucao e Liberdade","Sua missao e experimentar e evoluir. Franklin Roosevelt, Cristiano Ronaldo."),6:("Conciliacao e Responsabilidade","Sua missao e servir e harmonizar. John F. Kennedy, Elvis Presley."),7:("Sabedoria e Perfeicao","Sua missao e buscar a verdade. Stephen Hawking, Marie Curie, Nikola Tesla."),8:("Justica e Prosperidade","Sua missao e manifestar abundancia. Henry Ford, Silvio Santos."),9:("Sabedoria e Humanitarismo","Sua missao e servir a humanidade. Gandhi, Martin Luther King Jr."),11:("Inspiracao Divina","Sua missao e iluminar. Einstein, Mozart."),22:("Construcao em Grande Escala","Sua missao e realizar grandes obras. Oprah Winfrey, Thomas Edison.")}
+CAM = {1:("Realizacao","Sua missao e abrir caminhos, liderar e inovar. Voce veio ao mundo para ser pioneiro. Pessoas como Napoleao, Walt Disney, Steve Jobs e Pelé."),2:("Paz e Cooperacao","Sua missao e cooperar, equilibrar e servir como ponte. Princesa Diana, Abraham Lincoln e Roberto Carlos."),3:("Alegria e Criacao","Sua missao e comunicar, criar e inspirar. Oscar Wilde, Charles Dickens, Jim Carrey."),4:("Acao e Estrutura","Sua missao e construir com disciplina. Bill Gates, Sigmund Freud, Margaret Thatcher."),5:("Evolucao e Liberdade","Sua missao e experimentar e evoluir. Franklin Roosevelt, Cristiano Ronaldo."),6:("Conciliacao e Responsabilidade","Sua missao e servir e harmonizar. John F. Kennedy, Elvis Presley."),7:("Sabedoria e Perfeicao","Sua missao e buscar a verdade. Stephen Hawking, Marie Curie, Nikola Tesla."),8:("Justica e Prosperidade","Sua missao e manifestar abundancia. Henry Ford, Silvio Santos."),9:("Sabedoria e Humanitarismo","Sua missao e servir a humanidade. Gandhi, Martin Luther King Jr."),11:("Inspiracao Divina","Sua missao e iluminar. Einstein, Mozart."),22:("Construcao em Grande Escala","Sua missao e realizar grandes obras. Oprah Winfrey, Thomas Edison.")}
 
 DES = {0:"Equilibrio natural.",1:"Superar o egoismo e servir.",2:"Vencer timidez e dependencia.",3:"Foco na criatividade.",4:"Flexibilidade e adaptacao.",5:"Liberdade com responsabilidade.",6:"Confiar e deixar ir.",7:"Compartilhar conhecimento.",8:"Etica e generosidade.",9:"Concluir ciclos."}
 VIB = {1:"Nasceu sob vibracao 1. Lider nato, pioneiro.",2:"Nasceu sob vibracao 2. Sensivel, diplomatico, intuitivo.",3:"Nasceu sob vibracao 3. Criativo, comunicador.",4:"Nasceu sob vibracao 4. Trabalhador, pratico.",5:"Nasceu sob vibracao 5. Livre, aventureiro.",6:"Nasceu sob vibracao 6. Amoroso, familiar.",7:"Nasceu sob vibracao 7. Sabio, espiritual.",8:"Nasceu sob vibracao 8. Realizador, prospero.",9:"Nasceu sob vibracao 9. Humanitario, generoso."}
@@ -237,8 +233,7 @@ def pdf17(data, name, bd_str):
         e.append(Paragraph(f"<b>{l} {v} — {nm}</b>", BOLD))
         e.append(Paragraph(pos, JUST_PEQ))
         e.append(Paragraph(f"<b>Negativo:</b> {neg}", JUST_PEQ)); e.append(Paragraph(f"<b>Licao:</b> {licao}", JUST_PEQ))
-    fe = max(36-min(lp,36),25)
-    c1n = r1(lp+data["expression"]); c2n = r1(data["expression"]+data["soul_urge"]); c3n = r1(data["soul_urge"]+data["personality"])
+    fe = max(36-min(lp,36),25); c1n = r1(lp+data["expression"]); c2n = r1(data["expression"]+data["soul_urge"]); c3n = r1(data["soul_urge"]+data["personality"])
     e.append(Paragraph("<b>Ciclos da Vida</b>", SEC))
     e.append(Paragraph(f"<b>1 Formativo (0-{fe}a) Reg {c1n}:</b> Aprendizado.", JUST_PEQ))
     e.append(Paragraph(f"<b>2 Produtivo ({fe+1}-{fe+27}a) Reg {c2n}:</b> Realizacao.", JUST_PEQ))
@@ -253,18 +248,52 @@ def pdf17(data, name, bd_str):
     e.append(Paragraph(f"<b>Principal {dp_}:</b> {DES.get(dp_,'')}", JUST_PEQ))
     r1v=r1(d+m); r2v=r1(d+aa); r3v=r1(r1v+r2v); r4v=r1(d+m+aa)
     e.append(Paragraph("<b>Realizacoes</b>", SEC))
-    e.append(Paragraph(f"<b>1 ({r1v}) Juventude.</b>  <b>2 ({r2v}) Vida adulta.</b>  <b>3 ({r3v}) Maturidade.</b>  <b>4 ({r4v}) Legado.</b>", JUST_PEQ))
+    e.append(Paragraph(f"<b>1 ({r1v}) Juventude.</b> <b>2 ({r2v}) Vida adulta.</b> <b>3 ({r3v}) Maturidade.</b> <b>4 ({r4v}) Legado.</b>", JUST_PEQ))
     vib = r1(d)
     e.append(Paragraph("<b>Vibracao do Dia</b>", SEC))
     e.append(Paragraph(f"Dia {bb.day}, vibracao {vib}. {VIB.get(vib,'')}", JUST))
     e.append(Paragraph("<b>Grade de Inclusao</b>", SEC))
-    e.append(Paragraph("Frequencia de cada numero (1 a 9) no nome:", JUST))
     grid = calc_grid(name)
     presentes = [str(n) for n in range(1,10) if grid.get(n,0) > 0]
     ausentes = [str(n) for n in range(1,10) if grid.get(n,0) == 0]
     e.append(Paragraph(f"<b>Presentes:</b> {', '.join(presentes) or 'nenhum'}. <b>Carencias:</b> {', '.join(ausentes) or 'nenhum'}.", JUST))
     e.append(Paragraph("<b>Nota Final</b>", SEC))
-    e.append(Paragraph("A numerologia ilumina caminhos e revela potencialidades. Os numeros mostram tendencias, mas o livre arbitrio e sempre seu maior poder.", JUST))
+    e.append(Paragraph("A numerologia ilumina caminhos. Os numeros mostram tendencias, mas o livre arbitrio e sempre seu maior poder.", JUST))
+    e.append(Paragraph("© A1ELOS", ParagraphStyle("FF",fontName=FONTE,fontSize=10,textColor=GRAY,alignment=TA_CENTER,spaceBefore=ESPACO_LINHA*2)))
+    doc.build(e); return path
+
+def pdf_urna_validation(nome_completo, cargo_label, resultados, sugestoes):
+    path = f"/tmp/urna_{uuid.uuid4().hex[:8]}.pdf"
+    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50, topMargin=45, bottomMargin=45)
+    e = []
+    TIT = ParagraphStyle("TI",fontName=FONTE_NEGRITO,fontSize=TAM_TITULO,textColor=GOLD,alignment=TA_CENTER,spaceAfter=ESPACO_TITULO_TEXTO,leading=TAM_TITULO*1.5)
+    SEC = ParagraphStyle("SE",fontName=FONTE_NEGRITO,fontSize=TAM_SUBTITULO,textColor=GOLD,alignment=TA_LEFT,spaceBefore=ESPACO_LINHA,spaceAfter=ESPACO_TITULO_TEXTO,leading=TAM_SUBTITULO*1.5)
+    JUST = ParagraphStyle("J",fontName=FONTE,fontSize=TAM_CORPO,leading=ESPACO_LINHA,textColor=DARK,alignment=TA_JUSTIFY,spaceAfter=ESPACO_LINHA*0.5)
+    BOLD = ParagraphStyle("BL",fontName=FONTE_NEGRITO,fontSize=TAM_CORPO-1,leading=ESPACO_LINHA*0.95,textColor=DARK,spaceAfter=ESPACO_LINHA*0.3)
+
+    e.append(Spacer(1,30))
+    e.append(Paragraph("VALIDACAO DE NOME DE URNA", TIT))
+    e.append(Paragraph(nome_completo.title(), ParagraphStyle("NM",fontName=FONTE_NEGRITO,fontSize=TAM_CORPO+2,alignment=TA_CENTER,textColor=DARK,spaceAfter=4)))
+    e.append(Paragraph(f"Cargo: {cargo_label}", ParagraphStyle("DT",fontName=FONTE,fontSize=TAM_CORPO-2,alignment=TA_CENTER,textColor=GRAY,spaceAfter=ESPACO_LINHA)))
+
+    tem_ideal = any(r['eh_ideal'] for r in resultados)
+    if tem_ideal:
+        e.append(Paragraph("ENERGIA 8 ALCANCADA!", ParagraphStyle("OK",fontName=FONTE_NEGRITO,fontSize=TAM_CORPO+4,textColor=colors.HexColor("#4CAF50"),alignment=TA_CENTER,spaceAfter=ESPACO_LINHA)))
+
+    if sugestoes:
+        e.append(Paragraph("Sugestoes com Cargo", SEC))
+        for s in sugestoes[:3]:
+            e.append(Paragraph(f"<b>{s['nome']}</b> {'— ENERGIA 8 IDEAL!' if s['eh_ideal'] else ''}", BOLD))
+            e.append(Paragraph(f"Energia {s['energia']}", JUST))
+
+    e.append(Paragraph("Resultado da Validacao", SEC))
+    for r in resultados:
+        icone = "✅" if r['eh_ideal'] else "❌"
+        e.append(Paragraph(f"{icone} <b>{r['nome']}</b> — Energia {r['energia']}", JUST))
+
+    if not tem_ideal and not sugestoes:
+        e.append(Paragraph("Nenhum nome ideal encontrado. Tente com outras 5 opcoes.", JUST))
+
     e.append(Paragraph("© A1ELOS Assessoria e Consultoria", ParagraphStyle("FF",fontName=FONTE,fontSize=10,textColor=GRAY,alignment=TA_CENTER,spaceBefore=ESPACO_LINHA*2)))
     doc.build(e); return path
 
@@ -279,8 +308,6 @@ def send_email(to, subj, body, attach=None):
         sg.send(mail); logger.info(f"Email p/ {to}"); return True
     except Exception as e: logger.error(f"Falha email: {e}"); return False
 
-# ───── NOVOS ENDPOINTS URNA ─────
-
 @app.post("/api/pay/urna-session")
 def pay_urna_session(req: UrnaPayReq):
     if not STRIPE_KEY: raise HTTPException(503,"Stripe nao configurado")
@@ -291,8 +318,7 @@ def pay_urna_session(req: UrnaPayReq):
     logger.info(f"Urna: {req.nome_completo}, cargo={req.cargo}, {len(nomes)} nomes")
     try:
         metadata = {"product":"urna26","nome_completo":req.nome_completo,"cargo":req.cargo,"email":req.email}
-        for i, n in enumerate(nomes, 1):
-            metadata[f"nome{i}"] = n
+        for i, n in enumerate(nomes, 1): metadata[f"nome{i}"] = n
         params = {'mode':'payment','payment_method_types':['card'],
             'line_items':[{'price_data':{'currency':'brl','product_data':{'name':'Validacao Nome de Urna'},'unit_amount':2600},'quantity':1}],
             'customer_email':req.email,
@@ -300,8 +326,7 @@ def pay_urna_session(req: UrnaPayReq):
             'success_url':f"{BASE_URL}/api/pay/urna-success?session_id={{CHECKOUT_SESSION_ID}}",
             'cancel_url':f"{BASE_URL}/api/pay/cancel"}
         cs = stripe.checkout.Session.create(**params)
-        logger.info(f"Sessao urna: {cs.id}")
-        return {"payment_url":cs.url,"id":cs.id}
+        logger.info(f"Sessao urna: {cs.id}"); return {"payment_url":cs.url,"id":cs.id}
     except Exception as e: logger.error(f"Stripe: {e}"); raise HTTPException(500,"Erro")
 
 @app.get("/api/pay/urna-success")
@@ -314,67 +339,31 @@ def pay_urna_success(request: Request):
         if hasattr(meta,'to_dict'): meta = meta.to_dict()
         nome_completo = meta.get('nome_completo',''); cargo = meta.get('cargo','vereador')
         email = meta.get('email','') or getattr(s,'customer_email','')
-        nomes = []
-        for i in range(1,6):
-            n = meta.get(f'nome{i}','')
-            if n: nomes.append(n)
+        nomes = [meta.get(f'nome{i}','') for i in range(1,6) if meta.get(f'nome{i}','')]
         if not nomes: return HTMLResponse(ERR.format(msg="Dados nao encontrados"))
     except Exception as e: logger.error(f"Erro: {e}"); return HTMLResponse(ERR.format(msg="Falha ao processar"))
 
     resultados, ideal, sugestoes = validar_nomes_urna(nomes, cargo)
     cargo_label = CARGO_INFO.get(cargo, {}).get('label', cargo)
-
-    html = '<html><body style="background:#0a0a0a;color:#fff;font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;">'
-    html += f'<h1 style="color:#C9A94E;text-align:center;">Resultado da Validacao</h1>'
-    html += f'<p style="color:#888;text-align:center;">Nome: <b style="color:#fff;">{nome_completo.title()}</b> | Cargo: <b style="color:#C9A94E;">{cargo_label}</b></p>'
-
-    if ideal:
-        html += '<div style="background:#1a3a1a;border:1px solid #4CAF50;border-radius:15px;padding:25px;margin:20px 0;">'
-        html += '<h2 style="color:#4CAF50;text-align:center;">ENCONTREMOS!</h2>'
-    else:
-        html += '<div style="background:#1a1a1a;border:1px solid #333;border-radius:15px;padding:25px;margin:20px 0;">'
-
-    html += '<h3 style="color:#C9A94E;">Nomes Analisados</h3>'
-    for r in resultados:
-        icone = '✅' if r['eh_ideal'] else '❌'
-        cor = '#4CAF50' if r['eh_ideal'] else '#e74c3c'
-        html += f'<div style="background:#0a0a0a;padding:12px;border-radius:8px;margin:8px 0;">'
-        html += f'<span style="font-size:1.2rem;color:{cor};font-weight:bold;">{icone} {r["nome"]}</span>'
-        html += f' <span style="color:#C9A94E;">→ Energia {r["energia"]}</span></div>'
-
-    if ideal:
-        html += '</div>'
-        melhor = next(r for r in resultados if r['eh_ideal'])
-        html += f'<div style="background:#111;padding:20px;border-radius:15px;border:1px solid #C9A94E;margin:20px 0;">'
-        html += f'<h3 style="color:#C9A94E;">Nome Ideal para Urna</h3>'
-        html += f'<p style="font-size:1.5rem;color:#4CAF50;text-align:center;font-weight:bold;">{melhor["nome"]}</p>'
-        html += f'<p style="color:#888;text-align:center;">Energia {melhor["energia"]} — Poder e Prosperidade. Ideal para sua candidatura!</p>'
-        html += '</div>'
-    else:
-        html += '<p style="color:#e67e22;margin-top:15px;">Nenhum dos nomes testados atingiu energia 8.</p>'
-        if sugestoes:
-            html += '<h3 style="color:#C9A94E;margin-top:20px;">Sugestoes com Cargo</h3>'
-            for s in sugestoes:
-                html += f'<div style="background:#0a0a0a;padding:12px;border-radius:8px;margin:8px 0;border-left:3px solid #C9A94E;">'
-                html += f'<p style="font-size:1.1rem;color:#C9A94E;font-weight:bold;">{s["nome"]} {"✅" if s["eh_ideal"] else ""}</p>'
-                html += f'<p style="color:#888;">Energia {s["energia"]}</p></div>'
-        html += '<div style="background:#2a1a1a;border:1px solid #e67e22;border-radius:10px;padding:15px;margin-top:20px;">'
-        html += '<p style="color:#e67e22;text-align:center;">Nenhum dos nomes sugeridos ou combinacoes com o cargo atingiu a energia 8 ideal. '
-        html += 'Tente novamente com outros 5 nomes de candidato para uma nova consulta.</p></div>'
-        html += '</div>'
-
-    html += f'<p style="color:#888;text-align:center;margin-top:30px;">Documento enviado para {email}. Verifique o spam.</p>'
-    html += f'<div style="text-align:center;margin-top:20px;"><a href="/" style="display:inline-block;padding:12px 30px;background:#C9A94E;color:#000;text-decoration:none;border-radius:50px;">Voltar</a></div>'
-    html += '</body></html>'
+    primeiro_nome = nome_completo.split()[0] if nome_completo else "Cliente"
+    enviado = False
 
     try:
-        data = calc(nome_completo, '2000-01-01')
-        pf = pdf8(data, nome_completo, '2000-01-01')
-        send_email(email, "Validacao de Nome de Urna - A1ELOS", f"Ola {nome_completo.split()[0]},\n\nResultado da sua consulta de nome de urna.\nVerifique o spam.\n\nA1ELOS", pf)
-        if os.path.exists(pf): os.remove(pf)
-    except: pass
+        pf = pdf_urna_validation(nome_completo, cargo_label, resultados, sugestoes)
+        subj = "Validacao de Nome de Urna — A1ELOS"
+        body = f"Ola {primeiro_nome},\n\nSua consulta de nome de urna foi concluida.\nResultado em PDF anexo.\nVerifique o spam.\n\nA1ELOS"
+        enviado = send_email(email, subj, body, pf)
+        if pf and os.path.exists(pf): os.remove(pf)
+    except Exception as e:
+        logger.error(f"ERRO urna: {e}")
+        import traceback; logger.error(traceback.format_exc())
 
-    return HTMLResponse(html)
+    if enviado:
+        return HTMLResponse(URNA_OK)
+    return HTMLResponse(URNA_ERR)
+
+URNA_OK = "<html><body style='background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh'><div style='text-align:center'><h1 style='color:#C9A94E'>✅ Confirmado!</h1><p>Documento enviado para seu email.</p><p>Verifique o spam.</p><a href='/' style='display:inline-block;padding:12px 30px;background:#C9A94E;color:#000;text-decoration:none;border-radius:50px'>Voltar</a></div></body></html>"
+URNA_ERR = "<html><body style='background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh'><div style='text-align:center'><h1 style='color:#e74c3c'>❌ Pagamento OK, erro no envio.</h1><p>Entre em contato pelo email arvigne@gmail.com</p><a href='/' style='display:inline-block;padding:12px 30px;background:#C9A94E;color:#000;text-decoration:none;border-radius:50px'>Voltar</a></div></body></html>"
 
 @app.post("/api/calculate-eleitoral")
 def calculate_eleitoral(req: EleitoralReq):
