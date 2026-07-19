@@ -1,151 +1,432 @@
-def gerar_numeros_eleitorais(sigla, cargo, quantidade=5):
-    digitos_por_cargo = {'vereador': 5, 'dep_estadual': 5, 'dep_federal': 4, 'senador': 3}
-    total_digitos = digitos_por_cargo.get(cargo, 5)
-    sigla_str = str(sigla).zfill(2)[:2]
-    sigla_sum = int(sigla_str[0]) + int(sigla_str[1])
-    livres = total_digitos - 2
-    resultados = []
-    tentados = set()
-    energias_info = {
-        8: ("Poder e Prosperidade", "IDEAL para campanhas eleitorais. Atrai autoridade, sucesso nas urnas e capacidade de realizar grandes obras."),
-        7: ("Sabedoria e Análise", "Energia da reflexão e do conhecimento profundo. Pode ser útil para cargos que exigem discernimento, mas falta o poder de realização do 8."),
-        3: ("Criatividade e Brilho", "Energia da comunicação e do carisma. Ajuda na visibilidade da campanha, mas não substitui a autoridade do 8 para vencer eleições."),
-        1: ("Liderança e Iniciativa", "Energia do pioneirismo e da independência. Boa para iniciar projetos, mas limitada para sustentar uma candidatura de alto impacto."),
-        9: ("Humanitarismo e Idealismo", "Energia do serviço ao próximo e da comp放松ão. Nobre, mas desprovida do poder material necessário para campanhas."),
-        5: ("Liberdade e Mudança", "Energia da versatilidade e da adaptação. Favorável a mudanças, mas inconsistente para uma trajetória política estável."),
-        6: ("Família e Responsabilidade", "Energia do cuidado e da harmonia. Excelente para cargos ligados a causas sociais, mas sem o poder de realização do 8."),
-        4: ("Trabalho e Disciplina", "Energia da construção sólida e do esforço contínuo. Traz estabilidade, mas falta o brilho do poder e da prosperidade."),
-        2: ("Associação e Diplomacia", "Energia da parceria e da cooperação. Útil para coligações e alianças, mas sem a força individual necessária para liderar.")
-    }
+import os, logging, uuid, stripe, base64
+from datetime import datetime
+from typing import Optional
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from sqlalchemy import create_engine, Column, String, Integer, Float, DateTime
+from sqlalchemy.orm import sessionmaker, declarative_base
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail, Email, Content, Attachment, FileContent, FileName, FileType, Disposition
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER
+import dateutil.parser as dp
 
-    def buscar(alvo):
-        encontrados = []
-        for x in range(10 ** livres):
-            if len(encontrados) + len(resultados) >= quantidade:
-                break
-            digitos_livres = str(x).zfill(livres)
-            soma_livres = sum(int(d) for d in digitos_livres)
-            soma_total = sigla_sum + soma_livres
-            energia = r1(soma_total)
-            if energia == alvo:
-                numero = sigla_str + digitos_livres
-                if numero not in tentados:
-                    if 0 < x < 10 and alvo != r1(sigla_sum):
-                        continue
-                    tentados.add(numero)
-                    nome_energia, desc_energia = energias_info.get(alvo, ("", ""))
-                    encontrados.append({
-                        'numero': numero,
-                        'energia': alvo,
-                        'ideal': alvo == 8,
-                        'sigla': sigla_str,
-                        'digitos_livres': digitos_livres,
-                        'soma_sigla': sigla_sum,
-                        'soma_livres': soma_livres,
-                        'soma_total': soma_total,
-                        'nome_energia': nome_energia,
-                        'descricao_energia': desc_energia,
-                        'explicacao_calculo': f"Sigla {sigla_str} ({sigla_str[0]}+{sigla_str[1]}={sigla_sum}) + dígitos {digitos_livres} ({'+'.join(digitos_livres)}={soma_livres}) = soma total {soma_total} -> energia {alvo}"
-                    })
-        return encontrados
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-    resultados.extend(buscar(8))
-    if len(resultados) < quantidade:
-        resultados.extend(buscar(3))
-    if len(resultados) < quantidade:
-        for e in [7, 1, 9, 5, 6, 4, 2]:
-            if len(resultados) >= quantidade:
-                break
-            resultados.extend(buscar(e))
+STRIPE_KEY = os.getenv("STRIPE_SECRET_KEY", "")
+SENDGRID_KEY = os.getenv("SENDGRID_API_KEY", "")
+FROM_EMAIL = os.getenv("FROM_EMAIL", "arvigne@gmail.com")
+FROM_NAME = "Mapa Numerologico | A1ELOS"
+BASE_URL = os.getenv("BASE_URL", "https://numerologia-api-wd2q.onrender.com")
+DB_URL = os.getenv("DATABASE_URL", "sqlite:///./numerologia.db")
+logger.info(f"Stripe={bool(STRIPE_KEY)} SendGrid={bool(SENDGRID_KEY)}")
+if STRIPE_KEY: stripe.api_key = STRIPE_KEY
 
-    return resultados[:quantidade]
+engine = create_engine(DB_URL, connect_args={"check_same_thread": False})
+Base = declarative_base(); Session = sessionmaker(bind=engine)
 
-def pdf_eleitoral_validation(sigla_str, cargo_label, sugestoes, numero_existente=None):
-    path = f"/tmp/ele_{uuid.uuid4().hex[:8]}.pdf"
-    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50, topMargin=45, bottomMargin=45)
-    e = []
+class Calc(Base):
+    __tablename__ = "calculations"
+    id = Column(String, primary_key=True)
+    name = Column(String); birth_date = Column(String); email = Column(String, nullable=True)
+    life_path = Column(Integer); expression = Column(Integer); soul_urge = Column(Integer)
+    personality = Column(Integer); destiny = Column(Integer)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
-    TIT = ParagraphStyle("TI", fontName=FONTE_NEGRITO, fontSize=TAM_TITULO, textColor=GOLD, alignment=TA_CENTER, spaceAfter=ESPACO_TITULO_TEXTO*0.5, leading=TAM_TITULO*1.5)
-    SEC = ParagraphStyle("SE", fontName=FONTE_NEGRITO, fontSize=TAM_SUBTITULO, textColor=GOLD, alignment=TA_LEFT, spaceBefore=ESPACO_LINHA, spaceAfter=ESPACO_TITULO_TEXTO, leading=TAM_SUBTITULO*1.5)
-    JUST = ParagraphStyle("J", fontName=FONTE, fontSize=TAM_CORPO-1, leading=ESPACO_LINHA*0.9, textColor=DARK, alignment=TA_JUSTIFY, spaceAfter=ESPACO_LINHA*0.4)
-    BOLD = ParagraphStyle("BL", fontName=FONTE_NEGRITO, fontSize=TAM_CORPO-1, leading=ESPACO_LINHA*0.95, textColor=DARK, spaceAfter=ESPACO_LINHA*0.3)
-    VERDE = ParagraphStyle("VR", fontName=FONTE_NEGRITO, fontSize=TAM_CORPO+4, textColor=colors.HexColor("#4CAF50"), alignment=TA_CENTER, spaceAfter=ESPACO_LINHA)
+class Order(Base):
+    __tablename__ = "orders"
+    id = Column(String, primary_key=True); email = Column(String); product = Column(String)
+    price = Column(Float); status = Column(String, default="pending")
+    payment_id = Column(String, nullable=True); created_at = Column(DateTime, default=datetime.utcnow)
 
-    e.append(Spacer(1, 25))
-    e.append(Paragraph("NUMERO ELEITORAL - ANALISE COMPLETA", TIT))
-    e.append(Paragraph(f"Cargo: {cargo_label} | Sigla: {sigla_str}", ParagraphStyle("DT", fontName=FONTE, fontSize=TAM_CORPO-2, alignment=TA_CENTER, textColor=GRAY, spaceAfter=ESPACO_LINHA)))
+Base.metadata.create_all(bind=engine)
 
-    # 1. Explicacao do metodo de calculo
-    e.append(Paragraph("<b>Como calculamos o numero eleitoral?</b>", SEC))
-    e.append(Paragraph("Na numerologia eleitoral, cada numero possui uma vibracao energetica que influencia a campanha e o mandato. O calculo e feito a partir da soma de todos os digitos do numero eleitoral, reduzindo o resultado a um unico digito (exceto 11 e 22, que sao numeros mestres).", JUST))
-    e.append(Paragraph(f"Para o cargo de <b>{cargo_label}</b>, o numero eleitoral e composto por {len(sigla_str)+3 if cargo_label=='Senador' else len(sigla_str)+2 if cargo_label=='Deputado Federal' else len(sigla_str)+3} digitos. Os dois primeiros sao fixos (sigla partidaria <b>{sigla_str}</b>), e os demais sao os digitos livres que podemos escolher para atingir a energia ideal.", JUST))
-    e.append(Paragraph(f"<b>Calculo:</b> Os digitos da sigla {sigla_str} somam {int(sigla_str[0])}+{int(sigla_str[1])} = <b>{int(sigla_str[0])+int(sigla_str[1])}</b>. A este valor somamos os digitos livres escolhidos. O total e reduzido ate um unico digito (1 a 9) ou numero mestre (11, 22).", JUST))
+app = FastAPI()
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
-    # 2. Explicacao do numero 8
-    e.append(Paragraph("<b>Por que a energia 8 e a ideal?</b>", SEC))
-    e.append(Paragraph("Na numerologia, o numero 8 e conhecido como o numero do Poder, da Prosperidade e da Realizacao material. Ele representa:", JUST))
-    e.append(Paragraph("- Autoridade e lideranca natural", JUST))
-    e.append(Paragraph("- Capacidade de execucao e realizacao de grandes obras", JUST))
-    e.append(Paragraph("- Sucesso financeiro e prosperidade durante o mandato", JUST))
-    e.append(Paragraph("- Credibilidade e respeito perante o eleitorado", JUST))
-    e.append(Paragraph("- Forca para superar obstaculos e adversarios politicos", JUST))
-    e.append(Paragraph("Politicos como Henry Ford, Silvio Santos, Getulio Vargas e Julio Iglesias possuem o 8 como numero de expressao ou caminho de vida. Para numeros eleitorais, o 8 potencializa a campanha e atrai vibracoes positivas de conquista.", JUST))
+class PayReq(BaseModel):
+    name: str; email: str; product: Optional[str] = "pdf8"; price: Optional[float] = 0
+    calculation_id: Optional[str] = None; birth_date: Optional[str] = None; lang: Optional[str] = "pt"
 
-    # 3. Sugestoes com explicacao detalhada
-    e.append(Paragraph("Sugestoes de Numeros", SEC))
+class UrnaPayReq(BaseModel):
+    nome_completo: str; cargo: str; nome1: str; nome2: str = ""; nome3: str = ""; nome4: str = ""; nome5: str = ""
+    email: str
 
-    ideals = [s for s in sugestoes if s.get('ideal')]
-    fallbacks = [s for s in sugestoes if not s.get('ideal')]
+class EleitoralPayReq(BaseModel):
+    sigla: int; cargo: str; numero_existente: Optional[str] = ""
+    email: str
 
-    if ideals:
-        e.append(Paragraph("<b>Opcoes com Energia 8 - IDEAL para sua candidatura:</b>", BOLD))
-        for s in ideals:
-            e.append(Paragraph(f"<font color='#4CAF50'><b>S NUMERO {s['numero']}</b></font>", BOLD))
-            e.append(Paragraph(f"<b>Energia: 8 - {s.get('nome_energia', 'Poder e Prosperidade')}</b>", ParagraphStyle("TX", fontName=FONTE, fontSize=TAM_CORPO, leading=ESPACO_LINHA, textColor=colors.HexColor("#4CAF50"), spaceAfter=ESPACO_LINHA*0.3)))
+GOLD = colors.HexColor("#B8860B"); LGRAY = colors.HexColor("#f0f0f0"); DARK = colors.HexColor("#222"); GRAY = colors.HexColor("#888")
+FONTE = "Helvetica"; FN = "Helvetica-Bold"
+TAM_T = 20; TAM_S = 18; TAM_C = 14; EL = TAM_C * 1.5; ET = TAM_T * 2.0
+CARGO_INFO = {'vereador':{'label':'Vereador'},'dep_estadual':{'label':'Deputado Estadual'},'dep_federal':{'label':'Deputado Federal'},'senador':{'label':'Senador'}}
+ENERGIAS = {1:"Lideranca",2:"Cooperacao",3:"Criatividade",4:"Trabalho",5:"Liberdade",6:"Familia",7:"Sabedoria",8:"Poder e Prosperidade (IDEAL)",9:"Humanitarismo"}
+
+def r1(n):
+    while n > 9 and n not in (11,22,33): n = sum(int(d) for d in str(n))
+    return n
+
+def calc_nome(nome):
+    t = {c:(i%9 or 9) for i,c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ",1)}
+    limpo = nome.upper().replace(" ","").replace(".","").replace("-","").replace(",","")
+    total = sum(t.get(c,0) for c in limpo if c in t)
+    return r1(total), total
+
+def calc(nome, data_str):
+    bd = dp.parse(data_str).date()
+    lp = r1(bd.day + bd.month + bd.year)
+    t = {c:(i%9 or 9) for i,c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ",1)}
+    nu = nome.upper().replace(" ","")
+    e = sum(t.get(c,0) for c in nu)
+    v = sum(t.get(c,0) for c in nu if c in "AEIOU")
+    p = sum(t.get(c,0) for c in nu if c not in "AEIOU")
+    return {"life_path":lp,"expression":r1(e),"soul_urge":r1(v),"personality":r1(p),"destiny":r1(r1(e)+lp)}
+
+def calc_grid(nome):
+    t = {c:(i%9 or 9) for i,c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ",1)}
+    g = {i:0 for i in range(1,10)}
+    for c in nome.upper().replace(" ",""):
+        v = t.get(c,0)
+        if 1&lt;=v&lt;=9: g[v]+=1
+    return g
+
+def validar_nomes_urna(nomes, cargo_key):
+    results = []
+    lv = {c:(i%9 or 9) for i,c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ",1)}
+    for nome in nomes:
+        if not nome.strip(): continue
+        limpo = nome.upper().replace(" ","").replace(".","").replace("-","").replace(",","")
+        letras = []; st = 0
+        for c in limpo:
+            v = lv.get(c,0); letras.append({'letra':c,'valor':v}); st += v
+        en = r1(st)
+        if en==8: expl = f"Nome {nome.strip().title()} tem ENERGIA 8! Ideal para candidatura."
+        else: expl = f"Nome {nome.strip().title()} tem energia {en}. {ENERGIAS.get(en,'')}. O 8 (Poder) e o ideal."
+        results.append({'nome':nome.strip().title(),'energia':en,'soma':st,'eh_ideal':en==8,'explicacao':expl,'letras':letras})
+    ideal = any(r['eh_ideal'] for r in results)
+    sugs = []
+    if not ideal:
+        for nome in nomes:
+            if not nome.strip(): continue
+            for p in [CARGO_INFO.get(cargo_key,{}).get('label','')[:3], CARGO_INFO.get(cargo_key,{}).get('label','')]:
+                if not p: continue
+                for nt in [f"{p} {nome.strip()}", f"{nome.strip()} - {p.lower()[:3]}"]:
+                    en,_ = calc_nome(nt)
+                    sugs.append({'nome':nt.title(),'energia':en,'eh_ideal':en==8})
+                    if len(sugs)>=3: break
+            if len(sugs)>=3: break
+    return results, ideal, sugs[:3]
+
+def gerar_numeros(sigla, cargo, qtd=5):
+    dc = {'vereador':5,'dep_estadual':5,'dep_federal':4,'senador':3}
+    td = dc.get(cargo,5); ss = str(sigla).zfill(2)[:2]; sm = int(ss[0])+int(ss[1]); lv = td-2
+    res = []; tent = set()
+    ei = {8:"Poder e Prosperidade - IDEAL",7:"Sabedoria",3:"Criacao",1:"Lideranca",9:"Humanitarismo",5:"Liberdade",6:"Familia",4:"Trabalho",2:"Associacao"}
+    def busca(alvo):
+        enc = []
+        for x in range(10**lv):
+            if len(enc)+len(res)>=qtd: break
+            dl = str(x).zfill(lv)
+            en = r1(sm+sum(int(d) for d in dl))
+            if en==alvo:
+                n = ss+dl
+                if n not in tent and not (0<x&lt;10 and alvo!=r1(sm)):
+                    tent.add(n)
+                    st = sm+sum(int(d) for d in dl)
+                    enc.append({'numero':n,'energia':alvo,'ideal':alvo==8,'sigla':ss,'digitos_livres':dl,'soma_sigla':sm,'soma_total':st,'nome_energia':ei.get(alvo,''),'explicacao_calculo':f"Sigla {ss} ({ss[0]}+{ss[1]}={sm}) + digitos {dl} ({'+'.join(dl)}={sum(int(d) for d in dl)}) = {st} -> {alvo}"})
+        return enc
+    res.extend(busca(8))
+    if len(res)<qtd: res.extend(busca(3))
+    if len(res)<qtd:
+        for e in [7,1,9,5,6,4,2]:
+            if len(res)>=qtd: break; res.extend(busca(e))
+    return res[:qtd]
+
+def pdf8(data, nome, bd):
+    path = f"/tmp/p8_{uuid.uuid4().hex[:8]}.pdf"
+    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50,rightMargin=50,topMargin=45,bottomMargin=45)
+    e=[]
+    ST=ParagraphStyle("T",fontName=FN,fontSize=TAM_T,textColor=GOLD,alignment=TA_CENTER,spaceAfter=ET,leading=TAM_T*1.5)
+    TX={1:"Lider",2:"Diplomata",3:"Criativo",4:"Pratico",5:"Livre",6:"Amoroso",7:"Sabio",8:"Prospero",9:"Humanitario",11:"Mestre",22:"Mestre"}
+    e.append(Spacer(1,30))
+    e.append(Paragraph("MAPA NUMEROLOGICO",ST))
+    e.append(Paragraph("EXPRESS",ParagraphStyle("S",fontName=FONTE,fontSize=TAM_S,textColor=GOLD,alignment=TA_CENTER,spaceAfter=ET,leading=TAM_S*1.5)))
+    e.append(Paragraph(nome.upper(),ParagraphStyle("N",fontName=FN,fontSize=TAM_C+2,alignment=TA_CENTER,textColor=DARK,spaceAfter=4)))
+    e.append(Paragraph(bd,ParagraphStyle("D",fontName=FONTE,fontSize=TAM_C-2,alignment=TA_CENTER,textColor=GRAY,spaceAfter=EL)))
+    td=[["Numero","Valor"],["Caminho de Vida",str(data["life_path"])],["Expressao",str(data["expression"])],["Mot.Alma",str(data["soul_urge"])],["Personalidade",str(data["personality"])],["Destino",str(data["destiny"])]]
+    tbl=Table(td,colWidths=[200,150])
+    tbl.setStyle(TableStyle([("BACKGROUND",(0,0),(-1,0),GOLD),("TEXTCOLOR",(0,0),(-1,0),colors.white),("FONTSIZE",(0,0),(-1,-1),TAM_C-2),("FONTNAME",(0,0),(-1,-1),FONTE),("GRID",(0,0),(-1,-1),0.5,colors.grey),("ALIGN",(1,0),(1,-1),"CENTER"),("BACKGROUND",(0,1),(-1,-1),LGRAY),("TEXTCOLOR",(0,1),(-1,-1),DARK)]))
+    e.append(tbl); e.append(Spacer(1,EL))
+    for k,l in [("life_path","Vida"),("expression","Expressao"),("soul_urge","Alma"),("personality","Personal."),("destiny","Destino")]:
+        v=data[k]; e.append(Paragraph(f"<b>{l} {v}:</b> {TX.get(v,'')}",ParagraphStyle("X",fontName=FONTE,fontSize=TAM_C,leading=EL,textColor=DARK,spaceAfter=EL*0.5)))
+    e.append(Paragraph("(c) A1ELOS",ParagraphStyle("F",fontName=FONTE,fontSize=10,textColor=GRAY,alignment=TA_CENTER,spaceBefore=EL*2)))
+    doc.build(e); return path
+
+def pdf_urna(nc, cl, resultados, sugestoes):
+    path = f"/tmp/u_{uuid.uuid4().hex[:8]}.pdf"
+    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50,rightMargin=50,topMargin=45,bottomMargin=45)
+    e=[]
+    TIT=ParagraphStyle("T",fontName=FN,fontSize=TAM_T,textColor=GOLD,alignment=TA_CENTER,spaceAfter=ET*0.5,leading=TAM_T*1.5)
+    e.append(Spacer(1,25))
+    e.append(Paragraph("VALIDACAO DE NOME DE URNA",TIT))
+    e.append(Paragraph(nc.title(),ParagraphStyle("N",fontName=FN,fontSize=TAM_C+2,alignment=TA_CENTER,textColor=DARK,spaceAfter=4)))
+    e.append(Paragraph(f"Cargo: {cl}",ParagraphStyle("D",fontName=FONTE,fontSize=TAM_C-2,alignment=TA_CENTER,textColor=GRAY,spaceAfter=EL)))
+    tem = any(r['eh_ideal'] for r in resultados)
+    for r in resultados:
+        ic = "S" if r['eh_ideal'] else "X"; co = "#4CAF50" if r['eh_ideal'] else "#e74c3c"
+        e.append(Paragraph(f"{ic} <b>{r['nome']}</b> - Energia <font color='{co}'><b>{r['energia']}</b></font>",ParagraphStyle("B",fontName=FN,fontSize=TAM_C-1,leading=EL*0.95,textColor=DARK,spaceAfter=EL*0.3)))
+        if r['letras']:
+            ls = ", ".join([f'{l["letra"]}={l["valor"]}' for l in r['letras']])
+            e.append(Paragraph(f"<i>{ls} -> {r['soma']} -> {r['energia']}</i>",ParagraphStyle("C",fontName=FONTE,fontSize=TAM_C-2,leading=EL*0.7,textColor=GRAY,spaceAfter=EL*0.2)))
+        e.append(Paragraph(r['explicacao'],ParagraphStyle("J",fontName=FONTE,fontSize=TAM_C-1,leading=EL*0.9,textColor=DARK,spaceAfter=EL*0.4)))
+    if tem:
+        idl = next(r for r in resultados if r['eh_ideal'])
+        e.append(Paragraph(f"<b>Nome Ideal: {idl['nome']}</b>",ParagraphStyle("I",fontName=FN,fontSize=TAM_C+2,alignment=TA_CENTER,textColor=GOLD,spaceAfter=EL)))
+    if sugestoes:
+        e.append(Paragraph("Sugestoes:",ParagraphStyle("S",fontName=FN,fontSize=TAM_S,textColor=GOLD,spaceBefore=EL,spaceAfter=ET)))
+        for s in sugestoes[:3]:
+            e.append(Paragraph(f'<b>{s["nome"]}</b> - Energia {s["energia"]}',ParagraphStyle("X",fontName=FONTE,fontSize=TAM_C,leading=EL,textColor=DARK,spaceAfter=EL*0.3)))
+    e.append(Paragraph("(c) A1ELOS",ParagraphStyle("F",fontName=FONTE,fontSize=8,textColor=GRAY,alignment=TA_CENTER)))
+    doc.build(e); return path
+
+def pdf_eleitoral(ss, cl, sugestoes, ne=None):
+    path = f"/tmp/e_{uuid.uuid4().hex[:8]}.pdf"
+    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50,rightMargin=50,topMargin=45,bottomMargin=45)
+    e=[]
+    TIT=ParagraphStyle("T",fontName=FN,fontSize=TAM_T,textColor=GOLD,alignment=TA_CENTER,spaceAfter=ET*0.5,leading=TAM_T*1.5)
+    SEC=ParagraphStyle("S",fontName=FN,fontSize=TAM_S,textColor=GOLD,alignment=0,spaceBefore=EL,spaceAfter=ET,leading=TAM_S*1.5)
+    e.append(Spacer(1,25))
+    e.append(Paragraph("NUMERO ELEITORAL",TIT))
+    e.append(Paragraph(f"Cargo: {cl} | Sigla: {ss}",ParagraphStyle("D",fontName=FONTE,fontSize=TAM_C-2,alignment=TA_CENTER,textColor=GRAY,spaceAfter=EL)))
+    e.append(Paragraph("<b>Por que a energia 8 e a ideal?</b>",SEC))
+    e.append(Paragraph("Na numerologia, o numero 8 representa Poder, Prosperidade e Realizacao material. Para politicos, atrai autoridade, sucesso nas urnas e capacidade de realizar grandes obras.",ParagraphStyle("J",fontName=FONTE,fontSize=TAM_C-1,leading=EL*0.9,textColor=DARK,spaceAfter=EL*0.4)))
+    e.append(Paragraph("<b>Como calculamos:</b> Os 2 primeiros digitos sao fixos (sigla). Os demais sao escolhidos para que a soma total reduza a 8.",ParagraphStyle("J",fontName=FONTE,fontSize=TAM_C-1,leading=EL*0.9,textColor=DARK,spaceAfter=EL*0.4)))
+    e.append(Paragraph("Sugestoes:",SEC))
+    ids = [s for s in sugestoes if s.get('ideal')]; fbs = [s for s in sugestoes if not s.get('ideal')]
+    if ids:
+        e.append(Paragraph("<b>Opcoes com Energia 8 (Ideal):</b>",ParagraphStyle("B",fontName=FN,fontSize=TAM_C-1,leading=EL*0.95,textColor=DARK,spaceAfter=EL*0.3)))
+        for s in ids:
+            e.append(Paragraph(f"S {s['numero']} - Energia 8 - Poder e Prosperidade!",ParagraphStyle("X",fontName=FONTE,fontSize=TAM_C,leading=EL,textColor=colors.HexColor("#4CAF50"),spaceAfter=EL*0.2)))
             if 'explicacao_calculo' in s:
-                e.append(Paragraph(f"<i>Calculo: {s['explicacao_calculo']}</i>", ParagraphStyle("TC", fontName=FONTE, fontSize=TAM_CORPO-2, leading=ESPACO_LINHA*0.7, textColor=GRAY, spaceAfter=ESPACO_LINHA*0.2)))
-            e.append(Paragraph(s.get('descricao_energia', ''), JUST))
-            e.append(Paragraph("Este numero tem a vibracao ideal para sua campanha. Atrai sucesso eleitoral, credibilidade e prosperidade durante o mandato.", JUST))
-
-    if fallbacks:
-        if ideals:
-            e.append(Spacer(1, ESPACO_LINHA))
-        e.append(Paragraph("<b>Opcoes Alternativas (caso o ideal nao esteja disponivel):</b>", BOLD))
-        for s in fallbacks:
-            cor_energia = "#e67e22" if s['energia'] == 3 else "#888"
-            e.append(Paragraph(f"{s['numero']} - Energia {s['energia']} - <b>{s.get('nome_energia', '')}</b>", ParagraphStyle("TX2", fontName=FONTE_NEGRITO, fontSize=TAM_CORPO-1, leading=ESPACO_LINHA*0.9, textColor=DARK, spaceAfter=ESPACO_LINHA*0.2)))
+                e.append(Paragraph(f"<i>Calculo: {s['explicacao_calculo']}</i>",ParagraphStyle("C",fontName=FONTE,fontSize=TAM_C-2,leading=EL*0.7,textColor=GRAY,spaceAfter=EL*0.2)))
+    if fbs:
+        if ids: e.append(Spacer(1,EL*0.5))
+        e.append(Paragraph("<b>Opcoes Alternativas:</b>",ParagraphStyle("B",fontName=FN,fontSize=TAM_C-1,leading=EL*0.95,textColor=DARK,spaceAfter=EL*0.3)))
+        for s in fbs:
+            e.append(Paragraph(f"{s['numero']} - Energia {s['energia']} - {s.get('nome_energia','')}",ParagraphStyle("X",fontName=FONTE,fontSize=TAM_C-1,leading=EL*0.9,textColor=DARK,spaceAfter=EL*0.2)))
             if 'explicacao_calculo' in s:
-                e.append(Paragraph(f"<i>Calculo: {s['explicacao_calculo']}</i>", ParagraphStyle("TC", fontName=FONTE, fontSize=TAM_CORPO-2, leading=ESPACO_LINHA*0.7, textColor=GRAY, spaceAfter=ESPACO_LINHA*0.2)))
-            e.append(Paragraph(s.get('descricao_energia', ''), ParagraphStyle("J2", fontName=FONTE, fontSize=TAM_CORPO-1, leading=ESPACO_LINHA*0.85, textColor=DARK, spaceAfter=ESPACO_LINHA*0.3)))
+                e.append(Paragraph(f"<i>Calculo: {s['explicacao_calculo']}</i>",ParagraphStyle("C",fontName=FONTE,fontSize=TAM_C-2,leading=EL*0.7,textColor=GRAY,spaceAfter=EL*0.2)))
+    if ne:
+        e.append(Paragraph("Numero Existente:",SEC))
+        e.append(Paragraph(f"Analise: {ne['numero']} - Energia {ne['energia']} - {ne['interpretacao']}",ParagraphStyle("X",fontName=FONTE,fontSize=TAM_C,leading=EL,textColor=DARK,spaceAfter=EL*0.3)))
+    e.append(Paragraph("Verifique disponibilidade com o partido antes de escolher.",ParagraphStyle("A",fontName=FONTE,fontSize=TAM_C-2,leading=EL*0.7,textColor=GRAY,spaceAfter=EL)))
+    e.append(Paragraph("(c) A1ELOS",ParagraphStyle("F",fontName=FONTE,fontSize=8,textColor=GRAY,alignment=TA_CENTER)))
+    doc.build(e); return path
 
-    # 4. Analise do numero existente (se fornecido)
-    if numero_existente:
-        e.append(Spacer(1, ESPACO_LINHA))
-        e.append(Paragraph("Analise do Numero Existente", SEC))
-        n = numero_existente
-        e.append(Paragraph(f"<b>Numero informado: {n['numero']}</b>", BOLD))
-        # Calculo detalhado do numero existente
-        digitos = [int(d) for d in n['numero']]
-        soma = sum(digitos)
-        reducao = r1(soma)
-        dig_str = " + ".join(str(d) for d in digitos)
-        e.append(Paragraph(f"<i>Calculo: {dig_str} = {soma} -> {reducao}</i>", ParagraphStyle("TC", fontName=FONTE, fontSize=TAM_CORPO-2, leading=ESPACO_LINHA*0.7, textColor=GRAY, spaceAfter=ESPACO_LINHA*0.3)))
-        e.append(Paragraph(f"<b>Energia: {n['energia']}</b> - {n['interpretacao']}", ParagraphStyle("TX3", fontName=FONTE, fontSize=TAM_CORPO, leading=ESPACO_LINHA, textColor=DARK, spaceAfter=ESPACO_LINHA*0.3)))
+def enviar_email(para, assunto, corpo, anexo=None):
+    if not SENDGRID_KEY: return False
+    try:
+        sg = SendGridAPIClient(SENDGRID_KEY)
+        mail = Mail(Email(FROM_EMAIL, FROM_NAME), para, assunto, Content("text/plain", corpo))
+        if anexo and os.path.exists(anexo):
+            with open(anexo,"rb") as f: enc = base64.b64encode(f.read()).decode()
+            mail.attachment = Attachment(FileContent(enc), FileName("Documento_A1ELOS.pdf"), FileType("application/pdf"), Disposition("attachment"))
+        sg.send(mail)
+        logger.info(f"Email p/ {para}")
+        return True
+    except Exception as e: logger.error(f"Email: {e}"); return False
 
-        if n['energia'] == 8:
-            e.append(Paragraph("Seu numero ja possui energia 8! Isso e excelente. Mantenha este numero se estiver disponivel para uso.", JUST))
-        else:
-            diff = abs(8 - n['energia'])
-            if diff <= 2:
-                e.append(Paragraph(f"Seu numero tem energia {n['energia']}, que e proxima do 8. Considere substitui-lo por uma das sugestoes acima para potencializar sua campanha com a energia ideal.", JUST))
-            else:
-                e.append(Paragraph(f"Seu numero tem energia {n['energia']}, que e diferente do ideal (8). Recomendamos fortemente adotar uma das sugestoes com energia 8 para maximizar suas chances de sucesso eleitoral.", JUST))
+# ── ROTAS ──
 
-    # 5. Nota final sobre disponibilidade
-    e.append(Spacer(1, ESPACO_LINHA))
-    e.append(Paragraph("<b>Aviso Importante</b>", ParagraphStyle("AV2", fontName=FONTE_NEGRITO, fontSize=TAM_CORPO-1, leading=ESPACO_LINHA*0.8, textColor=colors.HexColor("#e67e22"), spaceAfter=ESPACO_LINHA*0.3)))
-    e.append(Paragraph("Verifique a disponibilidade do numero com seu partido antes de escolher. A prioridade de uso e de quem ja concorreu com aquele numero por antiguidade na sigla. Caso o numero ideal ja esteja em uso, escolha a melhor alternativa entre as sugeridas.", ParagraphStyle("AV", fontName=FONTE, fontSize=TAM_CORPO-2, leading=ESPACO_LINHA*0.7, textColor=GRAY, spaceAfter=ESPACO_LINHA)))
+@app.post("/api/pay/urna-session")
+def pay_urna_session(req: UrnaPayReq):
+    if not STRIPE_KEY: raise HTTPException(503,"Stripe nao configurado")
+    if not req.email: raise HTTPException(400,"Email obrigatorio")
+    if len(req.nome_completo.strip())&lt;3: raise HTTPException(400,"Nome obrigatorio")
+    nomes = [n.strip() for n in [req.nome1,req.nome2,req.nome3,req.nome4,req.nome5] if n.strip()]
+    if not nomes: raise HTTPException(400,"Pelo menos 1 nome")
+    meta = {"product":"urna26","nome_completo":req.nome_completo,"cargo":req.cargo,"email":req.email}
+    for i,n in enumerate(nomes,1): meta[f"nome{i}"]=n
+    cs = stripe.checkout.Session.create(mode='payment',payment_method_types=['card'],
+        line_items=[{'price_data':{'currency':'brl','product_data':{'name':'Validacao Nome'},'unit_amount':2600},'quantity':1}],
+        customer_email=req.email,metadata=meta,
+        success_url=f"{BASE_URL}/api/pay/urna-success?session_id={{CHECKOUT_SESSION_ID}}",
+        cancel_url=f"{BASE_URL}/api/pay/cancel")
+    return {"payment_url":cs.url,"id":cs.id}
 
-    e.append(Paragraph("(c) A1ELOS Assessoria e Consultoria - Numerologia aplicada ao sucesso eleitoral", ParagraphStyle("FF", fontName=FONTE, fontSize=8, textColor=GRAY, alignment=TA_CENTER)))
-    doc.build(e)
-    return path
+@app.get("/api/pay/urna-success")
+def pay_urna_success(request: Request):
+    sid = request.query_params.get("session_id","")
+    if not sid: return HTMLResponse(ERR.format(msg="Sessao invalida"))
+    s = stripe.checkout.Session.retrieve(sid)
+    meta = getattr(s,'metadata',{}) or {}
+    if hasattr(meta,'to_dict'): meta = meta.to_dict()
+    nc = meta.get('nome_completo',''); cr = meta.get('cargo','vereador')
+    em = meta.get('email','') or getattr(s,'customer_email','')
+    nomes = [meta.get(f'nome{i}','') for i in range(1,6) if meta.get(f'nome{i}','')]
+    if not nomes: return HTMLResponse(ERR.format(msg="Dados nao encontrados"))
+    res, idl, sugs = validar_nomes_urna(nomes, cr)
+    cl = CARGO_INFO.get(cr,{}).get('label',cr)
+    pf = pdf_urna(nc, cl, res, sugs)
+    pn = nc.split()[0] if nc else ""
+    enviar_email(em,"Validacao Nome - A1ELOS",f"Ola {pn},\n\nPDF anexo.\nVerifique spam.\n\nA1ELOS",pf)
+    if pf and os.path.exists(pf): os.remove(pf)
+    return HTMLResponse(URNA_OK)
+
+@app.post("/api/pay/eleitoral-session")
+def pay_eleitoral_session(req: EleitoralPayReq):
+    if not STRIPE_KEY: raise HTTPException(503,"Stripe nao configurado")
+    if not req.email: raise HTTPException(400,"Email obrigatorio")
+    if req.sigla&lt;10 or req.sigla>99: raise HTTPException(400,"Sigla 2 digitos")
+    if req.cargo not in ['vereador','dep_estadual','dep_federal','senador']: raise HTTPException(400,"Cargo invalido")
+    meta = {"product":"eleitoral26","sigla":str(req.sigla),"cargo":req.cargo,"email":req.email,"numero_existente":req.numero_existente or ""}
+    cs = stripe.checkout.Session.create(mode='payment',payment_method_types=['card'],
+        line_items=[{'price_data':{'currency':'brl','product_data':{'name':'Numero Eleitoral'},'unit_amount':2600},'quantity':1}],
+        customer_email=req.email,metadata=meta,
+        success_url=f"{BASE_URL}/api/pay/eleitoral-success?session_id={{CHECKOUT_SESSION_ID}}",
+        cancel_url=f"{BASE_URL}/api/pay/cancel")
+    return {"payment_url":cs.url,"id":cs.id}
+
+@app.get("/api/pay/eleitoral-success")
+def pay_eleitoral_success(request: Request):
+    sid = request.query_params.get("session_id","")
+    if not sid: return HTMLResponse(ERR.format(msg="Sessao invalida"))
+    s = stripe.checkout.Session.retrieve(sid)
+    meta = getattr(s,'metadata',{}) or {}
+    if hasattr(meta,'to_dict'): meta = meta.to_dict()
+    sg = int(meta.get('sigla','0')); cr = meta.get('cargo','vereador')
+    em = meta.get('email','') or getattr(s,'customer_email','')
+    if not em: return HTMLResponse(ERR.format(msg="Email nao encontrado"))
+    ne_str = meta.get('numero_existente','')
+    ss = str(sg).zfill(2); cl = {'vereador':'Vereador','dep_estadual':'Dep. Estadual','dep_federal':'Dep. Federal','senador':'Senador'}
+    cl2 = cl.get(cr,cr); sugs = gerar_numeros(sg, cr)
+    ei = {8:"Poder e Prosperidade",7:"Sabedoria",3:"Criacao",1:"Lideranca",9:"Humanitarismo",5:"Liberdade",6:"Familia",4:"Trabalho",2:"Associacao"}
+    ni = None
+    if ne_str and len(ne_str)>=3:
+        try: en=r1(sum(int(d) for d in ne_str)); ni={"numero":ne_str,"energia":en,"interpretacao":ei.get(en,"")}
+        except: pass
+    pf = pdf_eleitoral(ss, cl2, sugs, ni)
+    enviar_email(em,"Numero Eleitoral - A1ELOS",f"Ola,\n\nPDF com sugestoes para {cl2} anexo.\nVerifique spam.\n\nA1ELOS",pf)
+    if pf and os.path.exists(pf): os.remove(pf)
+    return HTMLResponse(ELET_OK)
+
+@app.post("/calculate")
+def calculate(req: PayReq):
+    db = Session()
+    if len(req.name.strip())&lt;2: raise HTTPException(400,"Nome curto")
+    if not req.birth_date: raise HTTPException(400,"Data obrigatoria")
+    res = calc(req.name, req.birth_date)
+    cid = uuid.uuid4().hex[:8]
+    db.add(Calc(id=cid,name=req.name,birth_date=req.birth_date,email=req.email,**res)); db.commit()
+    if req.email:
+        try:
+            pf = pdf8(res, req.name, req.birth_date)
+            enviar_email(req.email,"Seu Mapa Express!",f"Ola {req.name},\n\nMapa gerado.\nA1ELOS",pf)
+            if os.path.exists(pf): os.remove(pf)
+        except: pass
+    db.close()
+    return {"id":cid,**res,"email_sent":True}
+
+@app.post("/api/pay/stripe")
+def pay_stripe(req: PayReq):
+    if not STRIPE_KEY: raise HTTPException(503,"Stripe nao configurado")
+    if not req.price or req.price&lt;=0: raise HTTPException(400,"Preco invalido")
+    amt = int(float(req.price)*100)
+    cs = stripe.checkout.Session.create(mode='payment',payment_method_types=['card'],
+        line_items=[{'price_data':{'currency':'brl','product_data':{'name':f"Mapa-{req.product}"},'unit_amount':amt},'quantity':1}],
+        customer_email=req.email,
+        metadata={"product":req.product,"name":req.name,"birth_date":req.birth_date or "","email":req.email},
+        success_url=f"{BASE_URL}/api/pay/success?session_id={{CHECKOUT_SESSION_ID}}",
+        cancel_url=f"{BASE_URL}/api/pay/cancel",
+        payment_method_options={'card':{'installments':{'enabled':True}}})
+    return {"payment_url":cs.url,"id":cs.id,"methods":['card']}
+
+@app.get("/api/pay/success")
+def pay_success(request: Request):
+    sid = request.query_params.get("session_id","")
+    if not sid: return HTMLResponse(ERR.format(msg="Sessao invalida"))
+    s = stripe.checkout.Session.retrieve(sid)
+    meta = getattr(s,'metadata',{}) or {}
+    if hasattr(meta,'to_dict'): meta = meta.to_dict()
+    name = meta.get('name',''); email = meta.get('email','') or getattr(s,'customer_email','')
+    bd = meta.get('birth_date',''); prod = meta.get('product','pdf8')
+    total = int(getattr(s,'amount_total',0) or getattr(s,'amount_subtotal',0) or 0)
+    product = 'pdf17' if (prod=='pdf17' or total>=1200) else 'pdf8'
+    if not bd: bd = '2000-01-01'
+    if not email: return HTMLResponse(ERR.format(msg="Email nao encontrado"))
+    data = calc(name, bd)
+    if product=='pdf17': pf = pdf17(data,name,bd); subj = "Mapa Completo!"
+    else: pf = pdf8(data,name,bd); subj = "Mapa Express!"
+    sent = enviar_email(email,subj,f"Ola {name},\n\nPDF anexo.\nA1ELOS",pf) if pf else False
+    if pf and os.path.exists(pf): os.remove(pf)
+    if sent: return HTMLResponse(OK)
+    return HTMLResponse(ERR.format(msg="Erro no envio."))
+
+@app.get("/api/pay/cancel")
+def pay_cancel(): return HTMLResponse(CANCEL)
+
+@app.get("/")
+def root():
+    try: return HTMLResponse(open(os.path.join(os.path.dirname(__file__),"index.html"),"r",encoding="utf-8").read())
+    except: return HTMLResponse("<h1>API ativa</h1>")
+
+@app.get("/api/health")
+def health(): return {"status":"ok","stripe":bool(STRIPE_KEY),"sendgrid":bool(SENDGRID_KEY)}
+
+# PDF17 (COMPLETO) - versao compacta
+def pdf17(data, nome, bd_str):
+    path = f"/tmp/p17_{uuid.uuid4().hex[:8]}.pdf"
+    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50,rightMargin=50,topMargin=45,bottomMargin=45)
+    e=[]
+    ST=ParagraphStyle("T",fontName=FN,fontSize=TAM_T,textColor=GOLD,alignment=TA_CENTER,spaceAfter=ET,leading=TAM_T*1.5)
+    SE=ParagraphStyle("S",fontName=FN,fontSize=TAM_S,textColor=GOLD,alignment=0,spaceBefore=EL,spaceAfter=ET,leading=TAM_S*1.5)
+    JU=ParagraphStyle("J",fontName=FONTE,fontSize=TAM_C-1,leading=EL*0.9,textColor=DARK,spaceAfter=EL*0.4)
+    lp=data["life_path"]
+    e.append(Spacer(1,30))
+    e.append(Paragraph("M A P A   N U M E R O L O G I C O",ST))
+    e.append(Paragraph("C O M P L E T O",ParagraphStyle("U",fontName=FONTE,fontSize=TAM_S,textColor=GOLD,alignment=TA_CENTER,spaceAfter=ET,leading=TAM_S*1.5)))
+    e.append(Paragraph(nome.upper(),ParagraphStyle("N",fontName=FN,fontSize=TAM_C+2,alignment=TA_CENTER,textColor=DARK,spaceAfter=4)))
+    e.append(Paragraph(bd_str,ParagraphStyle("D",fontName=FONTE,fontSize=TAM_C-2,alignment=TA_CENTER,textColor=GRAY,spaceAfter=EL)))
+    e.append(Paragraph(f"Caminho de Vida {lp}. Expressao {data['expression']}. Motivacao {data['soul_urge']}. Personalidade {data['personality']}. Destino {data['destiny']}.",JU))
+    e.append(PageBreak())
+    e.append(Paragraph("<b>Analise Detalhada</b>",SE))
+    TX={1:"Lider nato",2:"Diplomata",3:"Criativo",4:"Pratico",5:"Livre",6:"Amoroso",7:"Sabio",8:"Prospero",9:"Humanitario",11:"Mestre",22:"Mestre"}
+    NG={1:"Egoista",2:"Indeciso",3:"Disperso",4:"Rigido",5:"Impulsivo",6:"Superprotetor",7:"Frio",8:"Materialista",9:"Melancolico",11:"Ansioso",22:"Ambicioso"}
+    LC={1:"Humildade",2:"Autoconfianca",3:"Foco",4:"Flexibilidade",5:"Responsabilidade",6:"Confiar",7:"Compartilhar",8:"Integridade",9:"Perdoar",11:"Equilibrar",22:"Equilibrar"}
+    for v in [lp,data["expression"],data["soul_urge"],data["personality"],data["destiny"]]:
+        e.append(Paragraph(f"<b>{TX.get(v,'')} ({v})</b> - {NG.get(v,'')}. Licao: {LC.get(v,'')}.",JU))
+    e.append(Spacer(1,EL))
+    bb = dp.parse(bd_str.split(" ")[0] if " " in bd_str else bd_str).date()
+    d,m,a = bb.day, bb.month, bb.year
+    fe = max(36-min(lp,36),25)
+    e.append(Paragraph(f"Ciclos: 1 (0-{fe}a), 2 ({fe+1}-{fe+27}a), 3 ({fe+28}+a).",JU))
+    e.append(PageBreak())
+    e.append(Paragraph("Desafios e Realizacoes:",SE))
+    d1=r1(abs(d-m)); d2=r1(abs(m-r1(a))); d3=r1(abs(d1-d2))
+    e.append(Paragraph(f"Desafios: {d1}, {d2}, Principal {d3}.",JU))
+    r1v=r1(d+m); r2v=r1(d+a); r3v=r1(r1v+r2v); r4v=r1(d+m+a)
+    e.append(Paragraph(f"Realizacoes: 1({r1v}), 2({r2v}), 3({r3v}), 4({r4v}).",JU))
+    e.append(Paragraph(f"Vibracao do dia {bb.day}: {r1(d)}.",JU))
+    grid = calc_grid(nome)
+    pres = [str(n) for n in range(1,10) if grid.get(n,0)>0]; aus = [str(n) for n in range(1,10) if grid.get(n,0)==0]
+    e.append(Paragraph(f"Grade: Presentes {', '.join(pres) or '-'}. Carencias {', '.join(aus) or '-'}.",JU))
+    e.append(Paragraph("A numerologia ilumina caminhos. O livre arbitrio e seu maior poder.",JU))
+    e.append(Paragraph("(c) A1ELOS",ParagraphStyle("F",fontName=FONTE,fontSize=10,textColor=GRAY,alignment=TA_CENTER,spaceBefore=EL*2)))
+    doc.build(e); return path
+
+URNA_OK = "<html><body style='background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh'><div style='text-align:center'><h1 style='color:#C9A94E'>Confirmado!</h1><p>Documento enviado para seu email.</p><p>Verifique o spam.</p><a href='/' style='display:inline-block;padding:12px 30px;background:#C9A94E;color:#000;text-decoration:none;border-radius:50px'>Voltar</a></div></body></html>"
+ELET_OK = "<html><body style='background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh'><div style='text-align:center'><h1 style='color:#C9A94E'>Confirmado!</h1><p>Documento com sugestoes enviado para seu email.</p><p>Verifique spam.</p><a href='/' style='display:inline-block;padding:12px 30px;background:#C9A94E;color:#000;text-decoration:none;border-radius:50px'>Voltar</a></div></body></html>"
+OK = "<html><body style='background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh'><div style='text-align:center'><h1 style='color:#C9A94E'>Confirmado!</h1><p>Documento enviado.</p><p>Verifique spam.</p><a href='/' style='display:inline-block;padding:12px 30px;background:#C9A94E;color:#000;text-decoration:none;border-radius:50px'>Voltar</a></div></body></html>"
+ERR = "<html><body style='background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh'><div style='text-align:center'><h1 style='color:#e74c3c'>{msg}</h1><a href='/' style='display:inline-block;padding:12px 30px;background:#C9A94E;color:#000;text-decoration:none;border-radius:50px'>Voltar</a></div></body></html>"
+CANCEL = "<html><body style='background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh'><div style='text-align:center'><h1 style='color:#e67e22'>Cancelado</h1><a href='/' style='display:inline-block;padding:12px 30px;background:#C9A94E;color:#000;text-decoration:none;border-radius:50px'>Voltar</a></div></body></html>"
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.getenv("PORT","10000"))
+    uvicorn.run(app,host="0.0.0.0",port=port)
