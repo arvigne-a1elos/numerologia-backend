@@ -25,6 +25,7 @@
         .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(201,169,78,0.4); }
         .btn-outline { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
         section { padding: 80px 20px; max-width: 1100px; margin: 0 auto; }
+        .section-hidden { display: none; }
         .form-container { background: #111; padding: 40px; border-radius: 20px; border: 1px solid #222; max-width: 600px; margin: 0 auto; }
         .form-group { margin-bottom: 20px; text-align: left; }
         .form-group label { display: block; font-size: 0.8rem; color: #888; margin-bottom: 8px; }
@@ -52,20 +53,18 @@
         .energy-card { background: #111; border: 1px solid #222; padding: 25px; border-radius: 15px; text-align: center; }
         .energy-card h4 { color: var(--gold); font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 10px; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideDown { from { opacity: 0; max-height: 0; } to { opacity: 1; max-height: 2000px; } }
+        .slide-section { animation: slideDown 0.6s ease; overflow: hidden; }
         footer { padding: 60px 20px; text-align: center; border-top: 1px solid #222; color: #444; font-size: 0.8rem; }
     </style>
 </head>
 <body>
-
-<div class="lang-wrapper">
-    <div class="lang-container" id="langSelector"></div>
-</div>
-
+<div class="lang-wrapper"><div class="lang-container" id="langSelector"></div></div>
 <nav class="sections">
     <a href="#inicio" data-i18n="nav_home">Início</a>
     <a href="#calc" data-i18n="nav_map">Mapa</a>
     <a href="#urna" data-i18n="nav_urna">Nome de Urna</a>
-    <a href="#eleitoral" data-i18n="nav_elec">Número Eleitoral</a>
+    <a href="#eleitoral" data-i18n="nav_elec">Nº Eleitoral</a>
     <a href="#energias" data-i18n="nav_energy">Energias</a>
     <a href="#produtos" data-i18n="nav_products">Preços</a>
 </nav>
@@ -75,9 +74,9 @@
     <h1 data-i18n="hero_title">MAPA NUMEROLÓGICO</h1>
     <p class="subtitle" data-i18n="hero_sub">A ciência dos números aplicada ao seu destino, nome e carreira política</p>
     <div style="display:flex; gap:15px; flex-wrap:wrap; justify-content:center;">
-        <button class="btn" onclick="document.getElementById('calc').scrollIntoView({behavior:'smooth'})" data-i18n="hero_btn1">Gerar Mapa Grátis</button>
-        <a href="#urna" class="btn btn-outline" data-i18n="hero_btn2">Nome de Urna</a>
-        <a href="#eleitoral" class="btn btn-outline" data-i18n="hero_btn3">Número Eleitoral</a>
+        <button class="btn" onclick="scrollToCalc()" data-i18n="hero_btn1">Gerar Mapa Grátis</button>
+        <button class="btn btn-outline" onclick="showSection('urna')" data-i18n="hero_btn2">Validar Nome de Urna</button>
+        <button class="btn btn-outline" onclick="showSection('eleitoral')" data-i18n="hero_btn3">Calcular Nº Eleitoral</button>
     </div>
 </section>
 
@@ -89,7 +88,7 @@
                 <label data-i18n="label_name">Nome Completo</label>
                 <input type="text" id="mainName" required>
             </div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
                 <div class="form-group">
                     <label data-i18n="label_date">Data de Nascimento</label>
                     <input type="date" id="mainDate" required>
@@ -101,15 +100,12 @@
             </div>
             <button type="submit" class="btn" style="width:100%;" id="calcBtn" data-i18n="btn_calc">Calcular Agora</button>
         </form>
-        <div id="calcResult" class="result-card">
-            <div id="calcResultGrid" class="result-grid"></div>
-        </div>
+        <div id="calcResult" class="result-card"><div id="calcResultGrid" class="result-grid"></div></div>
     </div>
 </section>
 
-<!-- NOME DE URNA - PRODUTO PAGO -->
-<section id="urna" style="padding: 80px 20px; max-width: 1100px; margin: 0 auto;">
-    <div class="form-container">
+<section id="urna" class="section-hidden">
+    <div class="form-container slide-section">
         <h2 style="text-align:center; margin-bottom:10px; font-family:'Playfair Display'; color:var(--gold);" data-i18n="urna_title">Validação do Nome de Urna</h2>
         <p style="text-align:center; color:#888; margin-bottom:30px; font-size:0.9rem;" data-i18n="urna_desc">Validação completa com 5 tentativas + sugestões com cargo — R$ 26</p>
         <form id="urnaForm" onsubmit="event.preventDefault(); payUrna();">
@@ -120,55 +116,37 @@
             <div class="form-group">
                 <label data-i18n="urna_cargo">Cargo em Disputa</label>
                 <select id="urnaCargo" required>
-                    <option value="vereador" data-i18n="tab_vereador">Vereador (5 dígitos)</option>
-                    <option value="dep_estadual" data-i18n="tab_estadual">Deputado Estadual (5 dígitos)</option>
-                    <option value="dep_federal" data-i18n="tab_federal">Deputado Federal (4 dígitos)</option>
-                    <option value="senador" data-i18n="tab_senador">Senador (3 dígitos)</option>
+                    <option value="vereador">Vereador (5 dígitos)</option>
+                    <option value="dep_estadual">Deputado Estadual (5 dígitos)</option>
+                    <option value="dep_federal">Deputado Federal (4 dígitos)</option>
+                    <option value="senador">Senador (3 dígitos)</option>
                 </select>
             </div>
             <div class="form-group">
-                <label data-i18n="urna_email">Email (para receber o resultado)</label>
+                <label data-i18n="urna_email">Email (para receber o resultado sigiloso)</label>
                 <input type="email" id="urnaEmail" placeholder="seu@email.com" required>
             </div>
-            <p style="color:#888; font-size:0.8rem; margin-bottom:15px;" data-i18n="urna_5names">Insira até 5 opções de nome de candidato. Calcularemos a energia de cada uma:</p>
-            <div class="form-group">
-                <label>Nome 1</label>
-                <input type="text" id="urnaNome1" placeholder="Ex: João Silva" required>
-            </div>
-            <div class="form-group">
-                <label>Nome 2</label>
-                <input type="text" id="urnaNome2" placeholder="Ex: João Silva Santos">
-            </div>
-            <div class="form-group">
-                <label>Nome 3</label>
-                <input type="text" id="urnaNome3" placeholder="Ex: J. Silva">
-            </div>
-            <div class="form-group">
-                <label>Nome 4</label>
-                <input type="text" id="urnaNome4" placeholder="Ex: João S. Santos">
-            </div>
-            <div class="form-group">
-                <label>Nome 5</label>
-                <input type="text" id="urnaNome5" placeholder="Ex: João da Silva">
-            </div>
-            <button type="submit" class="btn" style="width:100%; font-size:1rem; padding:16px;" id="urnaBtn">
-                🔒 Pagar R$ 26 e Validar Nomes
-            </button>
+            <p style="color:#888; font-size:0.8rem; margin-bottom:15px;" data-i18n="urna_5names">Insira até 5 opções de nome de candidato:</p>
+            <div class="form-group"><label>Nome 1</label><input type="text" id="urnaNome1" placeholder="Ex: João Silva" required></div>
+            <div class="form-group"><label>Nome 2</label><input type="text" id="urnaNome2" placeholder="Ex: João Silva Santos"></div>
+            <div class="form-group"><label>Nome 3</label><input type="text" id="urnaNome3" placeholder="Ex: J. Silva"></div>
+            <div class="form-group"><label>Nome 4</label><input type="text" id="urnaNome4" placeholder="Ex: João S. Santos"></div>
+            <div class="form-group"><label>Nome 5</label><input type="text" id="urnaNome5" placeholder="Ex: João da Silva"></div>
+            <button type="submit" class="btn" style="width:100%; font-size:1rem; padding:16px;" id="urnaBtn">🔒 Pagar R$ 26 — Resultado por Email</button>
         </form>
         <div id="urnaResult" style="display:none; margin-top:30px;"></div>
     </div>
 </section>
 
-<!-- NÚMERO ELEITORAL -->
-<section id="eleitoral" style="padding: 80px 20px; max-width: 1100px; margin: 0 auto;">
-    <div class="form-container">
+<section id="eleitoral" class="section-hidden">
+    <div class="form-container slide-section">
         <h2 style="text-align:center; margin-bottom:10px; font-family:'Playfair Display'; color:var(--gold);" data-i18n="elec_title">Cálculo do Número Eleitoral</h2>
-        <p style="text-align:center; color:#888; margin-bottom:30px; font-size:0.9rem;" data-i18n="elec_desc">Encontre o número ideal com energia 8 — R$ 26</p>
+        <p style="text-align:center; color:#888; margin-bottom:30px; font-size:0.9rem;" data-i18n="elec_desc">Encontre o número ideal com energia 8</p>
         <div class="tab-bar">
-            <button class="tab-btn active" onclick="setCargo('vereador', this)" data-i18n="tab_vereador">Vereador (5)</button>
-            <button class="tab-btn" onclick="setCargo('dep_estadual', this)" data-i18n="tab_estadual">Dep. Estadual (5)</button>
-            <button class="tab-btn" onclick="setCargo('dep_federal', this)" data-i18n="tab_federal">Dep. Federal (4)</button>
-            <button class="tab-btn" onclick="setCargo('senador', this)" data-i18n="tab_senador">Senador (3)</button>
+            <button class="tab-btn active" onclick="setCargo('vereador',this)">Vereador (5)</button>
+            <button class="tab-btn" onclick="setCargo('dep_estadual',this)">Dep. Estadual (5)</button>
+            <button class="tab-btn" onclick="setCargo('dep_federal',this)">Dep. Federal (4)</button>
+            <button class="tab-btn" onclick="setCargo('senador',this)">Senador (3)</button>
         </div>
         <form id="eleitoralForm" onsubmit="event.preventDefault(); calculateEleitoral();">
             <div class="form-group">
@@ -176,11 +154,11 @@
                 <input type="number" id="eleitoralSigla" min="10" max="99" placeholder="Ex: 22" required>
             </div>
             <div class="form-group">
-                <label data-i18n="elec_existente">Número já existente (opcional — para ver a energia)</label>
+                <label data-i18n="elec_existente">Número já existente (opcional)</label>
                 <input type="text" id="eleitoralNumero" placeholder="Ex: 22123">
             </div>
             <input type="hidden" id="eleitoralCargo" value="vereador">
-            <button type="submit" class="btn" style="width:100%;" data-i18n="elec_btn">Calcular Números Ideais</button>
+            <button type="submit" class="btn" style="width:100%;" data-i18n="elec_btn">Calcular Números</button>
         </form>
         <div id="eleitoralResult" style="display:none; margin-top:30px;"></div>
     </div>
@@ -188,280 +166,142 @@
 
 <section id="energias">
     <h2 style="text-align:center; color:var(--gold); font-family:'Playfair Display'; margin-bottom:40px;" data-i18n="energy_title">Significado das Energias</h2>
-    <p style="text-align:center; color:#888; max-width:700px; margin:0 auto 20px;" data-i18n="energy_desc">Cada número carrega uma vibração específica que influencia diferentes áreas da vida.</p>
+    <p style="text-align:center; color:#888; max-width:700px; margin:0 auto 20px;" data-i18n="energy_desc">Cada número carrega uma vibração específica.</p>
     <div class="energy-grid" id="energyGrid"></div>
 </section>
 
 <section id="produtos">
     <h2 style="text-align:center; color:var(--gold); font-family:'Playfair Display'; margin-bottom:40px;" data-i18n="prod_title">Produtos e Serviços</h2>
     <table class="pricing-table">
-        <thead>
-            <tr><th data-i18n="th_prod">Produto</th><th data-i18n="th_price">Preço</th><th data-i18n="th_desc">Descrição</th></tr>
-        </thead>
+        <thead><tr><th data-i18n="th_prod">Produto</th><th data-i18n="th_price">Preço</th><th data-i18n="th_desc">Descrição</th></tr></thead>
         <tbody>
-            <tr><td>📋 Mapa Numerológico Express</td><td>R$ 8</td><td data-i18n="prod_desc1">1 página com os 5 números principais + resumo</td></tr>
-            <tr><td>📋 Mapa Numerológico Completo</td><td>R$ 17</td><td data-i18n="prod_desc2">Mapa completo com análise do livro, ciclos, desafios, grade</td></tr>
-            <tr><td>🗳️ Validação do Nome de Urna</td><td>R$ 26</td><td data-i18n="prod_desc3">Validação de 5 nomes + sugestões com cargo + PDF no email</td></tr>
-            <tr><td>🔢 Cálculo do Número Eleitoral</td><td>R$ 26</td><td data-i18n="prod_desc4">5 sugestões de números com energia 8 para qualquer cargo</td></tr>
+            <tr><td>📋 Mapa Express</td><td>R$ 8</td><td data-i18n="prod_desc1">1 página com os 5 números principais</td></tr>
+            <tr><td>📋 Mapa Completo</td><td>R$ 17</td><td data-i18n="prod_desc2">Mapa completo com análise do livro</td></tr>
+            <tr><td>🗳️ Validação Nome de Urna</td><td>R$ 26</td><td data-i18n="prod_desc3">5 nomes + sugestões com cargo + PDF sigiloso</td></tr>
+            <tr><td>🔢 Número Eleitoral</td><td>R$ 26</td><td data-i18n="prod_desc4">5 números com energia 8 para qualquer cargo</td></tr>
         </tbody>
     </table>
 </section>
 
-<footer>
-    <p>© A1ELOS Assessoria e Consultoria — <span data-i18n="footer_text">A ciência dos números aplicada ao seu sucesso</span></p>
-</footer>
+<footer><p>© A1ELOS Assessoria e Consultoria — <span data-i18n="footer_text">A ciência dos números aplicada ao seu sucesso</span></p></footer>
 
 <script>
 const LANGUAGES = [
-    { code: 'pt', label: '🇧🇷 PT', name: 'Português' },
-    { code: 'en', label: '🇺🇸 EN', name: 'English' },
-    { code: 'es', label: '🇪🇸 ES', name: 'Español' },
-    { code: 'fr', label: '🇫🇷 FR', name: 'Français' },
-    { code: 'de', label: '🇩🇪 DE', name: 'Deutsch' },
-    { code: 'it', label: '🇮🇹 IT', name: 'Italiano' },
-    { code: 'ja', label: '🇯🇵 JP', name: '日本語' },
-    { code: 'zh', label: '🇨🇳 ZH', name: '中文' },
-    { code: 'ko', label: '🇰🇷 KO', name: '한국어' },
-    { code: 'ru', label: '🇷🇺 RU', name: 'Русский' },
-    { code: 'ar', label: '🇸🇦 AR', name: 'العربية' },
-    { code: 'nl', label: '🇳🇱 NL', name: 'Nederlands' }
+    {code:'pt',label:'🇧🇷 PT',name:'Português'},{code:'en',label:'🇺🇸 EN',name:'English'},{code:'es',label:'🇪🇸 ES',name:'Español'},
+    {code:'fr',label:'🇫🇷 FR',name:'Français'},{code:'de',label:'🇩🇪 DE',name:'Deutsch'},{code:'it',label:'🇮🇹 IT',name:'Italiano'},
+    {code:'ja',label:'🇯🇵 JP',name:'日本語'},{code:'zh',label:'🇨🇳 ZH',name:'中文'},{code:'ko',label:'🇰🇷 KO',name:'한국어'},
+    {code:'ru',label:'🇷🇺 RU',name:'Русский'},{code:'ar',label:'🇸🇦 AR',name:'العربية'},{code:'nl',label:'🇳🇱 NL',name:'Nederlands'}
 ];
-
-const i18n = {
-    pt: {
-        nav_home:'Início', nav_map:'Mapa', nav_urna:'Nome de Urna', nav_elec:'Número Eleitoral',
-        nav_energy:'Energias', nav_products:'Preços',
-        hero_title:'MAPA NUMEROLÓGICO', hero_sub:'A ciência dos números aplicada ao seu destino e carreira política',
-        hero_btn1:'Gerar Mapa Grátis', hero_btn2:'Nome de Urna', hero_btn3:'Número Eleitoral',
-        calc_title:'Calcule seu Mapa', label_name:'Nome Completo', label_date:'Data de Nascimento',
-        label_email:'Email', btn_calc:'Calcular Agora',
-        urna_title:'Validação do Nome de Urna', urna_desc:'Validação completa com 5 tentativas + sugestões com cargo — R$ 26',
-        urna_name:'Nome Completo da Pessoa', urna_cargo:'Cargo em Disputa', urna_email:'Email (para receber o resultado)',
-        urna_5names:'Insira até 5 opções de nome de candidato:',
-        elec_title:'Cálculo do Número Eleitoral', elec_desc:'Encontre o número ideal com energia 8 — R$ 26',
-        elec_sigla:'Número da Sigla Partidária (2 dígitos)', elec_existente:'Número já existente (opcional)',
-        elec_btn:'Calcular Números Ideais',
-        tab_vereador:'Vereador (5)', tab_estadual:'Dep. Estadual (5)', tab_federal:'Dep. Federal (4)', tab_senador:'Senador (3)',
-        energy_title:'Significado das Energias', energy_desc:'Cada número carrega uma vibração específica.',
-        prod_title:'Produtos e Serviços', th_prod:'Produto', th_price:'Preço', th_desc:'Descrição',
-        prod_desc1:'1 página com os 5 números principais', prod_desc2:'Mapa completo com análise do livro',
-        prod_desc3:'Validação de 5 nomes + sugestões com cargo + PDF', prod_desc4:'5 sugestões de números com energia 8',
-        footer_text:'A ciência dos números aplicada ao seu sucesso',
-        energy_1:'Liderança, independência, originalidade', energy_2:'Cooperação, diplomacia, sensibilidade',
-        energy_3:'Criatividade, comunicação, alegria', energy_4:'Trabalho, disciplina, estabilidade',
-        energy_5:'Liberdade, aventura, versatilidade', energy_6:'Família, amor, responsabilidade',
-        energy_7:'Sabedoria, espiritualidade, análise', energy_8:'Poder, prosperidade, realização (IDEAL para políticos)',
-        energy_9:'Humanitarismo, comp放松ão, generosidade',
-    },
-    en: {
-        nav_home:'Home', nav_map:'Map', nav_urna:'Ballot Name', nav_elec:'Electoral Number',
-        nav_energy:'Energies', nav_products:'Prices',
-        hero_title:'NUMEROLOGICAL MAP', hero_sub:'The science of numbers applied to your destiny and political career',
-        hero_btn1:'Generate Free Map', hero_btn2:'Ballot Name', hero_btn3:'Electoral Number',
-        calc_title:'Calculate Your Map', label_name:'Full Name', label_date:'Birth Date',
-        label_email:'Email', btn_calc:'Calculate Now',
-        urna_title:'Ballot Name Validation', urna_desc:'Complete validation with 5 attempts + cargo suggestions — $5',
-        urna_name:'Person Full Name', urna_cargo:'Position Running For', urna_email:'Email (to receive results)',
-        urna_5names:'Enter up to 5 candidate name options:',
-        elec_title:'Electoral Number Calculation', elec_desc:'Find the ideal number with energy 8 — $5',
-        elec_sigla:'Party Number (2 digits)', elec_existente:'Existing number (optional)',
-        elec_btn:'Calculate Ideal Numbers',
-        tab_vereador:'Councilor (5)', tab_estadual:'State Dep. (5)', tab_federal:'Federal Dep. (4)', tab_senador:'Senator (3)',
-        energy_title:'Meaning of Energies', energy_desc:'Each number carries a specific vibration.',
-        prod_title:'Products & Services', th_prod:'Product', th_price:'Price', th_desc:'Description',
-        prod_desc1:'1 page with 5 main numbers', prod_desc2:'Full map with book analysis',
-        prod_desc3:'5 name validation + cargo suggestions + PDF', prod_desc4:'5 number suggestions with energy 8',
-        footer_text:'The science of numbers applied to your success',
-        energy_1:'Leadership, independence, originality', energy_2:'Cooperation, diplomacy, sensitivity',
-        energy_3:'Creativity, communication, joy', energy_4:'Work, discipline, stability',
-        energy_5:'Freedom, adventure, versatility', energy_6:'Family, love, responsibility',
-        energy_7:'Wisdom, spirituality, analysis', energy_8:'Power, prosperity, achievement (IDEAL for politicians)',
-        energy_9:'Humanitarianism, compassion, generosity',
-    },
+const i18n={
+pt:{nav_home:'Início',nav_map:'Mapa',nav_urna:'Nome de Urna',nav_elec:'Nº Eleitoral',nav_energy:'Energias',nav_products:'Preços',
+hero_title:'MAPA NUMEROLÓGICO',hero_sub:'A ciência dos números aplicada ao seu destino e carreira política',
+hero_btn1:'Gerar Mapa Grátis',hero_btn2:'Validar Nome de Urna',hero_btn3:'Calcular Nº Eleitoral',
+calc_title:'Calcule seu Mapa',label_name:'Nome Completo',label_date:'Data de Nascimento',label_email:'Email',btn_calc:'Calcular Agora',
+urna_title:'Validação do Nome de Urna',urna_desc:'5 tentativas + sugestões com cargo — R$ 26',
+urna_name:'Nome Completo da Pessoa',urna_cargo:'Cargo em Disputa',urna_email:'Email (resultado sigiloso)',urna_5names:'Insira até 5 opções:',
+elec_title:'Cálculo do Número Eleitoral',elec_desc:'Encontre o número ideal com energia 8',
+elec_sigla:'Número da Sigla Partidária (2 dígitos)',elec_existente:'Número já existente (opcional)',elec_btn:'Calcular Números',
+energy_title:'Significado das Energias',energy_desc:'Cada número carrega uma vibração específica.',
+prod_title:'Produtos e Serviços',th_prod:'Produto',th_price:'Preço',th_desc:'Descrição',
+prod_desc1:'1 página com os 5 números',prod_desc2:'Mapa completo com análise do livro',
+prod_desc3:'5 nomes + sugestões + PDF sigiloso',prod_desc4:'5 números com energia 8',
+footer_text:'A ciência dos números aplicada ao seu sucesso',
+energy_1:'Liderança, independência',energy_2:'Cooperação, diplomacia',energy_3:'Criatividade, comunicação',
+energy_4:'Trabalho, disciplina',energy_5:'Liberdade, aventura',energy_6:'Família, amor',
+energy_7:'Sabedoria, espiritualidade',energy_8:'Poder, prosperidade (IDEAL para políticos)',energy_9:'Humanitarismo, comp放松ão'},
+en:{nav_home:'Home',nav_map:'Map',nav_urna:'Ballot Name',nav_elec:'Electoral N°',nav_energy:'Energies',nav_products:'Prices',
+hero_title:'NUMEROLOGICAL MAP',hero_sub:'The science of numbers applied to your destiny and political career',
+hero_btn1:'Generate Free Map',hero_btn2:'Validate Ballot Name',hero_btn3:'Calculate Electoral N°',
+calc_title:'Calculate Your Map',label_name:'Full Name',label_date:'Birth Date',label_email:'Email',btn_calc:'Calculate Now',
+urna_title:'Ballot Name Validation',urna_desc:'5 attempts + cargo suggestions — $5',
+urna_name:'Person Full Name',urna_cargo:'Position',urna_email:'Email (confidential result)',urna_5names:'Enter up to 5 options:',
+elec_title:'Electoral Number Calculation',elec_desc:'Find the ideal number with energy 8',
+elec_sigla:'Party Number (2 digits)',elec_existente:'Existing number (optional)',elec_btn:'Calculate Numbers',
+energy_title:'Meaning of Energies',energy_desc:'Each number carries a specific vibration.',
+prod_title:'Products & Services',th_prod:'Product',th_price:'Price',th_desc:'Description',
+prod_desc1:'1 page with 5 numbers',prod_desc2:'Full map with book analysis',
+prod_desc3:'5 names + suggestions + confidential PDF',prod_desc4:'5 numbers with energy 8',
+footer_text:'The science of numbers applied to your success',
+energy_1:'Leadership, independence',energy_2:'Cooperation, diplomacy',energy_3:'Creativity, communication',
+energy_4:'Work, discipline',energy_5:'Freedom, adventure',energy_6:'Family, love',
+energy_7:'Wisdom, spirituality',energy_8:'Power, prosperity (IDEAL for politicians)',energy_9:'Humanitarianism, compassion'},
 };
 
-// Fallback function
-function t(key) {
-    const lang = localStorage.getItem('a1elos-lang') || 'pt';
-    const data = i18n[lang] || i18n['pt'];
-    return data[key] || (i18n['pt'][key] || key);
-}
+function t(k){const l=localStorage.getItem('a1elos-lang')||'pt';return(i18n[l]||i18n.pt)[k]||i18n.pt[k]||k}
+function applyLang(){document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=t(el.dataset.i18n)});
+document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===(localStorage.getItem('a1elos-lang')||'pt')))}
+function setLang(c){localStorage.setItem('a1elos-lang',c);applyLang();renderEnergyGrid()}
+(function(){const c=document.getElementById('langSelector');LANGUAGES.forEach(l=>{const b=document.createElement('button');
+b.className='lang-btn'+((localStorage.getItem('a1elos-lang')||'pt')===l.code?' active':'');b.dataset.lang=l.code;
+b.innerHTML=l.label;b.onclick=()=>setLang(l.code);c.appendChild(b)})})();
 
-function applyLang() {
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.dataset.i18n;
-        el.textContent = t(key);
-    });
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.lang === (localStorage.getItem('a1elos-lang') || 'pt'));
-    });
-}
+function showSection(id){const el=document.getElementById(id);if(!el)return;
+el.classList.remove('section-hidden');el.scrollIntoView({behavior:'smooth',block:'start'});
+setTimeout(()=>el.classList.remove('section-hidden'),100)}
 
-function setLang(code) {
-    localStorage.setItem('a1elos-lang', code);
-    applyLang();
-    renderEnergyGrid();
-}
+const energies=[{num:1,k:'energy_1'},{num:2,k:'energy_2'},{num:3,k:'energy_3'},{num:4,k:'energy_4'},
+{num:5,k:'energy_5'},{num:6,k:'energy_6'},{num:7,k:'energy_7'},{num:8,k:'energy_8'},{num:9,k:'energy_9'}];
+function renderEnergyGrid(){const g=document.getElementById('energyGrid');if(!g)return;
+g.innerHTML='';energies.forEach(e=>{const c=document.createElement('div');c.className='energy-card';
+c.innerHTML=`<h4>${e.num}</h4><p style="color:var(--text-gray);font-size:0.9rem;">${t(e.k)}</p>`;g.appendChild(c)})}
 
-(function renderLangButtons() {
-    const container = document.getElementById('langSelector');
-    container.innerHTML = '';
-    LANGUAGES.forEach(l => {
-        const btn = document.createElement('button');
-        btn.className = 'lang-btn' + ((localStorage.getItem('a1elos-lang') || 'pt') === l.code ? ' active' : '');
-        btn.dataset.lang = l.code;
-        btn.innerHTML = l.label;
-        btn.onclick = () => setLang(l.code);
-        container.appendChild(btn);
-    });
-})();
+function scrollToCalc(){document.getElementById('calc').scrollIntoView({behavior:'smooth'})}
 
-const energies = [
-    { num:1, label_key:'energy_1' }, { num:2, label_key:'energy_2' }, { num:3, label_key:'energy_3' },
-    { num:4, label_key:'energy_4' }, { num:5, label_key:'energy_5' }, { num:6, label_key:'energy_6' },
-    { num:7, label_key:'energy_7' }, { num:8, label_key:'energy_8' }, { num:9, label_key:'energy_9' }
-];
+async function calculate(){const n=document.getElementById('mainName').value.trim();
+const d=document.getElementById('mainDate').value;const e=document.getElementById('mainEmail').value.trim();
+const btn=document.getElementById('calcBtn');const rd=document.getElementById('calcResult');
+const rg=document.getElementById('calcResultGrid');if(!n||!d||!e){alert('Preencha todos');return}
+btn.textContent='Calculando...';btn.disabled=true;rd.style.display='none';
+try{const r=await fetch('/calculate',{method:'POST',headers:{'Content-Type':'application/json'},
+body:JSON.stringify({name:n,birth_date:d,email:e,product:'pdf8'})});const data=await r.json();
+const items=[{key:'life_path',label:'Vida'},{key:'expression',label:'Expressão'},{key:'soul_urge',label:'Motivação'},{key:'personality',label:'Personalidade'},{key:'destiny',label:'Destino'}];
+rg.innerHTML='';items.forEach(i=>{const b=document.createElement('div');b.className='num-box';
+b.innerHTML=`<div class="val">${data[i.key]}</div><div class="label">${i.label}</div>`;rg.appendChild(b)});
+rd.style.display='block'}catch(ex){rg.innerHTML='<p style="color:#e74c3c;text-align:center;">Erro</p>';rd.style.display='block'}
+btn.textContent=t('btn_calc');btn.disabled=false}
 
-function renderEnergyGrid() {
-    const grid = document.getElementById('energyGrid');
-    if (!grid) return;
-    grid.innerHTML = '';
-    energies.forEach(e => {
-        const card = document.createElement('div');
-        card.className = 'energy-card';
-        card.innerHTML = `<h4>${e.num}</h4><p style="color:var(--text-gray); font-size:0.9rem;">${t(e.label_key)}</p>`;
-        grid.appendChild(card);
-    });
-}
+async function payUrna(){const fn=document.getElementById('urnaFullName').value.trim();
+const cr=document.getElementById('urnaCargo').value;const em=document.getElementById('urnaEmail').value.trim();
+const n1=document.getElementById('urnaNome1').value.trim();const n2=document.getElementById('urnaNome2').value.trim();
+const n3=document.getElementById('urnaNome3').value.trim();const n4=document.getElementById('urnaNome4').value.trim();
+const n5=document.getElementById('urnaNome5').value.trim();const nomes=[n1,n2,n3,n4,n5].filter(n=>n);
+if(!fn||fn.length<3){alert('Nome completo obrigatório');return}
+if(!em){alert('Email obrigatório');return}
+if(nomes.length===0){alert('Pelo menos 1 nome');return}
+const btn=document.getElementById('urnaBtn');btn.textContent='Redirecionando...';btn.disabled=true;
+try{const r=await fetch('/api/pay/urna-session',{method:'POST',headers:{'Content-Type':'application/json'},
+body:JSON.stringify({nome_completo:fn,cargo:cr,email:em,nome1:n1,nome2:n2,nome3:n3,nome4:n4,nome5:n5})});
+const data=await r.json();if(data.payment_url){window.location.href=data.payment_url}else{
+document.getElementById('urnaResult').innerHTML='<div style="color:#e74c3c;padding:20px;">Erro pagamento</div>';
+document.getElementById('urnaResult').style.display='block';btn.textContent='🔒 Pagar R$ 26';btn.disabled=false}
+}catch(ex){document.getElementById('urnaResult').innerHTML='<div style="color:#e74c3c;padding:20px;">Erro conexão</div>';
+document.getElementById('urnaResult').style.display='block';btn.textContent='🔒 Pagar R$ 26';btn.disabled=false}}
 
-async function calculate() {
-    const name = document.getElementById('mainName').value.trim();
-    const date = document.getElementById('mainDate').value;
-    const email = document.getElementById('mainEmail').value.trim();
-    const btn = document.getElementById('calcBtn');
-    const resDiv = document.getElementById('calcResult');
-    const gridDiv = document.getElementById('calcResultGrid');
-    if (!name || !date || !email) { alert('Preencha todos os campos'); return; }
-    btn.textContent = 'Calculando...'; btn.disabled = true; resDiv.style.display = 'none';
-    try {
-        const resp = await fetch('/calculate', {
-            method:'POST', headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({ name, birth_date: date, email, product: 'pdf8' })
-        });
-        const data = await resp.json();
-        const items = [{key:'life_path',label:'Vida'},{key:'expression',label:'Expressão'},{key:'soul_urge',label:'Motivação'},{key:'personality',label:'Personalidade'},{key:'destiny',label:'Destino'}];
-        gridDiv.innerHTML = '';
-        items.forEach(item => {
-            const box = document.createElement('div'); box.className = 'num-box';
-            box.innerHTML = `<div class="val">${data[item.key]}</div><div class="label">${item.label}</div>`;
-            gridDiv.appendChild(box);
-        });
-        resDiv.style.display = 'block';
-    } catch(e) {
-        gridDiv.innerHTML = '<p style="color:#e74c3c;text-align:center;">Erro ao calcular.</p>';
-        resDiv.style.display = 'block';
-    }
-    btn.textContent = t('btn_calc'); btn.disabled = false;
-}
+let selectedCargo='vereador';
+function setCargo(c,b){selectedCargo=c;document.getElementById('eleitoralCargo').value=c;
+document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active')}
 
-async function payUrna() {
-    const fullName = document.getElementById('urnaFullName').value.trim();
-    const cargo = document.getElementById('urnaCargo').value;
-    const email = document.getElementById('urnaEmail').value.trim();
-    const nomes = [
-        document.getElementById('urnaNome1').value.trim(),
-        document.getElementById('urnaNome2').value.trim(),
-        document.getElementById('urnaNome3').value.trim(),
-        document.getElementById('urnaNome4').value.trim(),
-        document.getElementById('urnaNome5').value.trim()
-    ].filter(n => n);
+async function calculateEleitoral(){const s=parseInt(document.getElementById('eleitoralSigla').value);
+const ne=document.getElementById('eleitoralNumero').value.trim();const rd=document.getElementById('eleitoralResult');
+const btn=document.querySelector('#eleitoralForm .btn');if(!s||s<10||s>99){alert('Sigla 10-99');return}
+btn.textContent='Calculando...';btn.disabled=true;rd.style.display='none';
+try{const r=await fetch('/api/calculate-eleitoral',{method:'POST',headers:{'Content-Type':'application/json'},
+body:JSON.stringify({sigla:s,cargo:selectedCargo,numero_existente:ne||undefined})});const data=await r.json();
+let html='<div class="result-card" style="display:block;"><div style="background:#1a1a1a;border-radius:15px;padding:25px;border:1px solid #333;">';
+html+=`<h3 style="color:var(--gold);margin-bottom:15px;">Números para ${data.cargo}</h3>`;
+html+=`<p style="color:#888;margin-bottom:15px;">Sigla: <b style="color:var(--gold);">${data.sigla}</b></p>`;
+const ideals=data.sugestoes.filter(s=>s.ideal);const fallbacks=data.sugestoes.filter(s=>!s.ideal);
+html+='<h4 style="color:var(--gold);margin-bottom:10px;">Sugestões com Energia 8</h4>';
+ideals.forEach(s=>{html+=`<div class="suggestion-item"><p class="num">${s.numero} <span class="tag-ideal">Ideal</span></p><p class="detail">⚡ Energia ${s.energia} — Poder e prosperidade</p></div>`});
+if(fallbacks.length>0){html+='<h4 style="color:#e67e22;margin:15px 0 10px;">Alternativas</h4>';
+fallbacks.forEach(s=>{const info=data.energias_info[s.energia]||`Energia ${s.energia}`;
+html+=`<div class="suggestion-item" style="border-left-color:#e67e22;"><p class="num">${s.numero} <span class="tag-fallback">Alt.</span></p><p class="detail">⚡ ${info}</p></div>`})}
+if(data.numero_existente){html+=`<div style="margin-top:20px;padding:15px;background:#111;border-radius:10px;"><h4 style="color:var(--gold);margin-bottom:8px;">Número Existente</h4><p>${data.numero_existente.numero} → Energia <span style="color:var(--gold);font-weight:bold;font-size:1.2rem;">${data.numero_existente.energia}</span> — ${data.numero_existente.interpretacao}</p></div>`}
+html+='<p style="color:#777;font-size:0.75rem;margin-top:15px;">⚠️ Verifique disponibilidade com seu partido.</p></div></div>';
+rd.innerHTML=html;rd.style.display='block'}catch(ex){rd.innerHTML='<div style="color:#e74c3c;padding:20px;">Erro</div>';rd.style.display='block'}
+btn.textContent=t('elec_btn');btn.disabled=false}
 
-    if (!fullName || fullName.length < 3) { alert('Nome completo obrigatório'); return; }
-    if (!email) { alert('Email obrigatório'); return; }
-    if (nomes.length === 0) { alert('Pelo menos 1 nome de candidato obrigatório'); return; }
-
-    const btn = document.getElementById('urnaBtn');
-    btn.textContent = 'Redirecionando para pagamento...'; btn.disabled = true;
-
-    try {
-        const resp = await fetch('/api/pay/urna-session', {
-            method:'POST', headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({
-                nome_completo: fullName, cargo: cargo, email: email,
-                nome1: nomes[0] || '', nome2: nomes[1] || '', nome3: nomes[2] || '',
-                nome4: nomes[3] || '', nome5: nomes[4] || ''
-            })
-        });
-        const data = await resp.json();
-        if (data.payment_url) {
-            window.location.href = data.payment_url;
-        } else {
-            document.getElementById('urnaResult').innerHTML = '<div style="color:#e74c3c;padding:20px;text-align:center;">Erro ao criar pagamento.</div>';
-            document.getElementById('urnaResult').style.display = 'block';
-            btn.textContent = '🔒 Pagar R$ 26 e Validar Nomes'; btn.disabled = false;
-        }
-    } catch(e) {
-        document.getElementById('urnaResult').innerHTML = '<div style="color:#e74c3c;padding:20px;text-align:center;">Erro de conexão.</div>';
-        document.getElementById('urnaResult').style.display = 'block';
-        btn.textContent = '🔒 Pagar R$ 26 e Validar Nomes'; btn.disabled = false;
-    }
-}
-
-let selectedCargo = 'vereador';
-function setCargo(cargo, btn) {
-    selectedCargo = cargo;
-    document.getElementById('eleitoralCargo').value = cargo;
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-}
-
-async function calculateEleitoral() {
-    const sigla = parseInt(document.getElementById('eleitoralSigla').value);
-    const numeroExistente = document.getElementById('eleitoralNumero').value.trim();
-    const resultDiv = document.getElementById('eleitoralResult');
-    const btn = document.querySelector('#eleitoralForm .btn');
-    if (!sigla || sigla < 10 || sigla > 99) { alert('Digite uma sigla válida (10-99)'); return; }
-    btn.textContent = 'Calculando...'; btn.disabled = true; resultDiv.style.display = 'none';
-    try {
-        const resp = await fetch('/api/calculate-eleitoral', {
-            method:'POST', headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({ sigla, cargo: selectedCargo, numero_existente: numeroExistente || undefined })
-        });
-        const data = await resp.json();
-        let html = '<div class="result-card" style="display:block;"><div style="background:#1a1a1a;border-radius:15px;padding:25px;border:1px solid #333;">';
-        html += `<h3 style="color:var(--gold);margin-bottom:15px;">Números para ${data.cargo}</h3>`;
-        html += `<p style="color:#888;margin-bottom:15px;">Sigla: <b style="color:var(--gold);">${data.sigla}</b></p>`;
-        const ideals = data.sugestoes.filter(s => s.ideal);
-        const fallbacks = data.sugestoes.filter(s => !s.ideal);
-        html += '<h4 style="color:var(--gold);margin-bottom:10px;">Sugestões com Energia 8 (Ideal)</h4>';
-        ideals.forEach(s => {
-            html += `<div class="suggestion-item"><p class="num">${s.numero} <span class="tag-ideal">Ideal</span></p>`;
-            html += `<p class="detail">⚡ Energia ${s.energia} — Poder, prosperidade e sucesso eleitoral</p></div>`;
-        });
-        if (fallbacks.length > 0) {
-            html += '<h4 style="color:#e67e22;margin:15px 0 10px;">Opções Alternativas</h4>';
-            fallbacks.forEach(s => {
-                const info = data.energias_info[s.energia] || `Energia ${s.energia}`;
-                html += `<div class="suggestion-item" style="border-left-color:#e67e22;"><p class="num">${s.numero} <span class="tag-fallback">Alternativa</span></p>`;
-                html += `<p class="detail">⚡ Energia ${s.energia} — ${info}</p></div>`;
-            });
-        }
-        if (data.numero_existente) {
-            html += `<div style="margin-top:20px;padding:15px;background:#111;border-radius:10px;">
-                <h4 style="color:var(--gold);margin-bottom:8px;">Número Existente</h4>
-                <p><b>${data.numero_existente.numero}</b> → Energia <span style="color:var(--gold);font-weight:bold;font-size:1.2rem;">${data.numero_existente.energia}</span> — ${data.numero_existente.interpretacao}</p></div>`;
-        }
-        html += '<p style="color:#777;font-size:0.75rem;margin-top:15px;">⚠️ Verifique a disponibilidade com seu partido. Prioridade de quem já concorreu com o número por antiguidade na sigla.</p>';
-        html += '</div></div>';
-        resultDiv.innerHTML = html; resultDiv.style.display = 'block';
-    } catch(e) {
-        resultDiv.innerHTML = '<div style="color:#e74c3c;padding:20px;text-align:center;">Erro ao calcular.</div>';
-        resultDiv.style.display = 'block';
-    }
-    btn.textContent = t('elec_btn'); btn.disabled = false;
-}
-
-document.addEventListener('DOMContentLoaded', () => { applyLang(); renderEnergyGrid(); });
+document.addEventListener('DOMContentLoaded',()=>{applyLang();renderEnergyGrid()});
 </script>
 </body>
 </html>
