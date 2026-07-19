@@ -53,6 +53,15 @@ class PayReq(BaseModel):
     name: str; email: str; product: Optional[str] = "pdf8"; price: Optional[float] = 0
     calculation_id: Optional[str] = None; birth_date: Optional[str] = None; lang: Optional[str] = "pt"
 
+class UrnaReq(BaseModel):
+    nome_completo: str
+    nome_candidato: str
+
+class EleitoralReq(BaseModel):
+    sigla: int
+    cargo: str
+    numero_existente: Optional[str] = None
+
 def r1(n):
     while n > 9 and n not in (11, 22, 33): n = sum(int(d) for d in str(n))
     return n
@@ -76,6 +85,115 @@ def calc_grid(name):
         v = t.get(ch, 0)
         if 1 <= v <= 9: g[v] += 1
     return g
+
+def calc_name_value(name):
+    """Calcula a energia numerológica de um nome (soma das letras reduzida)."""
+    t = {c: (i % 9 or 9) for i, c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)}
+    clean = name.upper().replace(" ", "")
+    total = sum(t.get(ch, 0) for ch in clean)
+    return r1(total), total
+
+def suggest_urna_names(candidate_name, max_count=3):
+    """Gera sugestoes de grafia alternativa com energia 8."""
+    letter_values = {c: (i % 9 or 9) for i, c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)}
+    current_r1, _ = calc_name_value(candidate_name)
+    if current_r1 == 8:
+        return [], current_r1, True
+
+    clean = candidate_name.upper().replace(" ", "")
+    target = 8
+    suggestions = []
+    tried = set()
+    tried.add(clean)
+
+    def make_suggestion(base, suffix, desc):
+        full = base + suffix
+        val = sum(letter_values.get(c, 0) for c in full)
+        sug_r1 = r1(val)
+        return {"name": (candidate_name.rstrip() + suffix.lower()).title(), "value": sug_r1, "description": desc}
+
+    # Estrategia 1: adicionar letra(s) no final
+    need = (target - current_r1) % 9
+    if need == 0: need = 9
+
+    for c, v in letter_values.items():
+        if v == need:
+            sug = clean + c
+            if sug not in tried:
+                tried.add(sug)
+                suggestions.append(make_suggestion(clean, c, f"Adicionar '{c.lower()}' ao final"))
+                if len(suggestions) >= max_count:
+                    return suggestions, current_r1, False
+
+    # Estrategia 2: duas letras
+    if len(suggestions) < max_count:
+        for c1, v1 in letter_values.items():
+            for c2, v2 in letter_values.items():
+                if (v1 + v2 - need) % 9 == 0:
+                    sug = clean + c1 + c2
+                    if sug not in tried:
+                        tried.add(sug)
+                        suggestions.append(make_suggestion(clean, c1 + c2, f"Adicionar '{c1.lower()}{c2.lower()}' ao final"))
+                        if len(suggestions) >= max_count:
+                            return suggestions, current_r1, False
+
+    # Estrategia 3: trocar ultima letra
+    if len(suggestions) < max_count and len(clean) > 1:
+        base = clean[:-1]
+        base_sum = sum(letter_values.get(c, 0) for c in base)
+        for c, v in letter_values.items():
+            if r1(base_sum + v) == target:
+                sug = base + c
+                if sug not in tried:
+                    tried.add(sug)
+                    suggestions.append(make_suggestion(base, c, f"Modificar final para '{c.lower()}'"))
+                    if len(suggestions) >= max_count:
+                        return suggestions, current_r1, False
+
+    return suggestions, current_r1, False
+
+def gerar_numeros_eleitorais(sigla, cargo, quantidade=5):
+    """Gera sugestoes de numeros eleitorais com energia 8 (e fallbacks)."""
+    digitos_por_cargo = {'vereador': 5, 'dep_estadual': 5, 'dep_federal': 4, 'senador': 3}
+    total_digitos = digitos_por_cargo.get(cargo, 5)
+    sigla_str = str(sigla).zfill(2)[:2]
+    sigla_sum = int(sigla_str[0]) + int(sigla_str[1])
+    livres = total_digitos - 2
+
+    resultados = []
+    tentados = set()
+
+    def buscar_para_energia(alvo):
+        encontrados = []
+        limite = 10 ** livres
+        for x in range(limite):
+            if len(encontrados) + len(resultados) >= quantidade:
+                break
+            digitos_livres = str(x).zfill(livres)
+            soma_livres = sum(int(d) for d in digitos_livres)
+            total = sigla_sum + soma_livres
+            if r1(total) == alvo:
+                numero = sigla_str + digitos_livres
+                if numero not in tentados:
+                    if soma_livres == 0 and alvo != r1(sigla_sum):
+                        continue
+                    tentados.add(numero)
+                    encontrados.append({'numero': numero, 'energia': alvo, 'ideal': alvo == 8})
+        return encontrados
+
+    # Prioridade: energia 8
+    resultados.extend(buscar_para_energia(8))
+    # Fallback: energia 3 (brilho)
+    if len(resultados) < quantidade:
+        resultados.extend(buscar_para_energia(3))
+    # Ultimo recurso: outras energias
+    if len(resultados) < quantidade:
+        for e in [7, 1, 9, 5, 6, 4, 2]:
+            if len(resultados) >= quantidade:
+                break
+            resultados.extend(buscar_para_energia(e))
+
+    return resultados[:quantidade]
 
 GOLD = colors.HexColor("#B8860B"); LGRAY = colors.HexColor("#f0f0f0"); DARK = colors.HexColor("#222"); GRAY = colors.HexColor("#888")
 
@@ -120,29 +238,19 @@ def pdf8(data, name, bd):
     path = f"/tmp/p8_{uuid.uuid4().hex[:8]}.pdf"
     doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50, topMargin=45, bottomMargin=45)
     e = []
-
-    JUST = ParagraphStyle("J",fontName=FONTE,fontSize=TAM_CORPO,leading=ESPACO_LINHA,textColor=DARK,alignment=TA_JUSTIFY,spaceAfter=ESPACO_LINHA*0.5)
     TIT = ParagraphStyle("TI",fontName=FONTE_NEGRITO,fontSize=TAM_TITULO,textColor=GOLD,alignment=TA_CENTER,spaceAfter=ESPACO_TITULO_TEXTO,leading=TAM_TITULO*1.5)
     TXT = {1:"Lider nato, pioneiro.",2:"Diplomata, sensivel.",3:"Criativo, comunicador.",4:"Pratico, disciplinado.",5:"Livre, aventureiro.",6:"Amoroso, responsavel.",7:"Sabio, espiritual.",8:"Poderoso, prospero.",9:"Humanitario, generoso.",11:"Mestre intuitivo.",22:"Mestre construtor."}
-
     e.append(Spacer(1,30))
     e.append(Paragraph("MAPA NUMEROLOGICO", TIT))
     e.append(Paragraph("EXPRESS", ParagraphStyle("SU",fontName=FONTE,fontSize=TAM_SUBTITULO,textColor=GOLD,alignment=TA_CENTER,spaceAfter=ESPACO_TITULO_TEXTO,leading=TAM_SUBTITULO*1.5)))
     e.append(Paragraph(name.upper(), ParagraphStyle("NM",fontName=FONTE_NEGRITO,fontSize=TAM_CORPO+2,alignment=TA_CENTER,textColor=DARK,spaceAfter=4)))
     e.append(Paragraph(bd, ParagraphStyle("DT",fontName=FONTE,fontSize=TAM_CORPO-2,alignment=TA_CENTER,textColor=GRAY,spaceAfter=ESPACO_LINHA)))
-
     td = [["Numero","Valor"],["Caminho de Vida",str(data["life_path"])],["Expressao",str(data["expression"])],["Motivacao da Alma",str(data["soul_urge"])],["Personalidade",str(data["personality"])],["Destino",str(data["destiny"])]]
     tbl = Table(td, colWidths=[200,150])
     tbl.setStyle(TableStyle([("BACKGROUND",(0,0),(-1,0),GOLD),("TEXTCOLOR",(0,0),(-1,0),colors.white),("FONTSIZE",(0,0),(-1,-1),TAM_CORPO-2),("FONTNAME",(0,0),(-1,-1),FONTE),("GRID",(0,0),(-1,-1),0.5,colors.grey),("ALIGN",(1,0),(1,-1),"CENTER"),("BACKGROUND",(0,1),(-1,-1),LGRAY),("TEXTCOLOR",(0,1),(-1,-1),DARK)]))
-    e.append(tbl)
-    e.append(Spacer(1,ESPACO_LINHA))
-
-    e.append(Paragraph("<b>Seus Numeros</b>", ParagraphStyle("SE",fontName=FONTE_NEGRITO,fontSize=TAM_SUBTITULO,textColor=GOLD,alignment=TA_LEFT,spaceBefore=ESPACO_LINHA,spaceAfter=ESPACO_SUBTITULO_TEXTO if 'ESPACO_SUBTITULO_TEXTO' in dir() else TAM_SUBTITULO*2.0,leading=TAM_SUBTITULO*1.5)))
-
+    e.append(tbl); e.append(Spacer(1,ESPACO_LINHA))
     for k,l in [("life_path","Caminho de Vida"),("expression","Expressao"),("soul_urge","Motivacao da Alma"),("personality","Personalidade"),("destiny","Destino")]:
-        v = data[k]
-        e.append(Paragraph(f"<b>{l} {v}:</b> {TXT.get(v,'Unico.')}", ParagraphStyle("TX",fontName=FONTE,fontSize=TAM_CORPO,leading=ESPACO_LINHA,textColor=DARK,spaceAfter=ESPACO_LINHA*0.5)))
-
+        v = data[k]; e.append(Paragraph(f"<b>{l} {v}:</b> {TXT.get(v,'Unico.')}", ParagraphStyle("TX",fontName=FONTE,fontSize=TAM_CORPO,leading=ESPACO_LINHA,textColor=DARK,spaceAfter=ESPACO_LINHA*0.5)))
     e.append(Paragraph("© A1ELOS Assessoria e Consultoria", ParagraphStyle("FF",fontName=FONTE,fontSize=10,textColor=GRAY,alignment=TA_CENTER,spaceBefore=ESPACO_LINHA*2)))
     doc.build(e); return path
 
@@ -150,34 +258,26 @@ def pdf17(data, name, bd_str):
     path = f"/tmp/p17_{uuid.uuid4().hex[:8]}.pdf"
     doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50, topMargin=45, bottomMargin=45)
     e = []
-
     JUST = ParagraphStyle("J",fontName=FONTE,fontSize=TAM_CORPO,leading=ESPACO_LINHA,textColor=DARK,alignment=TA_JUSTIFY,spaceAfter=ESPACO_LINHA*0.5)
     JUST_PEQ = ParagraphStyle("JP",fontName=FONTE,fontSize=TAM_CORPO-1,leading=ESPACO_LINHA*0.95,textColor=DARK,alignment=TA_JUSTIFY,spaceAfter=ESPACO_LINHA*0.4)
     TIT = ParagraphStyle("TI",fontName=FONTE_NEGRITO,fontSize=TAM_TITULO,textColor=GOLD,alignment=TA_CENTER,spaceAfter=ESPACO_TITULO_TEXTO,leading=TAM_TITULO*1.5)
     SUB = ParagraphStyle("SU",fontName=FONTE,fontSize=TAM_SUBTITULO,textColor=GOLD,alignment=TA_CENTER,spaceAfter=ESPACO_TITULO_TEXTO,leading=TAM_SUBTITULO*1.5)
     SEC = ParagraphStyle("SE",fontName=FONTE_NEGRITO,fontSize=TAM_SUBTITULO,textColor=GOLD,alignment=TA_LEFT,spaceBefore=ESPACO_LINHA,spaceAfter=ESPACO_TITULO_TEXTO,leading=TAM_SUBTITULO*1.5)
     BOLD = ParagraphStyle("BL",fontName=FONTE_NEGRITO,fontSize=TAM_CORPO-1,leading=ESPACO_LINHA*0.95,textColor=DARK,spaceAfter=ESPACO_LINHA*0.3)
-
     lp = data["life_path"]; kw, desc_cam = CAM.get(lp, ("", "")); nome_p = name.split()[0] if " " in name else name
-
-    # Pag 1
     e.append(Spacer(1,30))
     e.append(Paragraph("M A P A   N U M E R O L O G I C O", TIT))
     e.append(Paragraph("C O M P L E T O", SUB))
     e.append(Paragraph(name.upper(), ParagraphStyle("NM",fontName=FONTE_NEGRITO,fontSize=TAM_CORPO+2,alignment=TA_CENTER,textColor=DARK,spaceAfter=4)))
     e.append(Paragraph(bd_str, ParagraphStyle("DT",fontName=FONTE,fontSize=TAM_CORPO-2,alignment=TA_CENTER,textColor=GRAY,spaceAfter=ESPACO_LINHA)))
-
     td = [["Numero","Valor","Significado"],["Caminho de Vida",str(lp),SIG.get(lp,("","","",""))[0]],["Expressao",str(data["expression"]),SIG.get(data["expression"],("","","",""))[0]],["Motivacao da Alma",str(data["soul_urge"]),SIG.get(data["soul_urge"],("","","",""))[0]],["Personalidade",str(data["personality"]),SIG.get(data["personality"],("","","",""))[0]],["Destino",str(data["destiny"]),SIG.get(data["destiny"],("","","",""))[0]]]
     tbl = Table(td, colWidths=[125,45,280])
     tbl.setStyle(TableStyle([("BACKGROUND",(0,0),(-1,0),GOLD),("TEXTCOLOR",(0,0),(-1,0),colors.white),("FONTSIZE",(0,0),(-1,-1),TAM_CORPO-2),("FONTNAME",(0,0),(-1,-1),FONTE),("GRID",(0,0),(-1,-1),0.5,colors.grey),("ALIGN",(1,0),(1,-1),"CENTER"),("BACKGROUND",(0,1),(-1,-1),LGRAY),("TEXTCOLOR",(0,1),(-1,-1),DARK),("VALIGN",(0,0),(-1,-1),"MIDDLE"),("TOPPADDING",(0,0),(-1,-1),5),("BOTTOMPADDING",(0,0),(-1,-1),5)]))
     e.append(tbl)
-
     e.append(Paragraph("<b>Seu Perfil Numerologico</b>", SEC))
     e.append(Paragraph(f"{nome_p}, sua combinacao numerologica e: Caminho de Vida {lp} ({kw}), Expressao {data['expression']}, Motivacao da Alma {data['soul_urge']}, Personalidade {data['personality']}, Destino {data['destiny']}. Cada numero revela uma dimensao do seu ser e juntos formam um mapa completo da sua personalidade e do seu potencial.", JUST))
     e.append(Paragraph(f"<b>Caminho da Vida {lp}:</b> {desc_cam}", JUST))
     e.append(PageBreak())
-
-    # Pag 2: Analise
     e.append(Paragraph("<b>Analise Detalhada dos Numeros</b>", SEC))
     e.append(Paragraph("Cada numero possui um sentido positivo e um sentido negativo. Conhecer ambos e o primeiro passo para o autoconhecimento e a evolucao pessoal. A seguir, a analise completa dos seus numeros conforme a obra de referencia:", JUST))
     for k,l in [("life_path","Caminho de Vida"),("expression","Expressao"),("soul_urge","Motivacao da Alma"),("personality","Personalidade"),("destiny","Destino")]:
@@ -186,7 +286,6 @@ def pdf17(data, name, bd_str):
         e.append(Paragraph(livro_pos, JUST_PEQ))
         e.append(Paragraph(f"<b>Negativo:</b> {livro_neg}", JUST_PEQ))
         e.append(Paragraph(f"<b>Licao:</b> {livro_licao}", JUST_PEQ))
-
     fe = max(36-min(lp,36),25)
     c1n = r1(lp+data["expression"]); c2n = r1(data["expression"]+data["soul_urge"]); c3n = r1(data["soul_urge"]+data["personality"])
     e.append(Paragraph("<b>Ciclos da Vida</b>", SEC))
@@ -194,8 +293,6 @@ def pdf17(data, name, bd_str):
     e.append(Paragraph(f"<b>2 Produtivo ({fe+1}-{fe+27}a) Regente {c2n}:</b> Fase de trabalho, realizacao profissional e conquistas materiais. Maior produtividade.", JUST_PEQ))
     e.append(Paragraph(f"<b>3 Colheita ({fe+28}+a) Regente {c3n}:</b> Fase de sabedoria, colheita dos frutos e legado. Realizacao interior.", JUST_PEQ))
     e.append(PageBreak())
-
-    # Pag 3: Desafios + Realizacoes + Vibracao + Grade + Final
     bb = dp.parse(bd_str.split(" ")[0] if " " in bd_str else bd_str).date()
     d,m,aa = bb.day, bb.month, bb.year
     d1=r1(abs(d-m)); d2=r1(abs(m-r1(aa))); dp_=r1(abs(d1-d2))
@@ -204,7 +301,6 @@ def pdf17(data, name, bd_str):
     e.append(Paragraph(f"<b>Menor 1 (Dia x Mes) {d1}:</b> {DES.get(d1,'')}", JUST_PEQ))
     e.append(Paragraph(f"<b>Menor 2 (Mes x Ano) {d2}:</b> {DES.get(d2,'')}", JUST_PEQ))
     e.append(Paragraph(f"<b>Principal {dp_}:</b> {DES.get(dp_,'')}", JUST_PEQ))
-
     r1v=r1(d+m); r2v=r1(d+aa); r3v=r1(r1v+r2v); r4v=r1(d+m+aa)
     e.append(Paragraph("<b>Realizacoes da Vida</b>", SEC))
     e.append(Paragraph("As realizacoes sao periodos de oportunidade e crescimento que marcam cada fase da sua jornada:", JUST))
@@ -212,11 +308,9 @@ def pdf17(data, name, bd_str):
     e.append(Paragraph(f"<b>2 ({r2v}) Vida Adulta:</b> Consolidacao profissional e pessoal.", JUST_PEQ))
     e.append(Paragraph(f"<b>3 ({r3v}) Maturidade:</b> Colheita dos frutos do trabalho e sabedoria.", JUST_PEQ))
     e.append(Paragraph(f"<b>4 ({r4v}) Legado:</b> Realizacao interior e legado deixado ao mundo.", JUST_PEQ))
-
     vib = r1(d)
     e.append(Paragraph("<b>Vibracao do Dia de Nascimento</b>", SEC))
     e.append(Paragraph(f"Voce nasceu no dia <b>{bb.day}</b>. Reduzindo este numero: {d} → <b>{vib}</b>. {VIB.get(vib,'')}", JUST))
-
     e.append(Paragraph("<b>Grade de Inclusao</b>", SEC))
     e.append(Paragraph("A Grade de Inclusao mostra a frequencia de cada numero (1 a 9) no seu nome completo. Numeros com mais ocorrencias indicam seus pontos fortes e talentos naturais. Numeros ausentes indicam carencias, areas que precisam ser desenvolvidas ao longo da vida como licoes que a alma se propoe a aprender.", JUST))
     grid = calc_grid(name)
@@ -229,7 +323,6 @@ def pdf17(data, name, bd_str):
             sig_info = SIG.get(int(n), ("","","",""))
             nomes_aus.append(f"{n}({sig_info[0]})")
         e.append(Paragraph(f"As carencias ({', '.join(nomes_aus)}) indicam qualidades a desenvolver. Quanto mais consciente, maior seu potencial de crescimento pessoal.", JUST))
-
     e.append(Paragraph("<b>Nota Final</b>", SEC))
     e.append(Paragraph("A numerologia e uma ferramenta de autoconhecimento baseada no estudo da vibracao dos numeros e das letras. Ela nao determina seu destino, mas ilumina os caminhos possiveis e revela potencialidades. Os numeros mostram tendencias, mas o livre arbitrio e sempre seu maior poder. Use este conhecimento para fazer escolhas mais conscientes e alinhadas com sua essencia verdadeira.", JUST))
     e.append(Paragraph("© A1ELOS Assessoria e Consultoria", ParagraphStyle("FF",fontName=FONTE,fontSize=10,textColor=GRAY,alignment=TA_CENTER,spaceBefore=ESPACO_LINHA*2)))
@@ -245,6 +338,62 @@ def send_email(to, subj, body, attach=None):
             mail.attachment = Attachment(FileContent(encoded), FileName("Mapa_Numerologico.pdf"), FileType("application/pdf"), Disposition("attachment"))
         sg.send(mail); logger.info(f"Email p/ {to}"); return True
     except Exception as e: logger.error(f"Falha email: {e}"); return False
+
+# ──────── NOVOS ENDPOINTS ────────
+
+@app.post("/api/validate-urna")
+def validate_urna(req: UrnaReq):
+    if not req.nome_completo or len(req.nome_completo.strip()) < 3:
+        raise HTTPException(400, "Nome completo obrigatorio (min. 3 caracteres)")
+    if not req.nome_candidato or len(req.nome_candidato.strip()) < 2:
+        raise HTTPException(400, "Nome de candidato obrigatorio (min. 2 caracteres)")
+
+    pessoa_r1, pessoa_sum = calc_name_value(req.nome_completo)
+    cand_r1, _ = calc_name_value(req.nome_candidato)
+    sugestoes, _, is_ideal = suggest_urna_names(req.nome_candidato)
+
+    result = {
+        "pessoa": {"nome": req.nome_completo.strip().title(), "energia": pessoa_r1, "soma_numerica": pessoa_sum},
+        "candidato": {"nome": req.nome_candidato.strip().title(), "energia_atual": cand_r1, "energia_ideal": 8, "eh_ideal": is_ideal, "sugestoes": sugestoes}
+    }
+
+    if is_ideal:
+        result["candidato"]["mensagem"] = f"O nome '{req.nome_candidato.strip().title()}' ja possui energia 8! Ideal para sua candidatura."
+    else:
+        result["candidato"]["mensagem"] = f"A energia atual do nome e {cand_r1}. Para atingir energia 8, sugerimos as grafias abaixo:"
+    return result
+
+@app.post("/api/calculate-eleitoral")
+def calculate_eleitoral(req: EleitoralReq):
+    cargos_validos = {'vereador': 'Vereador', 'dep_estadual': 'Deputado Estadual', 'dep_federal': 'Deputado Federal', 'senador': 'Senador'}
+    if req.cargo not in cargos_validos:
+        raise HTTPException(400, f"Cargo invalido. Use: {', '.join(cargos_validos.keys())}")
+    if req.sigla < 10 or req.sigla > 99:
+        raise HTTPException(400, "Sigla deve ter 2 digitos (10-99)")
+
+    sigla_str = str(req.sigla).zfill(2)
+    sugestoes = gerar_numeros_eleitorais(req.sigla, req.cargo)
+    energias_info = {8: "Poder e Prosperidade (ideal)", 7: "Sabedoria", 3: "Criacao e Brilho", 1: "Lideranca", 9: "Humanitarismo", 5: "Liberdade", 6: "Familia", 4: "Trabalho", 2: "Associacao"}
+
+    result = {
+        "cargo": cargos_validos[req.cargo],
+        "cargo_key": req.cargo,
+        "sigla": sigla_str,
+        "sugestoes": sugestoes,
+        "energias_info": energias_info
+    }
+
+    if req.numero_existente and len(req.numero_existente) >= 3:
+        try:
+            n = req.numero_existente
+            soma = sum(int(d) for d in n)
+            energia = r1(soma)
+            result["numero_existente"] = {"numero": n, "energia": energia, "interpretacao": energias_info.get(energia, "Energia unica")}
+        except: pass
+
+    return result
+
+# ──────── ENDPOINTS EXISTENTES ────────
 
 @app.get("/", response_class=HTMLResponse)
 def root():
