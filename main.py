@@ -152,34 +152,22 @@ def gerar_numeros(sigla, cargo, qtd=5):
     # ══════ BLOCO 07 — PDF EXPRESS (1 PÁGINA) ══════
 def pdf8(data, nome, bd):
     path = f"/tmp/p8_{uuid.uuid4().hex[:8]}.pdf"
-    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=45, rightMargin=45, topMargin=20, bottomMargin=15)
+    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=45, rightMargin=45, topMargin=18, bottomMargin=15)
     e = []
-    e.append(Spacer(1, 10))
-    e.append(Paragraph("MAPA NUMEROLOGICO EXPRESS",
-        ParagraphStyle("T", fontName=FN, fontSize=16, textColor=GOLD, alignment=TA_CENTER, spaceAfter=4, leading=20)))
-    e.append(Paragraph(nome.upper(), ParagraphStyle("N", fontName=FN, fontSize=11, alignment=TA_CENTER, textColor=DARK, spaceAfter=2)))
-    e.append(Paragraph(bd, ParagraphStyle("D", fontName=FONTE, fontSize=9, alignment=TA_CENTER, textColor=GRAY, spaceAfter=6)))
-    td = [["Numero", "Valor"]] + [[l, str(data[k])] for k, l in
-        [("life_path","Caminho de Vida"),("expression","Expressao"),("soul_urge","Motiv.Alma"),("personality","Personalidade"),("destiny","Destino")]]
-    tbl = Table(td, colWidths=[180, 120])
-    tbl.setStyle(TableStyle([
-        ("BACKGROUND",(0,0),(-1,0),GOLD),("TEXTCOLOR",(0,0),(-1,0),colors.white),
-        ("FONTSIZE",(0,0),(-1,-1),9),("FONTNAME",(0,0),(-1,-1),FONTE),
-        ("GRID",(0,0),(-1,-1),0.3,colors.grey),("ALIGN",(1,0),(1,-1),"CENTER"),
-        ("BACKGROUND",(0,1),(-1,-1),LGRAY),("TEXTCOLOR",(0,1),(-1,-1),DARK),
-        ("TOPPADDING",(0,0),(-1,-1),2),("BOTTOMPADDING",(0,0),(-1,-1),2)]))
-    e.append(tbl)
-    e.append(Spacer(1, 4))
-    TXL = {1:"Lider nato, pioneiro, original",2:"Diplomata, sensivel, cooperativo",3:"Criativo, comunicador, otimista",
-           4:"Pratico, disciplinado, confiavel",5:"Livre, versatil, aventureiro",6:"Amoroso, responsavel, protetor",
-           7:"Sabio, analitico, espiritual",8:"Prospero, realizador, poderoso (IDEAL)",
-           9:"Humanitario, generoso, compassivo",11:"Mestre Inspirador",22:"Mestre Construtor"}
+    e.append(Spacer(1, 8))
+    e.append(Paragraph("MAPA NUMEROLOGICO EXPRESS", ParagraphStyle("T", fontName=FN, fontSize=15, textColor=GOLD, alignment=TA_CENTER, spaceAfter=3, leading=18)))
+    e.append(Paragraph(nome.upper(), ParagraphStyle("N", fontName=FN, fontSize=10, alignment=TA_CENTER, textColor=DARK, spaceAfter=1)))
+    e.append(Paragraph(bd, ParagraphStyle("D", fontName=FONTE, fontSize=8, alignment=TA_CENTER, textColor=GRAY, spaceAfter=5)))
+    td = [["Numero", "Valor"]] + [[l, str(data[k])] for k, l in [("life_path","Caminho de Vida"),("expression","Expressao"),("soul_urge","Motiv.Alma"),("personality","Personalidade"),("destiny","Destino")]]
+    tbl = Table(td, colWidths=[170, 110])
+    tbl.setStyle(TableStyle([("BACKGROUND",(0,0),(-1,0),GOLD),("TEXTCOLOR",(0,0),(-1,0),colors.white),("FONTSIZE",(0,0),(-1,-1),8.5),("FONTNAME",(0,0),(-1,-1),FONTE),("GRID",(0,0),(-1,-1),0.3,colors.grey),("ALIGN",(1,0),(1,-1),"CENTER"),("BACKGROUND",(0,1),(-1,-1),LGRAY),("TEXTCOLOR",(0,1),(-1,-1),DARK),("TOPPADDING",(0,0),(-1,-1),2),("BOTTOMPADDING",(0,0),(-1,-1),2)]))
+    e.append(tbl); e.append(Spacer(1, 3))
+    TXL = {1:"Lider nato, pioneiro",2:"Diplomata, sensivel",3:"Criativo, comunicador",4:"Pratico, disciplinado",5:"Livre, versatil",6:"Amoroso, responsavel",7:"Sabio, analitico",8:"Prospero, realizador (IDEAL)",9:"Humanitario, generoso",11:"Mestre Inspirador",22:"Mestre Construtor"}
     for k, l in [("life_path","Vida"),("expression","Expressao"),("soul_urge","Alma"),("personality","Personal."),("destiny","Destino")]:
         v = data[k]; txt = TXL.get(v, "")
-        e.append(Paragraph(f"<b>{l} {v}:</b> {txt}", ParagraphStyle("X", fontName=FONTE, fontSize=8.5, leading=10, textColor=DARK, spaceAfter=1.5)))
-    e.append(Paragraph("(c) A1ELOS", ParagraphStyle("F", fontName=FONTE, fontSize=7, textColor=GRAY, alignment=TA_CENTER, spaceBefore=4)))
-    doc.build(e)
-    return path
+        e.append(Paragraph(f"<b>{l} {v}:</b> {txt}", ParagraphStyle("X", fontName=FONTE, fontSize=8, leading=9.5, textColor=DARK, spaceAfter=1)))
+    e.append(Paragraph("(c) A1ELOS", ParagraphStyle("F", fontName=FONTE, fontSize=6.5, textColor=GRAY, alignment=TA_CENTER, spaceBefore=3)))
+    doc.build(e); return path
     # ══════ BLOCO 08 — PDF URNA + ELEITORAL ══════
 def pdf_urna(nc, cl, resultados, sugestoes):
     path = f"/tmp/u_{uuid.uuid4().hex[:8]}.pdf"
@@ -209,124 +197,47 @@ def pdf_urna(nc, cl, resultados, sugestoes):
     doc.build(e)
     return path
 
-def pdf_eleitoral(ss, cl, sugestoes, ne=None):
-    path = f"/tmp/e_{uuid.uuid4().hex[:8]}.pdf"
-    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=45, rightMargin=45, topMargin=35, bottomMargin=30)
-    e = []
-    J = ParagraphStyle("J", fontName=FONTE, fontSize=12, leading=16, textColor=DARK, spaceAfter=6)
-    SEC = ParagraphStyle("S", fontName=FN, fontSize=16, textColor=GOLD, alignment=0, spaceBefore=10, spaceAfter=6, leading=22)
-    e.append(Spacer(1, 20))
-    e.append(Paragraph("NUMERO ELEITORAL - ANALISE COMPLETA",
-        ParagraphStyle("T", fontName=FN, fontSize=18, textColor=GOLD, alignment=TA_CENTER, spaceAfter=8, leading=24)))
-    e.append(Paragraph(f"Cargo: {cl} | Sigla: {ss}", ParagraphStyle("D", fontName=FONTE, fontSize=12, alignment=TA_CENTER, textColor=GRAY, spaceAfter=14)))
-    e.append(Paragraph("<b>Como calculamos?</b>", SEC))
-    e.append(Paragraph("Na numerologia eleitoral, cada numero possui uma vibracao que influencia a campanha e o mandato. O calculo soma todos os digitos e reduz a um digito unico (exceto 11 e 22). Para vereador (5 digitos), os dois primeiros sao da sigla. Para deputado federal (4 digitos), e senador (3 digitos), a logica se adapta ao numero de vagas.", J))
-    e.append(Paragraph(f"Para {cl}, os dois primeiros digitos sao fixos (sigla {ss}). Os demais sao escolhidos para que a soma total reduza a 8.", J))
-    e.append(Paragraph("<b>Por que energia 8?</b>", SEC))
-    e.append(Paragraph("O numero 8 representa Poder, Prosperidade e Realizacao. Para candidatos, atrai autoridade, sucesso nas urnas e capacidade de realizar obras.", J))
-    e.append(Paragraph("<b>Sugestoes de Numeros</b>", SEC))
-    ids = [s for s in sugestoes if s.get("ideal")]
-    fbs = [s for s in sugestoes if not s.get("ideal")]
-    if ids:
-        e.append(Paragraph("<b>Opcoes com Energia 8 - IDEAL:</b>", ParagraphStyle("B", fontName=FN, fontSize=13, leading=18, textColor=DARK, spaceAfter=4)))
-        for s in ids:
-            e.append(Paragraph(f"S {s['numero']} - Energia 8 - Poder e Prosperidade!", ParagraphStyle("X", fontName=FONTE, fontSize=13, leading=17, textColor=colors.HexColor("#4CAF50"), spaceAfter=3)))
-            if "explicacao_calculo" in s:
-                e.append(Paragraph(f"<i>Calculo: {s['explicacao_calculo']}</i>", ParagraphStyle("C", fontName=FONTE, fontSize=11, leading=13, textColor=GRAY, spaceAfter=3)))
-    if fbs:
-        if ids: e.append(Spacer(1, 8))
-        e.append(Paragraph("<b>Alternativas (se o ideal nao estiver disponivel):</b>", ParagraphStyle("B", fontName=FN, fontSize=13, leading=18, textColor=DARK, spaceAfter=4)))
-        for s in fbs:
-            e.append(Paragraph(f"{s['numero']} - Energia {s['energia']} - {s.get('nome_energia','')}", ParagraphStyle("X2", fontName=FONTE, fontSize=12, leading=16, textColor=DARK, spaceAfter=2)))
-    if ne:
-        e.append(Paragraph("<b>Analise do Numero Existente</b>", SEC))
-        e.append(Paragraph(f"<b>Numero: {ne['numero']}</b>", ParagraphStyle("B", fontName=FN, fontSize=13, leading=18, textColor=DARK, spaceAfter=4)))
-        e.append(Paragraph(f"<b>Energia: {ne['energia']}</b> - {ne.get('interpretacao','')}", ParagraphStyle("X3", fontName=FONTE, fontSize=12, leading=16, textColor=DARK, spaceAfter=6)))
-    e.append(Paragraph("Verifique a disponibilidade com seu partido antes de escolher.", ParagraphStyle("AV", fontName=FONTE, fontSize=11, leading=14, textColor=GRAY, spaceAfter=8)))
-    e.append(Paragraph("(c) A1ELOS", ParagraphStyle("F", fontName=FONTE, fontSize=8, textColor=GRAY, alignment=TA_CENTER)))
-    doc.build(e)
-    return path
     # ══════ BLOCO 09 — PDF COMPLETO (ESPAÇAMENTO 2) ══════
 def pdf17(data, nome, bd_str):
     path = f"/tmp/p17_{uuid.uuid4().hex[:8]}.pdf"
-    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=42, rightMargin=42, topMargin=25, bottomMargin=20)
+    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=40, rightMargin=40, topMargin=22, bottomMargin=18)
     e = []
-    JU = ParagraphStyle("J", fontName=FONTE, fontSize=10, leading=12.5, textColor=DARK, spaceAfter=3)
-    SEC = ParagraphStyle("S", fontName=FN, fontSize=13, textColor=GOLD, alignment=0, spaceBefore=5, spaceAfter=3, leading=16)
+    JU = ParagraphStyle("J", fontName=FONTE, fontSize=9.5, leading=12, textColor=DARK, spaceAfter=2.5)
+    SEC = ParagraphStyle("S", fontName=FN, fontSize=12, textColor=GOLD, alignment=0, spaceBefore=4, spaceAfter=2.5, leading=15)
     lp = data["life_path"]
-    e.append(Spacer(1, 8))
-    e.append(Paragraph("M A P A   N U M E R O L O G I C O   C O M P L E T O",
-        ParagraphStyle("T", fontName=FN, fontSize=15, textColor=GOLD, alignment=TA_CENTER, spaceAfter=3, leading=18)))
-    e.append(Paragraph(nome.upper(), ParagraphStyle("N", fontName=FN, fontSize=11, alignment=TA_CENTER, textColor=DARK, spaceAfter=1)))
-    e.append(Paragraph(bd_str, ParagraphStyle("D", fontName=FONTE, fontSize=9, alignment=TA_CENTER, textColor=GRAY, spaceAfter=5)))
+    e.append(Spacer(1, 6))
+    e.append(Paragraph("M A P A   N U M E R O L O G I C O   C O M P L E T O", ParagraphStyle("T", fontName=FN, fontSize=14, textColor=GOLD, alignment=TA_CENTER, spaceAfter=2.5, leading=17)))
+    e.append(Paragraph(nome.upper(), ParagraphStyle("N", fontName=FN, fontSize=10, alignment=TA_CENTER, textColor=DARK, spaceAfter=1)))
+    e.append(Paragraph(bd_str, ParagraphStyle("D", fontName=FONTE, fontSize=8.5, alignment=TA_CENTER, textColor=GRAY, spaceAfter=4)))
     e.append(Paragraph(f"Caminho de Vida {lp}. Expressao {data['expression']}. Motivacao {data['soul_urge']}. Personalidade {data['personality']}. Destino {data['destiny']}.", JU))
     e.append(PageBreak())
-
     e.append(Paragraph("Analise Detalhada", SEC))
     TX = {1:"Lider nato",2:"Diplomata",3:"Criativo",4:"Pratico",5:"Livre",6:"Amoroso",7:"Sabio",8:"Prospero",9:"Humanitario",11:"Mestre",22:"Mestre"}
     NG = {1:"Egoista",2:"Indeciso",3:"Disperso",4:"Rigido",5:"Impulsivo",6:"Superprotetor",7:"Frio",8:"Materialista",9:"Melancolico",11:"Ansioso",22:"Ambicioso"}
     LC = {1:"Humildade",2:"Autoconfianca",3:"Foco",4:"Flexibilidade",5:"Responsabilidade",6:"Confiar",7:"Compartilhar",8:"Integridade",9:"Perdoar",11:"Equilibrar",22:"Equilibrar"}
     for v in [lp, data["expression"], data["soul_urge"], data["personality"], data["destiny"]]:
         e.append(Paragraph(f"<b>{TX.get(v,'')} ({v})</b> - {NG.get(v,'')}. Licao: {LC.get(v,'')}.", JU))
-
     e.append(Paragraph("Ciclos da Vida", SEC))
     bb = dp.parse(bd_str.split(" ")[0] if " " in bd_str else bd_str).date()
-    d, m, a = bb.day, bb.month, bb.year
-    fe = max(36 - min(lp, 36), 25)
+    d, m, a = bb.day, bb.month, bb.year; fe = max(36 - min(lp, 36), 25)
     e.append(Paragraph(f"Formativo (0-{fe}a). Produtivo ({fe+1}-{fe+27}a). Colheita ({fe+28}+a).", JU))
-
     e.append(Paragraph("Desafios", SEC))
     d1=r1(abs(d-m)); d2=r1(abs(m-r1(a))); dp_=r1(abs(d1-d2))
     DES = {0:"Equilibrio",1:"Superar egoismo",2:"Vencer timidez",3:"Foco",4:"Flexibilidade",5:"Responsabilidade",6:"Confiar",7:"Fe",8:"Etica",9:"Desapegar"}
     e.append(Paragraph(f"Menor 1 ({d1}): {DES.get(d1,'')}. Menor 2 ({d2}): {DES.get(d2,'')}. Principal ({dp_}): {DES.get(dp_,'')}.", JU))
-
     e.append(Paragraph("Realizacoes", SEC))
     e.append(Paragraph(f"1({r1(d+m)}) 2({r1(d+a)}) 3({r1(r1(d+m)+r1(d+a))}) 4({r1(d+m+a)}).", JU))
-
     e.append(Paragraph("Ano Pessoal", SEC))
     ap = r1(d+m+datetime.utcnow().year)
-    AP_TXT = {1:"Novos comecos",2:"Parcerias",3:"Criatividade",4:"Trabalho",5:"Mudancas",6:"Familia",7:"Reflexao",8:"Prosperidade",9:"Conclusao"}
-    e.append(Paragraph(f"{datetime.utcnow().year}: Ano {ap} - {AP_TXT.get(ap,'')}.", JU))
-
+    APT = {1:"Novos comecos",2:"Parcerias",3:"Criatividade",4:"Trabalho",5:"Mudancas",6:"Familia",7:"Reflexao",8:"Prosperidade",9:"Conclusao"}
+    e.append(Paragraph(f"{datetime.utcnow().year}: Ano {ap} - {APT.get(ap,'')}.", JU))
     e.append(Paragraph("Grade de Inclusao", SEC))
     grid = calc_grid(nome)
-    pres = [str(n) for n in range(1,10) if grid.get(n,0)>0]
-    aus = [str(n) for n in range(1,10) if grid.get(n,0)==0]
+    pres = [str(n) for n in range(1,10) if grid.get(n,0)>0]; aus = [str(n) for n in range(1,10) if grid.get(n,0)==0]
     e.append(Paragraph(f"Presentes: {', '.join(pres) or '-'}. Carencias: {', '.join(aus) or '-'}.", JU))
-
     e.append(Paragraph("A numerologia ilumina caminhos. O livre arbitrio e seu maior poder.", JU))
-    e.append(Paragraph("(c) A1ELOS - Baseado no sistema pitagorico e na obra de Monique Cissay",
-        ParagraphStyle("F", fontName=FONTE, fontSize=7, textColor=GRAY, alignment=TA_CENTER, spaceBefore=4)))
-    doc.build(e)
-    return path
-    # ══════ BLOCO 10 — EMAIL + ROTAS + HTML PAGES + STARTUP ══════
-def enviar_email(para, assunto, corpo, anexo=None):
-    if not SENDGRID_KEY: return False
-    try:
-        sg = SendGridAPIClient(SENDGRID_KEY)
-        mail = Mail(Email(FROM_EMAIL, FROM_NAME), para, assunto, Content("text/plain", corpo))
-        if anexo and os.path.exists(anexo):
-            with open(anexo, "rb") as f: enc = base64.b64encode(f.read()).decode()
-            mail.attachment = Attachment(FileContent(enc), FileName("Documento_A1ELOS.pdf"), FileType("application/pdf"), Disposition("attachment"))
-        sg.send(mail); logger.info(f"Email p/ {para}"); return True
-    except Exception as e: logger.error(f"Falha email: {e}"); return False
-
-# ROTA 1: URNA
-@app.post("/api/pay/urna-session")
-def pay_urna_session(req: UrnaPayReq):
-    if not STRIPE_KEY: raise HTTPException(503,"Stripe nao configurado")
-    if not req.email: raise HTTPException(400,"Email obrigatorio")
-    if len(req.nome_completo.strip())<3: raise HTTPException(400,"Nome obrigatorio")
-    nomes = [n.strip() for n in [req.nome1,req.nome2,req.nome3,req.nome4,req.nome5] if n.strip()]
-    if not nomes: raise HTTPException(400,"Pelo menos 1 nome")
-    meta = {"product":"urna26","nome_completo":req.nome_completo,"cargo":req.cargo,"email":req.email}
-    for i,n in enumerate(nomes,1): meta[f"nome{i}"]=n
-    cs = stripe.checkout.Session.create(mode="payment",payment_method_types=["card"],
-        line_items=[{"price_data":{"currency":"brl","product_data":{"name":"Validacao Nome"},"unit_amount":2600},"quantity":1}],
-        customer_email=req.email,metadata=meta,
-        success_url=f"{BASE_URL}/api/pay/urna-success?session_id={{CHECKOUT_SESSION_ID}}",
-        cancel_url=f"{BASE_URL}/api/pay/cancel")
-    return {"payment_url": cs.url, "id": cs.id}
+    e.append(Paragraph("(c) A1ELOS - Baseado em Monique Cissay e sistema pitagorico", ParagraphStyle("F", fontName=FONTE, fontSize=6.5, textColor=GRAY, alignment=TA_CENTER, spaceBefore=3)))
+    doc.build(e); return path
 
 @app.get("/api/pay/urna-success")
 def pay_urna_success(request: Request):
