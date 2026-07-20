@@ -472,12 +472,14 @@ footer{
   <p>© A1ELOS Assessoria e Consultoria —
     <span data-i18n="footer_text">A ciência dos números aplicada ao seu sucesso</span>
   </p>
-</footer>
+
+  </footer>
 <script>
-// ═══════════════════════════════════════════════
-// IDIOMAS DISPONÍVEIS (12 LÍNGUAS)
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// A1ELOS — JavaScript Unificado
+// ═══════════════════════════════════════════════════════════
 
+// ── IDIOMAS DISPONÍVEIS ──
 const LANGS = [
   {code:'pt',label:'🇧🇷 PT',name:'Português'},
   {code:'en',label:'🇺🇸 EN',name:'English'},
@@ -493,150 +495,7 @@ const LANGS = [
   {code:'nl',label:'🇳🇱 NL',name:'Nederlands'}
 ];
 
-// ═══════════════════════════════════════════════
-// DEFINIÇÃO DOS PRODUTOS
-// ═══════════════════════════════════════════════
-
-const PRODUTOS = [
-  {id:'express',emoji:'🔮',nome:'Mapa Express (tela)',desc:'Caminho de Vida + Expressão + Alma + Personalidade + Destino. Resultado instantâneo na tela.',preco:'Grátis',soma:0,link:'#calc',btn:'Calcular Agora',status:'ativo'},
-  {id:'express_pdf',emoji:'📄',nome:'Mapa Express PDF',desc:'5 números principais com frases explicativas. PDF simples enviado por email.',preco:'R$ 8',soma:'8',link:'#calc',btn:'Adquirir R$ 8',status:'ativo'},
-  {id:'completo',emoji:'📚',nome:'Mapa Completo PDF',desc:'10+ páginas com análise completa: Grade, Ciclos, Desafios, Ano Pessoal, Tabela de Relações (Monique Cissay).',preco:'R$ 17',soma:'1+7=8',link:'#calc',btn:'Adquirir R$ 17',status:'ativo'},
-  {id:'urna',emoji:'🗳️',nome:'Validação Nome de Urna',desc:'5 tentativas + cálculo letra a letra + sugestões com cargo + PDF sigiloso por email.',preco:'R$ 26',soma:'3+5=8',link:'#urna',btn:'Acessar',status:'ativo'},
-  {id:'eleitoral',emoji:'🔢',nome:'Cálculo Nº Eleitoral',desc:'5 sugestões de números com energia 8 + cálculo passo a passo + PDF sigiloso.',preco:'R$ 26',soma:'2+6=8',link:'#eleitoral',btn:'Acessar',status:'ativo'},
-  {id:'empresarial',emoji:'💼',nome:'Validação Empresarial',desc:'Análise do nome empresarial + assinatura profissional + sugestão + PDF empresarial.',preco:'R$ 26',soma:'2+6=8',btn:'Em breve',status:'breve'},
-  {id:'artistico',emoji:'🎭',nome:'Validação Nome Artístico',desc:'Análise do nome artístico + assinatura artística + sugestão + PDF.',preco:'R$ 26',soma:'2+6=8',btn:'Em breve',status:'breve'},
-  {id:'casal',emoji:'👥',nome:'Mapa Casal Completo',desc:'2 mapas individuais + relatório de compatibilidade. PDFs separados.',preco:'R$ 44',soma:'4+4=8',btn:'Em breve',status:'breve'},
-  {id:'pacote_ep',emoji:'📦',nome:'Pacote Empresa + Pessoa',desc:'Validação empresarial + mapa individual do empreendedor.',preco:'R$ 98',soma:'9+8=17→8',btn:'Em breve',status:'breve'},
-  {id:'pacote_ec',emoji:'🏢',nome:'Pacote Empresa Completa',desc:'Validação + 3 assinaturas sugeridas + mapa do negócio + consultoria escrita.',preco:'R$ 152',soma:'1+5+2=8',btn:'Em breve',status:'breve'},
-  {id:'premium',emoji:'🌟',nome:'Mapa Premium Família',desc:'Até 4 pessoas + todas as compatibilidades + PDF único encadernável.',preco:'R$ 197',soma:'1+9+7=17→8',btn:'Em breve',status:'breve'}
-];
-
-// ═══════════════════════════════════════════════
-// TRADUÇÕES — 12 IDIOMAS
-// Chaves: nav_home, nav_map, nav_prod, nav_urna, nav_elec, nav_energy,
-//         hero_title, hero_sub, hero_btn1, hero_btn2, hero_btn3,
-//         calc_title, label_name, label_date, label_email, btn_calc,
-//         btn_express, btn_completo,
-//         prod_title, prod_sub, th_prod, th_price, th_energy, th_action,
-//         urna_title, urna_desc, urna_name, urna_cargo, urna_email, urna_5names,
-//         elec_title, elec_desc, elec_mask, elec_sigla, elec_existente, elec_email,
-//         energy_title, energy_desc, footer_text
-// ═══════════════════════════════════════════════
-
-const i18n = {};
-
-const KEYS = [
-  'nav_home','nav_map','nav_prod','nav_urna','nav_elec','nav_energy',
-  'hero_title','hero_sub','hero_btn1','hero_btn2','hero_btn3',
-  'calc_title','label_name','label_date','label_email','btn_calc',
-  'btn_express','btn_completo',
-  'prod_title','prod_sub','th_prod','th_price','th_energy','th_action',
-  'urna_title','urna_desc','urna_name','urna_cargo','urna_email','urna_5names',
-  'elec_title','elec_desc','elec_mask','elec_sigla','elec_existente','elec_email',
-  'energy_title','energy_desc','footer_text'
-];
-
-// ══ PORTUGUÊS ══
-i18n.pt = [
-  'Início','Mapa','Produtos','Nome de Urna','Nº Eleitoral','Energias',
-  'MAPA NUMEROLÓGICO','A ciência dos números aplicada ao seu destino, negócios e carreira política',
-  'Gerar Mapa Grátis','Ver Produtos','Soluções Eleitorais',
-  'Calcule seu Mapa','Nome Completo','Data de Nascimento','Email','Calcular Agora',
-  '📄 Mapa Express PDF — R$ 8','📚 Mapa Completo PDF — R$ 17',
-  'Todos os Produtos','Todos os preços somam 8 — a energia do poder e da prosperidade',
-  'Produto','Preço','Soma 8','Ação',
-  'Validação do Nome de Urna','5 tentativas + cálculo letra a letra + sugestões com cargo + PDF sigiloso — R$ 26',
-  'Nome Completo da Pessoa','Cargo em Disputa','Email (resultado sigiloso)',
-  'Insira até 5 opções de nome de candidato:',
-  'Cálculo do Número Eleitoral','Sugestões com energia 8 para sua candidatura — R$ 26',
-  'Por lei eleitoral, números não podem ser divulgados publicamente. Consulte o PDF sigiloso por email.',
-  'Número da Sigla Partidária (2 dígitos)','Número já existente (opcional)','Email (resultado sigiloso)',
-  'Significado das Energias','Cada número carrega uma vibração específica que influencia diferentes áreas da vida.',
-  'A ciência dos números aplicada ao seu sucesso'
-].reduce((o,k,i)=>(o[KEYS[i]]=arguments.callee.caller.arguments[0][i],o),{});
-
-// ══ ENGLISH ══
-i18n.en = [
-  'Home','Map','Products','Ballot Name','Electoral N°','Energies',
-  'NUMEROLOGICAL MAP','The science of numbers applied to your destiny, business and political career',
-  'Generate Free Map','View Products','Electoral Solutions',
-  'Calculate Your Map','Full Name','Birth Date','Email','Calculate Now',
-  '📄 Express Map PDF — R$ 8','📚 Full Map PDF — R$ 17',
-  'All Products','All prices sum to 8 — the energy of power and prosperity',
-  'Product','Price','Sum 8','Action',
-  'Ballot Name Validation','5 attempts + letter-by-letter calculation + position suggestions + confidential PDF — R$ 26',
-  'Person Full Name','Position','Email (confidential result)',
-  'Enter up to 5 candidate name options:',
-  'Electoral Number Calculation','Number suggestions with energy 8 for your campaign — R$ 26',
-  'By electoral law, numbers cannot be publicly displayed. Check the confidential PDF sent by email.',
-  'Party Number (2 digits)','Existing number (optional)','Email (confidential result)',
-  'Meaning of Energies','Each number carries a specific vibration that influences different areas of life.',
-  'The science of numbers applied to your success'
-].reduce((o,k,i)=>(o[KEYS[i]]=arguments.callee.caller.arguments[0][i],o),{});
-
-i18n.es = [
-  'Inicio','Mapa','Productos','Nombre de Urna','Nº Electoral','Energías',
-  'MAPA NUMEROLÓGICO','La ciencia de los números aplicada a tu destino, negocios y carrera política',
-  'Generar Mapa Gratis','Ver Productos','Soluciones Electorales',
-  'Calcula tu Mapa','Nombre Completo','Fecha de Nacimiento','Email','Calcular Ahora',
-  '📄 Mapa Express PDF — R$ 8','📚 Mapa Completo PDF — R$ 17',
-  'Todos los Productos','Todos los precios suman 8 — la energía del poder',
-  'Producto','Precio','Suma 8','Acción',
-  'Validación del Nombre de Urna','5 intentos + cálculo letra a letra + sugerencias con cargo + PDF confidencial — R$ 26',
-  'Nombre Completo','Cargo en Disputa','Email (resultado confidencial)',
-  'Ingresa hasta 5 opciones de nombre de candidato:',
-  'Cálculo del Número Electoral','Sugerencias con energía 8 para tu candidatura — R$ 26',
-  'Por ley electoral, los números no pueden divulgarse públicamente. Consulte el PDF confidencial.',
-  'Número del Partido (2 dígitos)','Número existente (opcional)','Email (resultado confidencial)',
-  'Significado de las Energías','Cada número tiene una vibración específica.',
-  'La ciencia de los números aplicada a tu éxito'
-].reduce((o,k,i)=>(o[KEYS[i]]=arguments.callee.caller.arguments[0][i],o),{});
-
-i18n.fr = [
-  'Accueil','Carte','Produits','Nom d\'Urne','N° Électoral','Énergies',
-  'CARTE NUMÉROLOGIQUE','La science des nombres appliquée à votre destin, affaires et carrière politique',
-  'Générer une Carte Gratuite','Voir les Produits','Solutions Électorales',
-  'Calculez votre Carte','Nom Complet','Date de Naissance','Email','Calculer Maintenant',
-  '📄 Carte Express PDF — R$ 8','📚 Carte Complète PDF — R$ 17',
-  'Tous les Produits','Tous les prix totalisent 8 — l\'énergie du pouvoir',
-  'Produit','Prix','Somme 8','Action',
-  'Validation du Nom d\'Urne','5 tentatives + calcul lettre par lettre + suggestions avec poste + PDF confidentiel — R$ 26',
-  'Nom Complet de la Personne','Poste en Dispute','Email (résultat confidentiel)',
-  'Entrez jusqu\'à 5 options de nom de candidat:',
-  'Calcul du Numéro Électoral','Suggestions avec énergie 8 pour votre candidature — R$ 26',
-  'Par loi électorale, les numéros ne peuvent être divulgués publiquement.',
-  'Numéro du Parti (2 chiffres)','Numéro existant (optionnel)','Email (résultat confidentiel)',
-  'Signification des Énergies','Chaque nombre porte une vibration spécifique.',
-  'La science des nombres appliquée à votre succès'
-].reduce((o,k,i)=>(o[KEYS[i]]=arguments.callee.caller.arguments[0][i],o),{});
-
-// ATENÇÃO: O restante do JS completo continua na resposta. Devido ao tamanho,
-// preciso continuar abaixo com o restante das traduções e funções.
-</script>
-  <script>
-// ═══════════════════════════════════════════════
-// 1. IDIOMAS DISPONÍVEIS (12 LÍNGUAS)
-// ═══════════════════════════════════════════════
-
-const LANGS = [
-  {code:'pt',label:'🇧🇷 PT',name:'Português'},
-  {code:'en',label:'🇺🇸 EN',name:'English'},
-  {code:'es',label:'🇪🇸 ES',name:'Español'},
-  {code:'fr',label:'🇫🇷 FR',name:'Français'},
-  {code:'de',label:'🇩🇪 DE',name:'Deutsch'},
-  {code:'it',label:'🇮🇹 IT',name:'Italiano'},
-  {code:'ja',label:'🇯🇵 JP',name:'日本語'},
-  {code:'zh',label:'🇨🇳 ZH',name:'中文'},
-  {code:'ko',label:'🇰🇷 KO',name:'한국어'},
-  {code:'ru',label:'🇷🇺 RU',name:'Русский'},
-  {code:'ar',label:'🇸🇦 AR',name:'العربية'},
-  {code:'nl',label:'🇳🇱 NL',name:'Nederlands'}
-];
-
-// ═══════════════════════════════════════════════
-// 2. DEFINIÇÃO DOS PRODUTOS
-// ═══════════════════════════════════════════════
-
+// ── DEFINIÇÃO DOS PRODUTOS ──
 const PRODUTOS = [
   {id:'express',emoji:'🔮',nome:'Mapa Express (tela)',desc:'Caminho de Vida + Expressão + Alma + Personalidade + Destino. Resultado instantâneo na tela.',preco:'Grátis',soma:0,link:'#calc',btn:'Calcular Agora',status:'ativo'},
   {id:'express_pdf',emoji:'📄',nome:'Mapa Express PDF',desc:'5 números principais com frases explicativas. PDF simples por email.',preco:'R$ 8',soma:'8',btn:'Adquirir R$ 8',status:'ativo'},
@@ -651,19 +510,20 @@ const PRODUTOS = [
   {id:'premium',emoji:'🌟',nome:'Mapa Premium Família',desc:'Até 4 pessoas + compatibilidades + PDF.',preco:'R$ 197',soma:'1+9+7=17→8',btn:'Em breve',status:'breve'}
 ];
 
-// ═══════════════════════════════════════════════
-// 3. TRADUÇÕES — 12 IDIOMAS
-// Chaves em KEYS: nav_home,nav_map,nav_prod,nav_urna,nav_elec,nav_energy,
-// hero_title,hero_sub,hero_btn1,hero_btn2,hero_btn3,
-// calc_title,label_name,label_date,label_email,btn_calc,
-// btn_express,btn_completo,
-// prod_title,prod_sub,th_prod,th_price,th_energy,th_action,
-// urna_title,urna_desc,urna_name,urna_cargo,urna_email,urna_5names,
-// elec_title,elec_desc,elec_mask,elec_sigla,elec_existente,elec_email,
-// energy_title,energy_desc,footer_text
-// ═══════════════════════════════════════════════
+// ── ENERGIAS ──
+const ENERGY_DATA = [
+  {n:1,pt:'Liderança, independência, originalidade',en:'Leadership, independence, originality',es:'Liderazgo, independencia, originalidad'},
+  {n:2,pt:'Cooperação, diplomacia, sensibilidade',en:'Cooperation, diplomacy, sensitivity',es:'Cooperación, diplomacia, sensibilidad'},
+  {n:3,pt:'Criatividade, comunicação, alegria',en:'Creativity, communication, joy',es:'Creatividad, comunicación, alegría'},
+  {n:4,pt:'Trabalho, disciplina, estabilidade',en:'Work, discipline, stability',es:'Trabajo, disciplina, estabilidad'},
+  {n:5,pt:'Liberdade, aventura, versatilidade',en:'Freedom, adventure, versatility',es:'Libertad, aventura, versatilidad'},
+  {n:6,pt:'Família, amor, responsabilidade',en:'Family, love, responsibility',es:'Familia, amor, responsabilidad'},
+  {n:7,pt:'Sabedoria, espiritualidade, análise',en:'Wisdom, spirituality, analysis',es:'Sabiduría, espiritualidad, análisis'},
+  {n:8,pt:'Poder, prosperidade, realização (IDEAL)',en:'Power, prosperity, achievement (IDEAL)',es:'Poder, prosperidad, realización (IDEAL)'},
+  {n:9,pt:'Humanitarismo, comp放松ão, generosidade',en:'Humanitarianism, compassion, generosity',es:'Humanitarismo, compasión, generosidad'}
+];
 
-const i18n = {};
+// ── TRADUÇÕES - CHAVES ──
 const KEYS = [
   'nav_home','nav_map','nav_prod','nav_urna','nav_elec','nav_energy',
   'hero_title','hero_sub','hero_btn1','hero_btn2','hero_btn3',
@@ -675,45 +535,229 @@ const KEYS = [
   'energy_title','energy_desc','footer_text'
 ];
 
-const TRAD = {
-  pt: 'Início|Mapa|Produtos|Nome de Urna|Nº Eleitoral|Energias|MAPA NUMEROLÓGICO|A ciência dos números aplicada ao seu destino, negócios e carreira política|Gerar Mapa Grátis|Ver Produtos|Soluções Eleitorais|Calcule seu Mapa|Nome Completo|Data de Nascimento|Email|Calcular Agora|📄 Mapa Express PDF — R$ 8|📚 Mapa Completo PDF — R$ 17|Todos os Produtos|Todos os preços somam 8 — energia do poder e prosperidade|Produto|Preço|Soma 8|Ação|Validação do Nome de Urna|5 tentativas + cálculo letra a letra + sugestões + PDF sigiloso — R$ 26|Nome Completo|Cargo em Disputa|Email (resultado sigiloso)|Insira até 5 opções:|Cálculo do Número Eleitoral|Sugestões com energia 8 — R$ 26|Por lei eleitoral, números não podem ser divulgados publicamente. Consulte o PDF sigiloso.|Número da Sigla (2 dígitos)|Número existente (opcional)|Email (resultado sigiloso)|Significado das Energias|Cada número carrega uma vibração específica.|A ciência dos números aplicada ao seu sucesso',
+// ── TRADUÇÕES - VALORES POR IDIOMA (arrays planos, sem pipes) ──
+const LANG_VALS = {};
 
-  en: 'Home|Map|Products|Ballot Name|Electoral N°|Energies|NUMEROLOGICAL MAP|The science of numbers applied to your destiny, business and political career|Generate Free Map|View Products|Electoral Solutions|Calculate Your Map|Full Name|Birth Date|Email|Calculate Now|📄 Express Map PDF — R$ 8|📚 Full Map PDF — R$ 17|All Products|All prices sum to 8 — the energy of power and prosperity|Product|Price|Sum 8|Action|Ballot Name Validation|5 attempts + letter-by-letter + suggestions + confidential PDF — R$ 26|Full Name|Position|Email (confidential result)|Enter up to 5 options:|Electoral Number Calculation|Energy 8 suggestions — R$ 26|By electoral law, numbers cannot be publicly displayed. Check your confidential PDF.|Party Number (2 digits)|Existing number (optional)|Email (confidential result)|Meaning of Energies|Each number carries a specific vibration.|The science of numbers applied to your success',
+LANG_VALS.pt = [
+  'Início','Mapa','Produtos','Nome de Urna','Nº Eleitoral','Energias',
+  'MAPA NUMEROLÓGICO','A ciência dos números aplicada ao seu destino, negócios e carreira política',
+  'Gerar Mapa Grátis','Ver Produtos','Soluções Eleitorais',
+  'Calcule seu Mapa','Nome Completo','Data de Nascimento','Email','Calcular Agora',
+  '📄 Mapa Express PDF — R$ 8','📚 Mapa Completo PDF — R$ 17',
+  'Todos os Produtos','Todos os preços somam 8 — energia do poder e prosperidade',
+  'Produto','Preço','Soma 8','Ação',
+  'Validação do Nome de Urna','5 tentativas + cálculo letra a letra + sugestões + PDF sigiloso — R$ 26',
+  'Nome Completo','Cargo em Disputa','Email (resultado sigiloso)','Insira até 5 opções:',
+  'Cálculo do Número Eleitoral','Sugestões com energia 8 — R$ 26',
+  'Por lei eleitoral, números não podem ser divulgados publicamente. Consulte o PDF sigiloso.',
+  'Número da Sigla (2 dígitos)','Número existente (opcional)','Email (resultado sigiloso)',
+  'Significado das Energias','Cada número carrega uma vibração específica.',
+  'A ciência dos números aplicada ao seu sucesso'
+];
 
-  es: 'Inicio|Mapa|Productos|Nombre de Urna|Nº Electoral|Energías|MAPA NUMEROLÓGICO|La ciencia de los números aplicada a tu destino, negocios y carrera política|Generar Mapa Gratis|Ver Productos|Soluciones Electorales|Calcula tu Mapa|Nombre Completo|Fecha de Nacimiento|Email|Calcular Ahora|📄 Mapa Express PDF — R$ 8|📚 Mapa Completo PDF — R$ 17|Todos los Productos|Todos los precios suman 8 — energía del poder|Producto|Precio|Suma 8|Acción|Validación del Nombre de Urna|5 intentos + cálculo letra a letra + sugerencias + PDF confidencial — R$ 26|Nombre Completo|Cargo en Disputa|Email (resultado confidencial)|Ingresa hasta 5 opciones:|Cálculo del Número Electoral|Sugerencias con energía 8 — R$ 26|Por ley electoral, los números no pueden divulgarse públicamente. Consulte el PDF confidencial.|Número del Partido (2 dígitos)|Número existente (opcional)|Email (resultado confidencial)|Significado de las Energías|Cada número tiene una vibración específica.|La ciencia de los números aplicada a tu éxito',
+LANG_VALS.en = [
+  'Home','Map','Products','Ballot Name','Electoral N°','Energies',
+  'NUMEROLOGICAL MAP','The science of numbers applied to your destiny, business and political career',
+  'Generate Free Map','View Products','Electoral Solutions',
+  'Calculate Your Map','Full Name','Birth Date','Email','Calculate Now',
+  '📄 Express Map PDF — R$ 8','📚 Full Map PDF — R$ 17',
+  'All Products','All prices sum to 8 — the energy of power and prosperity',
+  'Product','Price','Sum 8','Action',
+  'Ballot Name Validation','5 attempts + letter-by-letter + suggestions + confidential PDF — R$ 26',
+  'Full Name','Position','Email (confidential result)','Enter up to 5 options:',
+  'Electoral Number Calculation','Energy 8 suggestions — R$ 26',
+  'By electoral law, numbers cannot be publicly displayed. Check your confidential PDF.',
+  'Party Number (2 digits)','Existing number (optional)','Email (confidential result)',
+  'Meaning of Energies','Each number carries a specific vibration.',
+  'The science of numbers applied to your success'
+];
 
-  fr: 'Accueil|Carte|Produits|Nom d\'Urne|N° Électoral|Énergies|CARTE NUMÉROLOGIQUE|La science des nombres appliquée à votre destin, affaires et carrière politique|Générer une Carte Gratuite|Voir les Produits|Solutions Électorales|Calculez votre Carte|Nom Complet|Date de Naissance|Email|Calculer Maintenant|📄 Carte Express PDF — R$ 8|📚 Carte Complète PDF — R$ 17|Tous les Produits|Tous les prix totalisent 8 — l\'énergie du pouvoir|Produit|Prix|Somme 8|Action|Validation du Nom d\'Urne|5 tentatives + calcul lettre à lettre + suggestions + PDF confidentiel — R$ 26|Nom Complet|Poste en Dispute|Email (résultat confidentiel)|Entrez jusqu\'à 5 options:|Calcul du Numéro Électoral|Suggestions avec énergie 8 — R$ 26|Par loi électorale, les numéros ne peuvent être divulgués publiquement.|Numéro du Parti (2 chiffres)|Numéro existant (optionnel)|Email (résultat confidentiel)|Signification des Énergies|Chaque nombre porte une vibration spécifique.|La science des nombres appliquée à votre succès',
+LANG_VALS.es = [
+  'Inicio','Mapa','Productos','Nombre de Urna','Nº Electoral','Energías',
+  'MAPA NUMEROLÓGICO','La ciencia de los números aplicada a tu destino, negocios y carrera política',
+  'Generar Mapa Gratis','Ver Productos','Soluciones Electorales',
+  'Calcula tu Mapa','Nombre Completo','Fecha de Nacimiento','Email','Calcular Ahora',
+  '📄 Mapa Express PDF — R$ 8','📚 Mapa Completo PDF — R$ 17',
+  'Todos los Productos','Todos los precios suman 8 — energía del poder',
+  'Producto','Precio','Suma 8','Acción',
+  'Validación del Nombre de Urna','5 intentos + cálculo letra a letra + sugerencias + PDF confidencial — R$ 26',
+  'Nombre Completo','Cargo en Disputa','Email (resultado confidencial)','Ingresa hasta 5 opciones:',
+  'Cálculo del Número Electoral','Sugerencias con energía 8 — R$ 26',
+  'Por ley electoral, los números no pueden divulgarse públicamente. Consulte el PDF confidencial.',
+  'Número del Partido (2 dígitos)','Número existente (opcional)','Email (resultado confidencial)',
+  'Significado de las Energías','Cada número tiene una vibración específica.',
+  'La ciencia de los números aplicada a tu éxito'
+];
 
-  de: 'Start|Karte|Produkte|Wahlname|Wahl-Nr|Energien|NUMEROLOGISCHE KARTE|Die Wissenschaft der Zahlen für Ihr Schicksal, Geschäft und politische Karriere|Kostenlose Karte erstellen|Produkte anzeigen|Wahllösungen|Berechnen Sie Ihre Karte|Vollständiger Name|Geburtsdatum|E-Mail|Jetzt berechnen|📄 Express-Karte PDF — R$ 8|📚 Vollständige Karte PDF — R$ 17|Alle Produkte|Alle Preise ergeben 8 — die Energie des Erfolgs|Produkt|Preis|Summe 8|Aktion|Wahlnamen-Validierung|5 Versuche + Buchstabenberechnung + Vorschläge + vertrauliches PDF — R$ 26|Vollständiger Name|Position|E-Mail (vertrauliches Ergebnis)|Bis zu 5 Optionen eingeben:|Wahlnummern-Berechnung|Vorschläge mit Energie 8 — R$ 26|Aus Wahlrechtsgründen nicht öffentlich. Prüfen Sie das vertrauliche PDF.|Parteinummer (2 Ziffern)|Bestehende Nummer (optional)|E-Mail (vertrauliches Ergebnis)|Bedeutung der Energien|Jede Zahl trägt eine spezifische Schwingung.|Die Wissenschaft der Zahlen für Ihren Erfolg',
+LANG_VALS.fr = [
+  'Accueil','Carte','Produits','Nom d\'Urne','N° Électoral','Énergies',
+  'CARTE NUMÉROLOGIQUE','La science des nombres appliquée à votre destin, affaires et carrière politique',
+  'Générer une Carte Gratuite','Voir les Produits','Solutions Électorales',
+  'Calculez votre Carte','Nom Complet','Date de Naissance','Email','Calculer Maintenant',
+  '📄 Carte Express PDF — R$ 8','📚 Carte Complète PDF — R$ 17',
+  'Tous les Produits','Tous les prix totalisent 8 — l\'énergie du pouvoir',
+  'Produit','Prix','Somme 8','Action',
+  'Validation du Nom d\'Urne','5 tentatives + calcul lettre à lettre + suggestions + PDF confidentiel — R$ 26',
+  'Nom Complet','Poste en Dispute','Email (résultat confidentiel)','Entrez jusqu\'à 5 options:',
+  'Calcul du Numéro Électoral','Suggestions avec énergie 8 — R$ 26',
+  'Par loi électorale, les numéros ne peuvent être divulgués publiquement.',
+  'Numéro du Parti (2 chiffres)','Numéro existant (optionnel)','Email (résultat confidentiel)',
+  'Signification des Énergies','Chaque nombre porte une vibration spécifique.',
+  'La science des nombres appliquée à votre succès'
+];
 
-  it: 'Home|Mappa|Prodotti|Nome Elettorale|N° Elettorale|Energie|MAPPA NUMEROLOGICA|La scienza dei numeri applicata al tuo destino, affari e carriera politica|Genera Mappa Gratuita|Vedi Prodotti|Soluzioni Elettorali|Calcola la tua Mappa|Nome Completo|Data di Nascita|Email|Calcola Ora|📄 Mappa Express PDF — R$ 8|📚 Mappa Completa PDF — R$ 17|Tutti i Prodotti|Tutti i prezzi sommano a 8 — energia del potere|Prodotto|Prezzo|Somma 8|Azione|Validazione del Nome Elettorale|5 tentativi + calcolo lettera per lettera + suggerimenti + PDF riservato — R$ 26|Nome Completo|Carica in Disputa|Email (risultato riservato)|Inserisci fino a 5 opzioni:|Calcolo del Numero Elettorale|Suggerimenti con energia 8 — R$ 26|Per legge elettorale, i numeri non possono essere divulgati pubblicamente.|Numero del Partito (2 cifre)|Numero esistente (opzionale)|Email (risultato riservato)|Significato delle Energie|Ogni numero ha una vibrazione specifica.|La scienza dei numeri applicata al tuo successo',
+LANG_VALS.de = [
+  'Start','Karte','Produkte','Wahlname','Wahl-Nr','Energien',
+  'NUMEROLOGISCHE KARTE','Die Wissenschaft der Zahlen für Ihr Schicksal, Geschäft und politische Karriere',
+  'Kostenlose Karte erstellen','Produkte anzeigen','Wahllösungen',
+  'Berechnen Sie Ihre Karte','Vollständiger Name','Geburtsdatum','E-Mail','Jetzt berechnen',
+  '📄 Express-Karte PDF — R$ 8','📚 Vollständige Karte PDF — R$ 17',
+  'Alle Produkte','Alle Preise ergeben 8 — die Energie des Erfolgs',
+  'Produkt','Preis','Summe 8','Aktion',
+  'Wahlnamen-Validierung','5 Versuche + Buchstabenberechnung + Vorschläge + vertrauliches PDF — R$ 26',
+  'Vollständiger Name','Position','E-Mail (vertrauliches Ergebnis)','Bis zu 5 Optionen:',
+  'Wahlnummern-Berechnung','Vorschläge mit Energie 8 — R$ 26',
+  'Aus Wahlrechtsgründen nicht öffentlich. Prüfen Sie das vertrauliche PDF.',
+  'Parteinummer (2 Ziffern)','Bestehende Nummer (optional)','E-Mail (vertrauliches Ergebnis)',
+  'Bedeutung der Energien','Jede Zahl trägt eine spezifische Schwingung.',
+  'Die Wissenschaft der Zahlen für Ihren Erfolg'
+];
 
-  ja: 'ホーム|地図|製品|選挙名|選挙番号|エネルギー|数秘術マップ|数字の科学を運命、ビジネス、政治キャリアに|無料で作成|製品を見る|選挙ソリューション|マップを計算|フルネーム|生年月日|メール|計算する|📄 エクスプレスPDF — R$ 8|📚 完全版PDF — R$ 17|すべての製品|すべての価格は8になります — 成功のエネルギー|製品|価格|合計8|アクション|選挙名検証|5回試行 + 文字計算 + 提案 + 機密PDF — R$ 26|氏名|役職|メール（機密）|最大5つの選択肢:|選挙番号計算|エネルギー8の提案 — R$ 26|選挙法により番号を公開できません。機密PDFをご確認ください。|政党番号（2桁）|既存番号（任意）|メール（機密結果）|エネルギーの意味|各数字が特定の波動を持ちます。|数字の科学を成功に',
+LANG_VALS.it = [
+  'Home','Mappa','Prodotti','Nome Elettorale','N° Elettorale','Energie',
+  'MAPPA NUMEROLOGICA','La scienza dei numeri applicata al tuo destino, affari e carriera politica',
+  'Genera Mappa Gratuita','Vedi Prodotti','Soluzioni Elettorali',
+  'Calcola la tua Mappa','Nome Completo','Data di Nascita','Email','Calcola Ora',
+  '📄 Mappa Express PDF — R$ 8','📚 Mappa Completa PDF — R$ 17',
+  'Tutti i Prodotti','Tutti i prezzi sommano a 8 — energia del potere',
+  'Prodotto','Prezzo','Somma 8','Azione',
+  'Validazione del Nome Elettorale','5 tentativi + calcolo lettera per lettera + suggerimenti + PDF riservato — R$ 26',
+  'Nome Completo','Carica in Disputa','Email (risultato riservato)','Inserisci fino a 5 opzioni:',
+  'Calcolo del Numero Elettorale','Suggerimenti con energia 8 — R$ 26',
+  'Per legge elettorale, i numeri non possono essere divulgati pubblicamente.',
+  'Numero del Partito (2 cifre)','Numero esistente (opzionale)','Email (risultato riservato)',
+  'Significato delle Energie','Ogni numero ha una vibrazione specifica.',
+  'La scienza dei numeri applicata al tuo successo'
+];
 
-  zh: '首页|地图|产品|竞选名称|选举号码|能量|数字命理地图|数字科学应用于您的命运、商业和政治生涯|免费生成|查看产品|选举方案|计算您的地图|全名|出生日期|邮箱|立即计算|📄 快捷版PDF — R$ 8|📚 完整版PDF — R$ 17|所有产品|所有价格加起来都是8 — 成功的力量|产品|价格|总和8|操作|竞选名称验证|5次尝试 + 字母计算 + 建议 + 机密PDF — R$ 26|全名|职位|邮箱（机密结果）|最多输入5个选项:|选举号码计算|能量8的建议 — R$ 26|根据选举法，号码不能公开。请检查您的机密PDF。|政党号码（2位）|现有号码（可选）|邮箱（机密结果）|能量的含义|每个数字都有特定的振动。|数字科学应用于您的成功',
+LANG_VALS.ja = [
+  'ホーム','マップ','製品','選挙名','選挙番号','エネルギー',
+  '数秘術マップ','数字の科学を運命、ビジネス、政治キャリアに',
+  '無料で作成','製品を見る','選挙ソリューション',
+  'マップを計算','フルネーム','生年月日','メール','計算',
+  '📄 エクスプレスPDF — R$ 8','📚 完全版PDF — R$ 17',
+  'すべての製品','すべての価格は8になります — 成功のエネルギー',
+  '製品','価格','合計8','アクション',
+  '選挙名検証','5回試行 + 文字計算 + 提案 + 機密PDF — R$ 26',
+  '氏名','役職','メール（機密）','最大5つの選択肢:',
+  '選挙番号計算','エネルギー8の提案 — R$ 26',
+  '選挙法により番号を公開できません。機密PDFをご確認ください。',
+  '政党番号（2桁）','既存番号（任意）','メール（機密結果）',
+  'エネルギーの意味','各数字が特定の波動を持ちます。',
+  '数字の科学を成功に'
+];
 
-  ko: '홈|지도|제품|선거명|선거번호|에너지|수비학 지도|숫자의 과학을 운명, 비즈니스, 정치 경력에|무료 생성|제품 보기|선거 솔루션|지도 계산|전체 이름|생년월일|이메일|지금 계산|📄 익스프레스 PDF — R$ 8|📚 전체 버전 PDF — R$ 17|모든 제품|모든 가격은 8 — 성공의 에너지|제품|가격|합계 8|액션|선거명 검증|5회 시도 + 문자 계산 + 제안 + 기밀 PDF — R$ 26|전체 이름|직책|이메일(기밀)|최대 5개 옵션 입력:|선거번호 계산|에너지 8 제안 — R$ 26|선거법상 번호를 공개할 수 없습니다. 기밀 PDF를 확인하세요.|정당 번호(2자리)|기존 번호(선택)|이메일(기밀 결과)|에너지의 의미|각 숫자는 특정 진동을 가집니다.|숫자의 과학을 성공에',
+LANG_VALS.zh = [
+  '首页','地图','产品','竞选名称','选举号码','能量',
+  '数字命理地图','数字科学应用于您的命运、商业和政治生涯',
+  '免费生成','查看产品','选举方案',
+  '计算您的地图','全名','出生日期','邮箱','立即计算',
+  '📄 快捷版PDF — R$ 8','📚 完整版PDF — R$ 17',
+  '所有产品','所有价格加起来都是8 — 成功的力量',
+  '产品','价格','总和8','操作',
+  '竞选名称验证','5次尝试 + 字母计算 + 建议 + 机密PDF — R$ 26',
+  '全名','职位','邮箱（机密结果）','最多输入5个选项:',
+  '选举号码计算','能量8的建议 — R$ 26',
+  '根据选举法，号码不能公开。请检查您的机密PDF。',
+  '政党号码（2位）','现有号码（可选）','邮箱（机密结果）',
+  '能量的含义','每个数字都有特定的振动。',
+  '数字科学应用于您的成功'
+];
 
-  ru: 'Главная|Карта|Продукты|Избирательное имя|Избирательный номер|Энергии|НУМЕРОЛОГИЧЕСКАЯ КАРТА|Наука чисел для вашей судьбы, бизнеса и политической карьеры|Создать бесплатно|Посмотреть продукты|Избирательные решения|Рассчитать карту|Полное имя|Дата рождения|Email|Рассчитать|📄 Экспресс PDF — R$ 8|📚 Полная PDF — R$ 17|Все продукты|Все цены сходятся к 8 — энергия успеха|Продукт|Цена|Сумма 8|Действие|Проверка избирательного имени|5 попыток + расчёт букв + предложения + конфиденциальный PDF — R$ 26|Полное имя|Должность|Email (конфиденциально)|Введите до 5 вариантов:|Расчёт избирательного номера|Предложения с энергией 8 — R$ 26|По закону номера не могут быть опубликованы. Проверьте конфиденциальный PDF.|Номер партии (2 цифры)|Существующий номер (опционально)|Email (конфиденциально)|Значение энергий|Каждое число имеет свою вибрацию.|Наука чисел для вашего успеха',
+LANG_VALS.ko = [
+  '홈','지도','제품','선거명','선거번호','에너지',
+  '수비학 지도','숫자의 과학을 운명, 비즈니스, 정치 경력에',
+  '무료 생성','제품 보기','선거 솔루션',
+  '지도 계산','전체 이름','생년월일','이메일','지금 계산',
+  '📄 익스프레스 PDF — R$ 8','📚 전체 버전 PDF — R$ 17',
+  '모든 제품','모든 가격은 8 — 성공의 에너지',
+  '제품','가격','합계 8','액션',
+  '선거명 검증','5회 시도 + 문자 계산 + 제안 + 기밀 PDF — R$ 26',
+  '전체 이름','직책','이메일(기밀)','최대 5개 옵션:',
+  '선거번호 계산','에너지 8 제안 — R$ 26',
+  '선거법상 번호를 공개할 수 없습니다. 기밀 PDF를 확인하세요.',
+  '정당 번호(2자리)','기존 번호(선택)','이메일(기밀 결과)',
+  '에너지의 의미','각 숫자는 특정 진동을 가집니다.',
+  '숫자의 과학을 성공에'
+];
 
-  ar: 'الرئيسية|الخريطة|المنتجات|اسم الاقتراع|رقم الانتخاب|الطاقات|الخريطة العددية|علم الأرقام يطبق على مصيرك وعملك ومسيرتك السياسية|إنشاء مجاني|عرض المنتجات|حلول انتخابية|احسب خريطتك|الاسم الكامل|تاريخ الميلاد|البريد الإلكتروني|احسب الآن|📄 خريطة سريعة PDF — R$ 8|📚 خريطة كاملة PDF — R$ 17|جميع المنتجات|جميع الأسعار مجموعها 8 — طاقة النجاح|المنتج|السعر|المجموع 8|إجراء|التحقق من اسم الاقتراع|5 محاولات + حساب الحروف + اقتراحات + PDF سري — R$ 26|الاسم الكامل|المنصب|البريد الإلكتروني (نتيجة سرية)|أدخل حتى 5 خيارات:|حساب رقم الانتخاب|اقتراحات بالطاقة 8 — R$ 26|بموجب قانون الانتخابات، لا يمكن نشر الأرقام علناً. راجع PDF السري.|رقم الحزب (رقمان)|الرقم الحالي (اختياري)|البريد الإلكتروني (نتيجة سرية)|معنى الطاقات|كل رقم يحمل اهتزازاً محدداً.|علم الأرقام يطبق على نجاحك',
+LANG_VALS.ru = [
+  'Главная','Карта','Продукты','Избирательное имя','Избирательный номер','Энергии',
+  'НУМЕРОЛОГИЧЕСКАЯ КАРТА','Наука чисел для вашей судьбы, бизнеса и политической карьеры',
+  'Создать бесплатно','Посмотреть продукты','Избирательные решения',
+  'Рассчитать карту','Полное имя','Дата рождения','Email','Рассчитать',
+  '📄 Экспресс PDF — R$ 8','📚 Полная PDF — R$ 17',
+  'Все продукты','Все цены сходятся к 8 — энергия успеха',
+  'Продукт','Цена','Сумма 8','Действие',
+  'Проверка избирательного имени','5 попыток + расчёт букв + предложения + конфиденциальный PDF — R$ 26',
+  'Полное имя','Должность','Email (конфиденциально)','Введите до 5 вариантов:',
+  'Расчёт избирательного номера','Предложения с энергией 8 — R$ 26',
+  'По закону номера не могут быть опубликованы. Проверьте конфиденциальный PDF.',
+  'Номер партии (2 цифры)','Существующий номер (опционально)','Email (конфиденциально)',
+  'Значение энергий','Каждое число имеет свою вибрацию.',
+  'Наука чисел для вашего успеха'
+];
 
-  nl: 'Home|Kaart|Producten|Stembusnaam|Verkiezingsnummer|Energieën|NUMEROLOGISCHE KAART|De wetenschap van getallen voor uw lot, zaken en politieke carrière|Gratis kaart genereren|Producten bekijken|Verkiezingsoplossingen|Bereken uw kaart|Volledige naam|Geboortedatum|E-mail|Nu berekenen|📄 Express Kaart PDF — R$ 8|📚 Volledige Kaart PDF — R$ 17|Alle Producten|Alle prijzen sommeren tot 8 — de energie van succes|Product|Prijs|Som 8|Actie|Stembusnaam Validatie|5 pogingen + letterberekening + suggesties + vertrouwelijke PDF — R$ 26|Volledige naam|Functie|E-mail (vertrouwelijk resultaat)|Voer tot 5 opties in:|Verkiezingsnummer Berekening|Suggesties met energie 8 — R$ 26|Volgens de kieswet mogen nummers niet openbaar worden getoond. Raadpleeg de vertrouwelijke PDF.|Partijnummer (2 cijfers)|Bestaand nummer (optioneel)|E-mail (vertrouwelijk resultaat)|Betekenis van Energieën|Elk getal draagt een specifieke trilling.|De wetenschap van getallen voor uw succes'
-};
+LANG_VALS.ar = [
+  'الرئيسية','الخريطة','المنتجات','اسم الاقتراع','رقم الانتخاب','الطاقات',
+  'الخريطة العددية','علم الأرقام يطبق على مصيرك وعملك ومسيرتك السياسية',
+  'إنشاء مجاني','عرض المنتجات','حلول انتخابية',
+  'احسب خريطتك','الاسم الكامل','تاريخ الميلاد','البريد الإلكتروني','احسب الآن',
+  '📄 خريطة سريعة PDF — R$ 8','📚 خريطة كاملة PDF — R$ 17',
+  'جميع المنتجات','جميع الأسعار مجموعها 8 — طاقة النجاح',
+  'المنتج','السعر','المجموع 8','إجراء',
+  'التحقق من اسم الاقتراع','5 محاولات + حساب الحروف + اقتراحات + PDF سري — R$ 26',
+  'الاسم الكامل','المنصب','البريد الإلكتروني (نتيجة سرية)','أدخل حتى 5 خيارات:',
+  'حساب رقم الانتخاب','اقتراحات بالطاقة 8 — R$ 26',
+  'بموجب قانون الانتخابات، لا يمكن نشر الأرقام علناً. راجع PDF السري.',
+  'رقم الحزب (رقمان)','الرقم الحالي (اختياري)','البريد الإلكتروني (نتيجة سرية)',
+  'معنى الطاقات','كل رقم يحمل اهتزازاً محدداً.',
+  'علم الأرقام يطبق على نجاحك'
+];
 
-// Inicializar i18n
-for (var lang in TRAD) {
-  i18n[lang] = {};
-  var vals = TRAD[lang].split('|');
-  for (var i = 0; i < KEYS.length; i++) {
-    i18n[lang][KEYS[i]] = vals[i] || TRAD.pt.split('|')[i] || '';
+LANG_VALS.nl = [
+  'Home','Kaart','Producten','Stembusnaam','Verkiezingsnummer','Energieën',
+  'NUMEROLOGISCHE KAART','De wetenschap van getallen voor uw lot, zaken en politieke carrière',
+  'Gratis kaart genereren','Producten bekijken','Verkiezingsoplossingen',
+  'Bereken uw kaart','Volledige naam','Geboortedatum','E-mail','Nu berekenen',
+  '📄 Express Kaart PDF — R$ 8','📚 Volledige Kaart PDF — R$ 17',
+  'Alle Producten','Alle prijzen sommeren tot 8 — de energie van succes',
+  'Product','Prijs','Som 8','Actie',
+  'Stembusnaam Validatie','5 pogingen + letterberekening + suggesties + vertrouwelijke PDF — R$ 26',
+  'Volledige naam','Functie','E-mail (vertrouwelijk resultaat)','Voer tot 5 opties in:',
+  'Verkiezingsnummer Berekening','Suggesties met energie 8 — R$ 26',
+  'Volgens de kieswet mogen nummers niet openbaar worden getoond.',
+  'Partijnummer (2 cijfers)','Bestaand nummer (optioneel)','E-mail (vertrouwelijk resultaat)',
+  'Betekenis van Energieën','Elk getal draagt een specifieke trilling.',
+  'De wetenschap van getallen voor uw succes'
+];
+
+// ── CONSTRUIR OBJETO i18n ──
+const i18n = {};
+
+function buildI18n() {
+  for (var lang in LANG_VALS) {
+    i18n[lang] = {};
+    var vals = LANG_VALS[lang];
+    var fallback = LANG_VALS.pt;
+    for (var i = 0; i < KEYS.length; i++) {
+      i18n[lang][KEYS[i]] = vals[i] || (fallback[i] || '');
+    }
   }
 }
+buildI18n();
 
-// ═══════════════════════════════════════════════
-// 4. FUNÇÕES DE IDIOMA
-// ═══════════════════════════════════════════════
-
+// ── FUNÇÕES DE IDIOMA ──
 function t(k) {
   var l = localStorage.getItem('a1elos-lang') || 'pt';
   return (i18n[l] || i18n.pt)[k] || i18n.pt[k] || k;
@@ -727,7 +771,6 @@ function applyLang() {
   document.querySelectorAll('.lang-btn').forEach(function(b) {
     b.classList.toggle('active', b.dataset.lang === l);
   });
-  // RTL para árabe
   document.documentElement.dir = (l === 'ar') ? 'rtl' : 'ltr';
 }
 
@@ -739,10 +782,7 @@ function setLang(code) {
   renderEnergyGrid();
 }
 
-// ═══════════════════════════════════════════════
-// 5. INICIALIZAR SELETOR DE IDIOMAS
-// ═══════════════════════════════════════════════
-
+// ── INICIALIZAR SELETOR DE IDIOMAS ──
 (function() {
   var c = document.getElementById('langSelector');
   if (!c) return;
@@ -757,42 +797,31 @@ function setLang(code) {
   });
 })();
 
-// ═══════════════════════════════════════════════
-// 6. RENDERIZAR TABELA DE PRODUTOS
-// ═══════════════════════════════════════════════
-
+// ── RENDERIZAR TABELA DE PRODUTOS ──
 function renderProdTable() {
   var tb = document.getElementById('productTableBody');
   if (!tb) return;
   tb.innerHTML = '';
   PRODUTOS.forEach(function(p) {
     var tr = document.createElement('tr');
-    var statusClass = p.status === 'ativo' ? 'tag-s8' : 'tag-breve';
-    var statusLabel = p.status === 'ativo' ? (p.soma ? '✅ Soma ' + p.soma : '✅') : '📅 Em breve';
-
+    var statusTag = p.status === 'ativo'
+      ? '<span class="tag-s8">' + (p.soma ? '✅ Soma ' + p.soma : '✅') + '</span>'
+      : '<span class="tag-breve">📅 Em breve</span>';
     var btnHTML = '';
     if (p.status === 'ativo') {
-      if (p.link) {
-        btnHTML = '<a href="' + p.link + '" class="btn btn-sm">' + p.btn + '</a>';
-      } else if (p.id === 'express_pdf') {
-        btnHTML = '<button class="btn btn-sm" onclick="payExpress()">' + p.btn + '</button>';
-      } else if (p.id === 'completo') {
-        btnHTML = '<button class="btn btn-sm" onclick="payCompleto()">' + p.btn + '</button>';
-      }
+      if (p.link) btnHTML = '<a href="' + p.link + '" class="btn btn-sm">' + p.btn + '</a>';
+      else if (p.id === 'express_pdf') btnHTML = '<button class="btn btn-sm" onclick="payExpress()">' + p.btn + '</button>';
+      else if (p.id === 'completo') btnHTML = '<button class="btn btn-sm" onclick="payCompleto()">' + p.btn + '</button>';
     }
-
-    tr.innerHTML = '<td>' + p.emoji + ' ' + p.nome + '<br><span style="font-size:.75rem;color:#888">' + p.desc + '</span></td>' +
-      '<td style="font-weight:700;color:var(--gold)">' + p.preco + '</td>' +
-      '<td><span class="' + statusClass + '">' + statusLabel + '</span></td>' +
-      '<td>' + btnHTML + '</td>';
+    tr.innerHTML = '<td>' + p.emoji + ' ' + p.nome + '<br><span style="font-size:.75rem;color:#888">' + p.desc + '</span></td>'
+      + '<td style="font-weight:700;color:var(--gold)">' + p.preco + '</td>'
+      + '<td>' + statusTag + '</td>'
+      + '<td>' + btnHTML + '</td>';
     tb.appendChild(tr);
   });
 }
 
-// ═══════════════════════════════════════════════
-// 7. RENDERIZAR CARDS DE PRODUTO
-// ═══════════════════════════════════════════════
-
+// ── RENDERIZAR CARDS DE PRODUTO ──
 function renderProdCards() {
   var container = document.getElementById('prodCards');
   if (!container) return;
@@ -803,39 +832,22 @@ function renderProdCards() {
     var statusTag = p.status === 'ativo'
       ? '<span class="tag-s8">✅ Ativo' + (p.soma ? ' | Soma ' + p.soma : '') + '</span>'
       : '<span class="tag-breve">📅 Em breve</span>';
-
     var btnHTML = '';
     if (p.status === 'ativo') {
       if (p.id === 'express_pdf') btnHTML = '<button class="btn btn-sm" onclick="payExpress()">' + p.btn + '</button>';
       else if (p.id === 'completo') btnHTML = '<button class="btn btn-sm" onclick="payCompleto()">' + p.btn + '</button>';
       else if (p.link) btnHTML = '<a href="' + p.link + '" class="btn btn-sm">' + p.btn + '</a>';
     }
-
-    card.innerHTML = '<h3>' + p.emoji + ' ' + p.nome + '</h3>' +
-      '<div class="price">' + p.preco + '</div>' +
-      '<div class="desc">' + p.desc + '</div>' +
-      '<div style="margin-bottom:12px">' + statusTag + '</div>' +
-      btnHTML;
+    card.innerHTML = '<h3>' + p.emoji + ' ' + p.nome + '</h3>'
+      + '<div class="price">' + p.preco + '</div>'
+      + '<div class="desc">' + p.desc + '</div>'
+      + '<div style="margin-bottom:12px">' + statusTag + '</div>'
+      + btnHTML;
     container.appendChild(card);
   });
 }
 
-// ═══════════════════════════════════════════════
-// 8. ENERGIAS
-// ═══════════════════════════════════════════════
-
-var ENERGY_DATA = [
-  { n:1, pt:'Liderança, independência, originalidade', en:'Leadership, independence, originality', es:'Liderazgo, independencia, originalidad' },
-  { n:2, pt:'Cooperação, diplomacia, sensibilidade', en:'Cooperation, diplomacy, sensitivity', es:'Cooperación, diplomacia, sensibilidad' },
-  { n:3, pt:'Criatividade, comunicação, alegria', en:'Creativity, communication, joy', es:'Creatividad, comunicación, alegría' },
-  { n:4, pt:'Trabalho, disciplina, estabilidade', en:'Work, discipline, stability', es:'Trabajo, disciplina, estabilidad' },
-  { n:5, pt:'Liberdade, aventura, versatilidade', en:'Freedom, adventure, versatility', es:'Libertad, aventura, versatilidad' },
-  { n:6, pt:'Família, amor, responsabilidade', en:'Family, love, responsibility', es:'Familia, amor, responsabilidad' },
-  { n:7, pt:'Sabedoria, espiritualidade, análise', en:'Wisdom, spirituality, analysis', es:'Sabiduría, espiritualidad, análisis' },
-  { n:8, pt:'Poder, prosperidade, realização (IDEAL)', en:'Power, prosperity, achievement (IDEAL)', es:'Poder, prosperidad, realización (IDEAL)' },
-  { n:9, pt:'Humanitarismo, comp放松ão, generosidade', en:'Humanitarianism, compassion, generosity', es:'Humanitarismo, compasión, generosidad' }
-];
-
+// ── RENDERIZAR ENERGIAS ──
 function renderEnergyGrid() {
   var g = document.getElementById('energyGrid');
   if (!g) return;
@@ -850,10 +862,7 @@ function renderEnergyGrid() {
   });
 }
 
-// ═══════════════════════════════════════════════
-// 9. MOSTRAR SEÇÃO OCULTA
-// ═══════════════════════════════════════════════
-
+// ── MOSTRAR SEÇÃO OCULTA ──
 function showSection(id) {
   var el = document.getElementById(id);
   if (!el) return;
@@ -865,32 +874,25 @@ function scrollToCalc() {
   document.getElementById('calc').scrollIntoView({ behavior:'smooth' });
 }
 
-// ═══════════════════════════════════════════════
-// 10. MAPA EXPRESS GRÁTIS (tela)
-// ═══════════════════════════════════════════════
-
+// ── MAPA EXPRESS GRÁTIS ──
 async function calculate() {
   var n = document.getElementById('mainName').value.trim();
   var d = document.getElementById('mainDate').value;
-  var e = document.getElementById('mainEmail').value.trim();
+  var em = document.getElementById('mainEmail').value.trim();
   var btn = document.getElementById('calcBtn');
   var rd = document.getElementById('results');
   var rg = document.getElementById('resultGrid');
-
-  if (!n || !d || !e) { alert(t('label_name') + ', ' + t('label_date') + ' e ' + t('label_email') + ' obrigatórios'); return; }
-
+  if (!n || !d || !em) { alert('Preencha todos os campos'); return; }
   btn.textContent = 'Calculando...';
   btn.disabled = true;
   if (rd) rd.style.display = 'none';
-
   try {
     var r = await fetch('/calculate', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ name:n, birth_date:d, email:e, product:'pdf8' })
+      body:JSON.stringify({ name:n, birth_date:d, email:em, product:'pdf8' })
     });
     var data = await r.json();
-
     var items = [
       { key:'life_path', label:'Vida' },
       { key:'expression', label:'Expressão' },
@@ -905,34 +907,26 @@ async function calculate() {
       b.innerHTML = '<div class="val">' + data[i.key] + '</div><div class="label">' + i.label + '</div>';
       rg.appendChild(b);
     });
-
-    if (rd) {
-      rd.style.display = 'block';
-      rd.scrollIntoView({ behavior:'smooth' });
-    }
+    if (rd) { rd.style.display = 'block'; rd.scrollIntoView({ behavior:'smooth' }); }
   } catch(ex) {
     rg.innerHTML = '<p style="color:#e74c3c;text-align:center">Erro ao calcular. Tente novamente.</p>';
     if (rd) rd.style.display = 'block';
   }
-
   btn.textContent = t('btn_calc');
   btn.disabled = false;
 }
 
-// ═══════════════════════════════════════════════
-// 11. PAGAMENTO MAPA EXPRESS PDF (R$ 8)
-// ═══════════════════════════════════════════════
-
+// ── PAGAMENTO MAPA EXPRESS PDF (R$ 8) ──
 async function payExpress() {
   var n = document.getElementById('mainName').value.trim();
   var d = document.getElementById('mainDate').value;
-  var e = document.getElementById('mainEmail').value.trim();
-  if (!n || !d || !e) { alert('Preencha nome, data e email primeiro'); return; }
+  var em = document.getElementById('mainEmail').value.trim();
+  if (!n || !d || !em) { alert('Preencha nome, data e email primeiro'); return; }
   try {
     var r = await fetch('/api/pay/stripe', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ name:n, birth_date:d, email:e, product:'pdf8', price:8 })
+      body:JSON.stringify({ name:n, birth_date:d, email:em, product:'pdf8', price:8 })
     });
     var data = await r.json();
     if (data.payment_url) window.location.href = data.payment_url;
@@ -940,20 +934,17 @@ async function payExpress() {
   } catch(ex) { alert('Erro de conexão'); }
 }
 
-// ═══════════════════════════════════════════════
-// 12. PAGAMENTO MAPA COMPLETO PDF (R$ 17)
-// ═══════════════════════════════════════════════
-
+// ── PAGAMENTO MAPA COMPLETO PDF (R$ 17) ──
 async function payCompleto() {
   var n = document.getElementById('mainName').value.trim();
   var d = document.getElementById('mainDate').value;
-  var e = document.getElementById('mainEmail').value.trim();
-  if (!n || !d || !e) { alert('Preencha nome, data e email primeiro'); return; }
+  var em = document.getElementById('mainEmail').value.trim();
+  if (!n || !d || !em) { alert('Preencha nome, data e email primeiro'); return; }
   try {
     var r = await fetch('/api/pay/stripe', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ name:n, birth_date:d, email:e, product:'pdf17', price:17 })
+      body:JSON.stringify({ name:n, birth_date:d, email:em, product:'pdf17', price:17 })
     });
     var data = await r.json();
     if (data.payment_url) window.location.href = data.payment_url;
@@ -961,10 +952,7 @@ async function payCompleto() {
   } catch(ex) { alert('Erro de conexão'); }
 }
 
-// ═══════════════════════════════════════════════
-// 13. PAGAMENTO URNA (R$ 26)
-// ═══════════════════════════════════════════════
-
+// ── PAGAMENTO URNA (R$ 26) ──
 async function payUrna() {
   var fn = document.getElementById('urnaFullName').value.trim();
   var cr = document.getElementById('urnaCargo').value;
@@ -974,15 +962,12 @@ async function payUrna() {
   var n3 = document.getElementById('urnaNome3').value.trim();
   var n4 = document.getElementById('urnaNome4').value.trim();
   var n5 = document.getElementById('urnaNome5').value.trim();
-
   if (!fn || fn.length < 3) { alert('Nome completo obrigatório'); return; }
   if (!em) { alert('Email obrigatório'); return; }
   if (!n1) { alert('Pelo menos o Nome 1 é obrigatório'); return; }
-
   var btn = document.getElementById('urnaBtn');
   btn.textContent = 'Redirecionando...';
   btn.disabled = true;
-
   try {
     var r = await fetch('/api/pay/urna-session', {
       method:'POST',
@@ -995,10 +980,7 @@ async function payUrna() {
   } catch(ex) { alert('Erro de conexão'); btn.textContent = '🔒 Pagar R$ 26'; btn.disabled = false; }
 }
 
-// ═══════════════════════════════════════════════
-// 14. PAGAMENTO ELEITORAL (R$ 26)
-// ═══════════════════════════════════════════════
-
+// ── PAGAMENTO ELEITORAL (R$ 26) ──
 var selCargo = 'vereador';
 
 function setCargo(c, b) {
@@ -1012,14 +994,11 @@ async function payEleitoral() {
   var s = parseInt(document.getElementById('eleitoralSigla').value);
   var ne = document.getElementById('eleitoralNumero').value.trim();
   var em = document.getElementById('eleitoralEmail').value.trim();
-
   if (!s || s < 10 || s > 99) { alert('Sigla deve ter 2 dígitos (10-99)'); return; }
   if (!em) { alert('Email obrigatório'); return; }
-
   var btn = document.getElementById('eleitoralBtn');
   btn.textContent = 'Redirecionando...';
   btn.disabled = true;
-
   try {
     var r = await fetch('/api/pay/eleitoral-session', {
       method:'POST',
@@ -1032,17 +1011,12 @@ async function payEleitoral() {
   } catch(ex) { alert('Erro de conexão'); btn.textContent = '🔒 Pagar R$ 26'; btn.disabled = false; }
 }
 
-// ═══════════════════════════════════════════════
-// 15. INICIALIZAÇÃO
-// ═══════════════════════════════════════════════
-
+// ── INICIALIZAÇÃO ──
 document.addEventListener('DOMContentLoaded', function() {
   applyLang();
   renderProdTable();
   renderProdCards();
   renderEnergyGrid();
-
-  // Se vier de um scroll com hash, mostrar seção oculta
   if (window.location.hash === '#urna' || window.location.hash === '#eleitoral') {
     showSection(window.location.hash.replace('#',''));
   }
