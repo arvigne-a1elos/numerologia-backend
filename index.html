@@ -34,7 +34,7 @@ section{padding:80px 20px;max-width:1100px;margin:0 auto}
 .form-group input:focus,.form-group select:focus{border-color:var(--gold)}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
 .result-card{display:none;margin-top:40px;animation:fadeIn .8s ease}
-.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px}
+.var rg = document.getElementById('calcResultGrid') result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px}
 .num-box{background:#1a1a1a;padding:20px;border-radius:15px;border:1px solid #222;text-align:center}
 .num-box .val{font-family:'Playfair Display',serif;font-size:2.5rem;color:var(--gold)}
 .num-box .label{font-size:.7rem;text-transform:uppercase;color:#777;margin-top:5px}
@@ -73,7 +73,7 @@ footer{padding:60px 20px;text-align:center;border-top:1px solid #222;color:#444;
 <h1 data-i18n="hero_title">MAPA NUMEROLÓGICO</h1>
 <p class="subtitle" data-i18n="hero_sub">A ciência dos números aplicada ao seu destino e carreira política</p>
 <div style="display:flex;gap:15px;flex-wrap:wrap;justify-content:center">
-<button class="btn" onclick="document.getElementById('calc').scrollIntoView({behavior:'smooth'})" data-i18n="hero_btn1">Gerar Mapa Grátis</button>
+<button class="btn" onclick="var rd = document.getElementById('calcResult') scrollIntoView({behavior:'smooth'})" data-i18n="hero_btn1">Gerar Mapa Grátis</button>
 <button class="btn btn-outline" onclick="showSection('urna')" data-i18n="hero_btn2">Validar Nome de Urna</button>
 <button class="btn btn-outline" onclick="showSection('eleitoral')" data-i18n="hero_btn3">Calcular Nº Eleitoral</button>
 </div>
