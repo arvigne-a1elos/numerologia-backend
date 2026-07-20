@@ -74,7 +74,7 @@ def calc_grid(name):
     g = {i: 0 for i in range(1, 10)}
     for ch in name.upper().replace(" ", ""):
         v = t.get(ch, 0)
-        if 1 &lt;= v &lt;= 9: g[v] += 1
+        if 1 <= v <= 9: g[v] += 1
     return g
 
 GOLD = colors.HexColor("#B8860B"); LGRAY = colors.HexColor("#f0f0f0"); DARK = colors.HexColor("#222"); GRAY = colors.HexColor("#888")
@@ -175,43 +175,7 @@ def pdf17(data, nome, bd_str):
     e.append(Paragraph("A numerologia ilumina caminhos. O livre arbitrio e seu maior poder.", JU))
     e.append(Paragraph("(c) A1ELOS - Baseado em Monique Cissay e sistema pitagorico", ParagraphStyle("F", fontName=FONTE, fontSize=6.5, textColor=GRAY, alignment=TA_CENTER, spaceBefore=3)))
     doc.build(e); return path
-
-@app.get("/api/pay/cancel")
-def pay_cancel(): return HTMLResponse(CANCEL)
-
-OK = "<html><body style='background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh'><div style='text-align:center'><h1 style='color:#C9A94E'>✅ Confirmado!</h1><p>Documento enviado.</p><p>Verifique spam.</p><a href='/' style='display:inline-block;padding:12px 30px;background:#C9A94E;color:#000;text-decoration:none;border-radius:50px'>Voltar</a></div></body></html>"
-ERR = "<html><body style='background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh'><div style='text-align:center'><h1 style='color:#e74c3c'>❌ {msg}</h1><a href='/' style='display:inline-block;padding:12px 30px;background:#C9A94E;color:#000;text-decoration:none;border-radius:50px'>Voltar</a></div></body></html>"
-CANCEL = "<html><body style='background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh'><div style='text-align:center'><h1 style='color:#e67e22'>⏸️ Cancelado</h1><a href='/' style='display:inline-block;padding:12px 30px;background:#C9A94E;color:#000;text-decoration:none;border-radius:50px'>Voltar</a></div></body></html>"
-
-
-def pdf_urna(nc, cl, resultados, sugestoes):
-    path = f"/tmp/u_{uuid.uuid4().hex[:8]}.pdf"
-    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50, topMargin=45, bottomMargin=45)
-    e = []
-    TIT = ParagraphStyle("T", fontName=FN, fontSize=TAM_T, textColor=GOLD, alignment=TA_CENTER, spaceAfter=ET * 0.5, leading=TAM_T * 1.5)
-    e.append(Spacer(1, 25))
-    e.append(Paragraph("VALIDACAO DE NOME DE URNA", TIT))
-    e.append(Paragraph(nc.title(), ParagraphStyle("N", fontName=FN, fontSize=TAM_C + 2, alignment=TA_CENTER, textColor=DARK, spaceAfter=4)))
-    e.append(Paragraph(f"Cargo: {cl}", ParagraphStyle("D", fontName=FONTE, fontSize=TAM_C - 2, alignment=TA_CENTER, textColor=GRAY, spaceAfter=EL)))
-    for r in resultados:
-        ic = "S" if r["eh_ideal"] else "X"
-        co = "#4CAF50" if r["eh_ideal"] else "#e74c3c"
-        e.append(Paragraph(f"{ic} <b>{r['nome']}</b> - Energia <font color='{co}'><b>{r['energia']}</b></font>",
-                          ParagraphStyle("B", fontName=FN, fontSize=TAM_C - 1, leading=EL * 0.95, textColor=DARK, spaceAfter=EL * 0.3)))
-        if r["letras"]:
-            ls = ", ".join([f'{l["letra"]}={l["valor"]}' for l in r["letras"]])
-            e.append(Paragraph(f"<i>{ls} -> {r['soma']} -> {r['energia']}</i>",
-                              ParagraphStyle("C", fontName=FONTE, fontSize=TAM_C - 2, leading=EL * 0.7, textColor=GRAY, spaceAfter=EL * 0.2)))
-        e.append(Paragraph(r["explicacao"], ParagraphStyle("J", fontName=FONTE, fontSize=TAM_C - 1, leading=EL * 0.9, textColor=DARK, spaceAfter=EL * 0.4)))
-    if sugestoes:
-        e.append(Paragraph("Sugestoes:", ParagraphStyle("S", fontName=FN, fontSize=18, textColor=GOLD, spaceBefore=EL, spaceAfter=ET, leading=27)))
-        for s in sugestoes[:3]:
-            e.append(Paragraph(f'<b>{s["nome"]}</b> - Energia {s["energia"]}',
-                              ParagraphStyle("X", fontName=FONTE, fontSize=TAM_C, leading=EL, textColor=DARK, spaceAfter=EL * 0.3)))
-    e.append(Paragraph("(c) A1ELOS", ParagraphStyle("F", fontName=FONTE, fontSize=8, textColor=GRAY, alignment=TA_CENTER)))
-    doc.build(e)
-    return path
-
+    
 def pdf_eleitoral(ss, cl, sugestoes, ne=None):
     path = f"/tmp/e_{uuid.uuid4().hex[:8]}.pdf"
     doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50, topMargin=45, bottomMargin=45)
