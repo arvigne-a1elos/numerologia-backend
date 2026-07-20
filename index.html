@@ -880,8 +880,8 @@ async function calculate() {
   var d = document.getElementById('mainDate').value;
   var em = document.getElementById('mainEmail').value.trim();
   var btn = document.getElementById('calcBtn');
-  var rd = document.getElementById('results');
-  var rg = document.getElementById('resultGrid');
+  var rd = document.getElementById('calcResult');
+  var rg = document.getElementById('calcResultGrid');
   if (!n || !d || !em) { alert('Preencha todos os campos'); return; }
   btn.textContent = 'Calculando...';
   btn.disabled = true;
@@ -907,7 +907,10 @@ async function calculate() {
       b.innerHTML = '<div class="val">' + data[i.key] + '</div><div class="label">' + i.label + '</div>';
       rg.appendChild(b);
     });
-    if (rd) { rd.style.display = 'block'; rd.scrollIntoView({ behavior:'smooth' }); }
+    if (rd) {
+      rd.style.display = 'block';
+      rd.scrollIntoView({ behavior:'smooth' });
+    }
   } catch(ex) {
     rg.innerHTML = '<p style="color:#e74c3c;text-align:center">Erro ao calcular. Tente novamente.</p>';
     if (rd) rd.style.display = 'block';
@@ -915,7 +918,6 @@ async function calculate() {
   btn.textContent = t('btn_calc');
   btn.disabled = false;
 }
-
 // ── PAGAMENTO MAPA EXPRESS PDF (R$ 8) ──
 async function payExpress() {
   var n = document.getElementById('mainName').value.trim();
