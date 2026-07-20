@@ -283,6 +283,11 @@ def enviar_email(para, assunto, corpo, anexo=None):
 # -------- ROTAS --------
 
 @app.post("/api/pay/urna-session")
+class UrnaPayReq(BaseModel):
+    nome_completo: str; cargo: str; nome1: str; nome2: str = ""; nome3: str = ""; nome4: str = ""; nome5: str = ""; email: str
+
+class EleitoralPayReq(BaseModel):
+    sigla: int; cargo: str; numero_existente: Optional[str] = ""; email: str
 def pay_urna_session(req: UrnaPayReq):
     if not STRIPE_KEY:
         raise HTTPException(503, "Stripe nao configurado")
@@ -336,6 +341,11 @@ def pay_urna_success(request: Request):
         return HTMLResponse(ERR.format(msg="Erro ao gerar. Contate arvigne@gmail.com"))
 
 @app.post("/api/pay/eleitoral-session")
+class UrnaPayReq(BaseModel):
+    nome_completo: str; cargo: str; nome1: str; nome2: str = ""; nome3: str = ""; nome4: str = ""; nome5: str = ""; email: str
+
+class EleitoralPayReq(BaseModel):
+    sigla: int; cargo: str; numero_existente: Optional[str] = ""; email: str
 def pay_eleitoral_session(req: EleitoralPayReq):
     if not STRIPE_KEY:
         raise HTTPException(503, "Stripe nao configurado")
@@ -364,6 +374,11 @@ def pay_eleitoral_session(req: EleitoralPayReq):
     return {"payment_url": cs.url, "id": cs.id}
 
 @app.get("/api/pay/eleitoral-success")
+class UrnaPayReq(BaseModel):
+    nome_completo: str; cargo: str; nome1: str; nome2: str = ""; nome3: str = ""; nome4: str = ""; nome5: str = ""; email: str
+
+class EleitoralPayReq(BaseModel):
+    sigla: int; cargo: str; numero_existente: Optional[str] = ""; email: str
 def pay_eleitoral_success(request: Request):
     sid = request.query_params.get("session_id", "")
     if not sid:
@@ -533,14 +548,13 @@ def pdf17(data, nome, bd_str):
     r4v = r1(d + m + a)
     e.append(Paragraph(f"Realizacoes: 1({r1v}), 2({r2v}), 3({r3v}), 4({r4v}).", JU))
     e.append(Paragraph(f"Vibracao do dia {bb.day}: {r1(d)}.", JU))
-    grid = calc_grid(nome)
-    pres = [str(n) for n in range(1, 10) if grid.get(n, 0) > 0]
-    aus = [str(n) for n in range(1, 10) if grid.get(n, 0) == 0]
-    e.append(Paragraph(f"Grade: Presentes {', '.join(pres) or '-'}. Carencias {', '.join(aus) or '-'}.", JU))
-    e.append(Paragraph("A numerologia ilumina caminhos. O livre arbitrio e seu maior poder.", JU))
-    e.append(Paragraph("(c) A1ELOS", ParagraphStyle("F", fontName=FONTE, fontSize=10, textColor=GRAY, alignment=TA_CENTER, spaceBefore=EL * 2)))
-    doc.build(e)
-    return path
+   def calc_grid(name):
+    t = {c: (i % 9 or 9) for i, c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)}
+    g = {i: 0 for i in range(1, 10)}
+    for ch in name.upper().replace(" ", ""):
+        v = t.get(ch, 0)
+        if 1 <= v <= 9: g[v] += 1
+    return g
 
 URNA_OK = """<html><body style='background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh'><div style='text-align:center'><h1 style='color:#C9A94E'>Confirmado!</h1><p>Documento enviado para seu email.</p><p>Verifique o spam.</p><a href='/' style='display:inline-block;padding:12px 30px;background:#C9A94E;color:#000;text-decoration:none;border-radius:50px'>Voltar</a></div></body></html>"""
 
