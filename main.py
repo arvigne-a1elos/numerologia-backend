@@ -168,34 +168,6 @@ def pdf8(data, nome, bd):
         e.append(Paragraph(f"<b>{l} {v}:</b> {txt}", ParagraphStyle("X", fontName=FONTE, fontSize=8, leading=9.5, textColor=DARK, spaceAfter=1)))
     e.append(Paragraph("(c) A1ELOS", ParagraphStyle("F", fontName=FONTE, fontSize=6.5, textColor=GRAY, alignment=TA_CENTER, spaceBefore=3)))
     doc.build(e); return path
-    # ══════ BLOCO 08 — PDF URNA + ELEITORAL ══════
-def pdf_urna(nc, cl, resultados, sugestoes):
-    path = f"/tmp/u_{uuid.uuid4().hex[:8]}.pdf"
-    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50, topMargin=45, bottomMargin=45)
-    e = []
-    TIT = ParagraphStyle("T", fontName=FN, fontSize=20, textColor=GOLD, alignment=TA_CENTER, spaceAfter=14, leading=30)
-    e.append(Spacer(1, 25))
-    e.append(Paragraph("VALIDACAO DE NOME DE URNA", TIT))
-    e.append(Paragraph(nc.title(), ParagraphStyle("N", fontName=FN, fontSize=16, alignment=TA_CENTER, textColor=DARK, spaceAfter=4)))
-    e.append(Paragraph(f"Cargo: {cl}", ParagraphStyle("D", fontName=FONTE, fontSize=12, alignment=TA_CENTER, textColor=GRAY, spaceAfter=18)))
-    for r in resultados:
-        ic = "S" if r["eh_ideal"] else "X"
-        co = "#4CAF50" if r["eh_ideal"] else "#e74c3c"
-        e.append(Paragraph(f"{ic} <b>{r['nome']}</b> - Energia <font color='{co}'><b>{r['energia']}</b></font>",
-            ParagraphStyle("B", fontName=FN, fontSize=13, leading=18, textColor=DARK, spaceAfter=4)))
-        if r["letras"]:
-            ls = ", ".join([f'{l["letra"]}={l["valor"]}' for l in r["letras"]])
-            e.append(Paragraph(f"<i>{ls} -> {r['soma']} -> {r['energia']}</i>",
-                ParagraphStyle("C", fontName=FONTE, fontSize=11, leading=14, textColor=GRAY, spaceAfter=3)))
-        e.append(Paragraph(r["explicacao"], ParagraphStyle("J", fontName=FONTE, fontSize=12, leading=16, textColor=DARK, spaceAfter=6)))
-    if sugestoes:
-        e.append(Paragraph("Sugestoes:", ParagraphStyle("S", fontName=FN, fontSize=18, textColor=GOLD, spaceBefore=12, spaceAfter=8, leading=24)))
-        for s in sugestoes[:3]:
-            e.append(Paragraph(f'<b>{s["nome"]}</b> - Energia {s["energia"]}',
-                ParagraphStyle("X", fontName=FONTE, fontSize=12, leading=16, textColor=DARK, spaceAfter=4)))
-    e.append(Paragraph("(c) A1ELOS", ParagraphStyle("F", fontName=FONTE, fontSize=8, textColor=GRAY, alignment=TA_CENTER)))
-    doc.build(e)
-    return path
 
     # ══════ BLOCO 09 — PDF COMPLETO (ESPAÇAMENTO 2) ══════
 def pdf17(data, nome, bd_str):
