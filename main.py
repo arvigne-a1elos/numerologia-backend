@@ -168,7 +168,7 @@ def pdf8(data, nome, bd):
         e.append(Paragraph(f"<b>{l} {v}:</b> {txt}", ParagraphStyle("X", fontName=FONTE, fontSize=8, leading=9.5, textColor=DARK, spaceAfter=1)))
     e.append(Paragraph("(c) A1ELOS", ParagraphStyle("F", fontName=FONTE, fontSize=6.5, textColor=GRAY, alignment=TA_CENTER, spaceBefore=3)))
     doc.build(e); return path
-
+    
     # ══════ BLOCO 09 — PDF COMPLETO (ESPAÇAMENTO 2) ══════
 def pdf17(data, nome, bd_str):
     path = f"/tmp/p17_{uuid.uuid4().hex[:8]}.pdf"
@@ -210,7 +210,6 @@ def pdf17(data, nome, bd_str):
     e.append(Paragraph("A numerologia ilumina caminhos. O livre arbitrio e seu maior poder.", JU))
     e.append(Paragraph("(c) A1ELOS - Baseado em Monique Cissay e sistema pitagorico", ParagraphStyle("F", fontName=FONTE, fontSize=6.5, textColor=GRAY, alignment=TA_CENTER, spaceBefore=3)))
     doc.build(e); return path
-
 @app.get("/api/pay/urna-success")
 def pay_urna_success(request: Request):
     sid = request.query_params.get("session_id","")
