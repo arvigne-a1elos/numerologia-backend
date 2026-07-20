@@ -1017,15 +1017,12 @@ async function payEleitoral() {
 }
 
 // ── INICIALIZAÇÃO ──
-document.addEventListener('DOMContentLoaded', function() {
-  applyLang();
-  renderProdTable();
-  renderProdCards();
-  renderEnergyGrid();
-  if (window.location.hash === '#urna' || window.location.hash === '#eleitoral') {
-    showSection(window.location.hash.replace('#',''));
-  }
-});
+    function onHashChange(){
+  var h=window.location.hash.replace('#','');
+  if(h==='urna'||h==='eleitoral')showSection(h);
+}
+window.addEventListener('hashchange',onHashChange);
+document.addEventListener('DOMContentLoaded',function(){applyLang();renderEnergyGrid();onHashChange()});
 </script>
 </body>
 </html>
