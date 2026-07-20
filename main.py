@@ -441,32 +441,46 @@ def gerar_numeros_eleitorais(sigla: int, cargo: str, quantidade: int = 5) -> lis
 # 1 página, PDF simples por email
 # ═══════════════════════════════════════════
 
-def pdf8(data: dict, nome: str, bd: str) -> str:
-    """Mapa Express em 1 página com espaçamento reduzido."""
+def pdf8(data, nome, bd):
+    """Mapa Express em 1 página — espaçamento reduzido."""
     path = f"/tmp/p8_{uuid.uuid4().hex[:8]}.pdf"
-    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50, topMargin=30, bottomMargin=25)
+    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50, topMargin=25, bottomMargin=20)
     e = []
     TX = {1: "Lider", 2: "Diplomata", 3: "Criativo", 4: "Pratico", 5: "Livre", 6: "Amoroso", 7: "Sabio", 8: "Prospero", 9: "Humanitario", 11: "Mestre", 22: "Mestre"}
-    e.append(Paragraph("M A P A   N U M E R O L O G I C O   E X P R E S S",
-        ParagraphStyle("T", fontName=FN, fontSize=18, textColor=GOLD, alignment=TA_CENTER, spaceAfter=8, leading=24)))
-    e.append(Paragraph(nome.upper(), ParagraphStyle("N", fontName=FN, fontSize=13, alignment=TA_CENTER, textColor=DARK, spaceAfter=2)))
-    e.append(Paragraph(bd, ParagraphStyle("D", fontName=FONTE, fontSize=10, alignment=TA_CENTER, textColor=GRAY, spaceAfter=10)))
+    TXL = {1: "Lider nato, pioneiro, original. Sua missao e abrir caminhos e inovar.",
+           2: "Diplomata nato, sensivel, cooperativo. Sua missao e harmonizar e conectar.",
+           3: "Criativo nato, comunicador, otimista. Sua missao e expressar e inspirar.",
+           4: "Pratico e disciplinado. Sua missao e construir bases solidas.",
+           5: "Livre e versatil. Sua missao e experimentar e evoluir.",
+           6: "Amoroso e responsavel. Sua missao e servir e harmonizar.",
+           7: "Sabio e analitico. Sua missao e buscar a verdade.",
+           8: "Prospero e realizador. Sua missao e manifestar abundancia.",
+           9: "Humanitario e generoso. Sua missao e servir a humanidade.",
+           11: "Mestre Inspirador. Intuitivo e iluminado.",
+           22: "Mestre Construtor. Realizador de grandes obras."}
+    e.append(Spacer(1, 15))
+    e.append(Paragraph("MAPA NUMEROLOGICO EXPRESS",
+        ParagraphStyle("T", fontName=FN, fontSize=16, textColor=GOLD, alignment=TA_CENTER, spaceAfter=6, leading=22)))
+    e.append(Paragraph(nome.upper(),
+        ParagraphStyle("N", fontName=FN, fontSize=12, alignment=TA_CENTER, textColor=DARK, spaceAfter=2)))
+    e.append(Paragraph(bd,
+        ParagraphStyle("D", fontName=FONTE, fontSize=10, alignment=TA_CENTER, textColor=GRAY, spaceAfter=8)))
     td = [["Numero", "Valor"]] + [[l, str(data[k])] for k, l in
-        [("life_path","Caminho de Vida"),("expression","Expressao"),("soul_urge","Mot.Alma"),("personality","Personalidade"),("destiny","Destino")]]
+        [("life_path","Caminho de Vida"),("expression","Expressao"),("soul_urge","Mot.Alma"),
+         ("personality","Personalidade"),("destiny","Destino")]]
     tbl = Table(td, colWidths=[200, 150])
-    tbl.setStyle(TableStyle([("BACKGROUND",(0,0),(-1,0),GOLD),("TEXTCOLOR",(0,0),(-1,0),colors.white),
-        ("FONTSIZE",(0,0),(-1,-1),11),("FONTNAME",(0,0),(-1,-1),FONTE),("GRID",(0,0),(-1,-1),0.5,colors.grey),
-        ("ALIGN",(1,0),(1,-1),"CENTER"),("BACKGROUND",(0,1),(-1,-1),LGRAY),("TEXTCOLOR",(0,1),(-1,-1),DARK),
+    tbl.setStyle(TableStyle([
+        ("BACKGROUND",(0,0),(-1,0),GOLD),("TEXTCOLOR",(0,0),(-1,0),colors.white),
+        ("FONTSIZE",(0,0),(-1,-1),10),("FONTNAME",(0,0),(-1,-1),FONTE),
+        ("GRID",(0,0),(-1,-1),0.5,colors.grey),("ALIGN",(1,0),(1,-1),"CENTER"),
+        ("BACKGROUND",(0,1),(-1,-1),LGRAY),("TEXTCOLOR",(0,1),(-1,-1),DARK),
         ("TOPPADDING",(0,0),(-1,-1),3),("BOTTOMPADDING",(0,0),(-1,-1),3)]))
     e.append(tbl)
-    e.append(Spacer(1, 8))
-    TXL = {1: "Lider nato", 2: "Diplomata nato", 3: "Criativo nato", 4: "Pratico e disciplinado",
-           5: "Livre e versatil", 6: "Amoroso e responsavel", 7: "Sabio e analitico",
-           8: "Prospero e realizador", 9: "Humanitario e generoso", 11: "Mestre Inspirador", 22: "Mestre Construtor"}
+    e.append(Spacer(1, 6))
     for k, l in [("life_path","Vida"),("expression","Expressao"),("soul_urge","Alma"),("personality","Personal."),("destiny","Destino")]:
         v = data[k]
-        e.append(Paragraph(f"<b>{l} {v}:</b> {TXL.get(v,'')}",
-            ParagraphStyle("X", fontName=FONTE, fontSize=10, leading=13, textColor=DARK, spaceAfter=3)))
+        e.append(Paragraph(f"<b>{l} {v}:</b> {TXL.get(v, TX.get(v, ''))}",
+            ParagraphStyle("X", fontName=FONTE, fontSize=9, leading=12, textColor=DARK, spaceAfter=2)))
     doc.build(e)
     return path
 
@@ -476,103 +490,67 @@ def pdf8(data: dict, nome: str, bd: str) -> str:
 # 10+ páginas com análise completa
 # ═══════════════════════════════════════════
 
-def pdf17(data: dict, nome: str, bd_str: str) -> str:
+def pdf17(data, nome, bd_str):
     """Mapa Completo com espaçamento reduzido entre seções."""
     path = f"/tmp/p17_{uuid.uuid4().hex[:8]}.pdf"
-    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=45, rightMargin=45, topMargin=35, bottomMargin=30)
+    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=45, rightMargin=45, topMargin=30, bottomMargin=25)
     e = []
-    JU = ParagraphStyle("J", fontName=FONTE, fontSize=11, leading=14, textColor=DARK, spaceAfter=4)
-    SEC = ParagraphStyle("S", fontName=FN, fontSize=14, textColor=GOLD, alignment=0, spaceBefore=8, spaceAfter=6, leading=18)
+    JU = ParagraphStyle("J", fontName=FONTE, fontSize=10, leading=13, textColor=DARK, spaceAfter=3)
+    SEC = ParagraphStyle("S", fontName=FN, fontSize=13, textColor=GOLD, alignment=0, spaceBefore=6, spaceAfter=4, leading=17)
     lp = data["life_path"]
-    e.append(Spacer(1, 15))
+    e.append(Spacer(1, 10))
     e.append(Paragraph("M A P A   N U M E R O L O G I C O   C O M P L E T O",
-        ParagraphStyle("T", fontName=FN, fontSize=18, textColor=GOLD, alignment=TA_CENTER, spaceAfter=6, leading=24)))
-    e.append(Paragraph(nome.upper(), ParagraphStyle("N", fontName=FN, fontSize=13, alignment=TA_CENTER, textColor=DARK, spaceAfter=2)))
-    e.append(Paragraph(bd_str, ParagraphStyle("D", fontName=FONTE, fontSize=10, alignment=TA_CENTER, textColor=GRAY, spaceAfter=8)))
-    e.append(Spacer(1, 4))
-
-    # Perfil
-    e.append(Paragraph("<b>Perfil Numerologico</b>", SEC))
-    e.append(Paragraph(f"{nome.split()[0]}, sua combinacao: Vida {lp}, Expressao {data['expression']}, Motivacao {data['soul_urge']}, Personalidade {data['personality']}, Destino {data['destiny']}.", JU))
-    TX = {1: "Lider nato, pioneiro, original", 2: "Diplomata, sensivel, cooperativo", 3: "Criativo, comunicador, otimista",
-          4: "Pratico, disciplinado, confiavel", 5: "Livre, versatil, aventureiro", 6: "Amoroso, responsavel, protetor",
-          7: "Sabio, analitico, espiritual", 8: "Poderoso, realizador, prospero", 9: "Humanitario, generoso, sabio",
-          11: "Mestre Inspirador", 22: "Mestre Construtor"}
-    e.append(Paragraph(f"<b>Caminho de Vida {lp}:</b> {TX.get(lp, '')}", JU))
+        ParagraphStyle("T", fontName=FN, fontSize=16, textColor=GOLD, alignment=TA_CENTER, spaceAfter=4, leading=20)))
+    e.append(Paragraph(nome.upper(),
+        ParagraphStyle("N", fontName=FN, fontSize=12, alignment=TA_CENTER, textColor=DARK, spaceAfter=2)))
+    e.append(Paragraph(bd_str,
+        ParagraphStyle("D", fontName=FONTE, fontSize=10, alignment=TA_CENTER, textColor=GRAY, spaceAfter=6)))
+    e.append(Paragraph(f"Caminho de Vida {lp}. Expressao {data['expression']}. Motivacao {data['soul_urge']}. Personalidade {data['personality']}. Destino {data['destiny']}.", JU))
     e.append(PageBreak())
 
-    # Analise Detalhada
-    e.append(Paragraph("<b>Analise Detalhada</b>", SEC))
-    SIG = {1:("Individualidade","Original, criativo, lider nato, independente, pioneiro","Egoista, arrogante, dominador, impulsivo","Desenvolver humildade e trabalho em equipe"),
-           2:("Associacao","Diplomatico, sensivel, cooperativo, pacificador, intuitivo","Indeciso, carente, submisso, hipersensivel","Desenvolver autoconfianca e independencia"),
-           3:("Criacao","Criativo, comunicativo, otimista, carismatico, talentoso","Superficial, disperso, exagerado, dramatico","Desenvolver foco e disciplina"),
-           4:("Trabalho","Pratico, disciplinado, confiavel, leal, persistente","Rigido, teimoso, lento para mudar","Desenvolver flexibilidade e leveza"),
-           5:("Liberdade","Livre, versatil, aventureiro, inteligente, curioso","Impulsivo, irresponsavel, ansioso, inconsequente","Equilibrar liberdade com responsabilidade"),
-           6:("Familia","Responsavel, amoroso, protetor, justo, compassivo","Superprotetor, intrometido, sacrifica-se demais","Amar sem controlar. Cuidar de si tambem"),
-           7:("Sabedoria","Sabio, analitico, espiritual, perfeccionista, profundo","Frio, sarcastico, isolado, desconfiado","Equilibrar razao e emocao. Compartilhar"),
-           8:("Poder","Poderoso, realizador, prospero, estrategista, visionario","Materialista, autoritario, workaholic","Usar o poder com integridade"),
-           9:("Humanidade","Humanitario, generoso, compassivo, sabio, altruista","Melancolico, disperso, vitimista, apegado ao passado","Perdoar e deixar ir"),
-           11:("Mestre Inspirador","Intuitivo, iluminado, inspirador, visionario, carismatico","Ansioso, nervoso, distante, fanatico","Equilibrar espiritual e material"),
-           22:("Mestre Construtor","Realizador, visionario pratico, construtor de grandes obras","Ambicioso excessivo, estressado, prepotente","Construir sem escravizar-se")}
+    # Análise Detalhada
+    e.append(Paragraph("Analise Detalhada", SEC))
+    TX = {1: "Lider nato", 2: "Diplomata", 3: "Criativo", 4: "Pratico", 5: "Livre", 6: "Amoroso", 7: "Sabio", 8: "Prospero", 9: "Humanitario", 11: "Mestre", 22: "Mestre"}
+    NG = {1: "Egoista", 2: "Indeciso", 3: "Disperso", 4: "Rigido", 5: "Impulsivo", 6: "Superprotetor", 7: "Frio", 8: "Materialista", 9: "Melancolico", 11: "Ansioso", 22: "Ambicioso"}
+    LC = {1: "Humildade", 2: "Autoconfianca", 3: "Foco", 4: "Flexibilidade", 5: "Responsabilidade", 6: "Confiar", 7: "Compartilhar", 8: "Integridade", 9: "Perdoar", 11: "Equilibrar", 22: "Equilibrar"}
     for v in [lp, data["expression"], data["soul_urge"], data["personality"], data["destiny"]]:
-        d = SIG.get(v, ("","","",""))
-        e.append(Paragraph(f"<b>{d[0]} ({v}):</b> {d[1]}", JU))
-        e.append(Paragraph(f"<i>Ponto negativo:</i> {d[2]} | <i>Licao:</i> {d[3]}", JU))
-
-    # Caminho de Vida
-    e.append(Paragraph("<b>Caminho de Vida</b>", SEC))
-    CAM = {1:"Abrir caminhos e liderar",2:"Servir como ponte entre pessoas",3:"Comunicar e inspirar",
-           4:"Construir bases solidas",5:"Evoluir e experimentar",6:"Harmonizar e servir",
-           7:"Buscar a verdade",8:"Prosperar e realizar",9:"Servir a humanidade",
-           11:"Iluminar consciencias",22:"Realizar grandes obras"}
-    e.append(Paragraph(f"Sua missao: {CAM.get(lp, '')}", JU))
+        e.append(Paragraph(f"<b>{TX.get(v, '')} ({v})</b> — {NG.get(v, '')}. Licao: {LC.get(v, '')}.", JU))
 
     # Ciclos
-    e.append(Paragraph("<b>Ciclos da Vida</b>", SEC))
-    fe = max(36 - min(lp, 36), 25)
-    e.append(Paragraph(f"Formativo (0-{fe}a) - Produtivo ({fe+1}-{fe+27}a) - Colheita ({fe+28}+a)", JU))
-
-    # Desafios
+    e.append(Paragraph("Ciclos da Vida", SEC))
     bb = dp.parse(bd_str.split(" ")[0] if " " in bd_str else bd_str).date()
     d, m, a = bb.day, bb.month, bb.year
-    e.append(Paragraph("<b>Desafios</b>", SEC))
-    d1, d2 = r1(abs(d-m)), r1(abs(m-r1(a)))
-    dp_ = r1(abs(d1-d2))
-    DES = {0:"Equilibrio natural",1:"Superar o egoismo",2:"Vencer a timidez",3:"Desenvolver foco",
-           4:"Desenvolver flexibilidade",5:"Desenvolver responsabilidade",6:"Aprender a confiar",
-           7:"Desenvolver fe",8:"Desenvolver etica",9:"Aprender a desapegar"}
-    e.append(Paragraph(f"Menor 1 ({d1}): {DES.get(d1,'')} | Menor 2 ({d2}): {DES.get(d2,'')} | Principal ({dp_}): {DES.get(dp_,'')}", JU))
+    fe = max(36 - min(lp, 36), 25)
+    c1n, c2n, c3n = r1(lp + data["expression"]), r1(data["expression"] + data["soul_urge"]), r1(data["soul_urge"] + data["personality"])
+    e.append(Paragraph(f"Formativo (0-{fe}a) regente {c1n}. Produtivo ({fe+1}-{fe+27}a) regente {c2n}. Colheita ({fe+28}+a) regente {c3n}.", JU))
 
-    # Realizacoes
-    e.append(Paragraph("<b>Realizacoes</b>", SEC))
-    e.append(Paragraph(f"1({r1(d+m)}) 2({r1(d+a)}) 3({r1(r1(d+m)+r1(d+a))}) 4({r1(d+m+a)})", JU))
+    # Desafios
+    e.append(Paragraph("Desafios", SEC))
+    d1, d2, d3 = r1(abs(d-m)), r1(abs(m-r1(a))), r1(abs(r1(abs(d-m)) - r1(abs(m-r1(a)))))
+    DES = {0:"Equilibrio natural",1:"Superar egoismo",2:"Vencer timidez",3:"Desenvolver foco",4:"Flexibilidade",5:"Responsabilidade",6:"Confiar",7:"Desenvolver fe",8:"Etica no poder",9:"Desapegar"}
+    e.append(Paragraph(f"Menor 1 ({d1}): {DES.get(d1,'')}. Menor 2 ({d2}): {DES.get(d2,'')}. Principal ({d3}): {DES.get(d3,'')}.", JU))
+
+    # Realizações
+    e.append(Paragraph("Realizacoes", SEC))
+    e.append(Paragraph(f"1({r1(d+m)}) 2({r1(d+a)}) 3({r1(r1(d+m)+r1(d+a))}) 4({r1(d+m+a)}). Vibracao dia {bb.day}: {r1(d)}.", JU))
 
     # Ano Pessoal
-    e.append(Paragraph("<b>Ano Pessoal</b>", SEC))
+    e.append(Paragraph("Ano Pessoal", SEC))
     ap = r1(d + m + datetime.utcnow().year)
-    AP_TXT = {1:"Novos comecos",2:"Parcerias",3:"Criatividade",4:"Trabalho",5:"Mudancas",
-              6:"Familia",7:"Reflexao",8:"Prosperidade",9:"Conclusao"}
-    e.append(Paragraph(f"{datetime.utcnow().year}: Ano {ap} - {AP_TXT.get(ap,'')}", JU))
+    AP_TXT = {1:"Novos comecos",2:"Parcerias",3:"Criatividade",4:"Trabalho",5:"Mudancas",6:"Familia",7:"Reflexao",8:"Prosperidade",9:"Conclusao"}
+    e.append(Paragraph(f"{datetime.utcnow().year}: Ano {ap} — {AP_TXT.get(ap,'')}.", JU))
 
     # Grade
-    e.append(Paragraph("<b>Grade de Inclusao</b>", SEC))
+    e.append(Paragraph("Grade de Inclusao", SEC))
     grid = calc_grid(nome)
     pres = [str(n) for n in range(1,10) if grid.get(n,0)>0]
     aus = [str(n) for n in range(1,10) if grid.get(n,0)==0]
-    e.append(Paragraph(f"Presentes: {', '.join(pres) or '-'} | Carencias: {', '.join(aus) or '-'}", JU))
+    e.append(Paragraph(f"Presentes: {', '.join(pres) or '-'}. Carencias: {', '.join(aus) or '-'}.", JU))
 
     # Final
-    e.append(Paragraph("<b>Tabela de Relacoes</b>", SEC))
-    rel = [["Numero","Harmoniza","Conflita"]] + [[str(n),", ".join([str(x) for x in [3,5,7] if n==1 or [4,6,8] if n==2 or [1,5,9] if n==3 or [2,6,8] if n==4 or [1,3,7] if n==5 or [2,4,8] if n==6 or [1,5,9] if n==7 or [2,4,6] if n==8 else [3,6,9]][0]),", ".join([str(x) for x in [2,4,8] if n==1 or [1,5,7] if n==2 or [4,6,8] if n==3 or [1,3,5] if n==4 or [2,4,9] if n==5 or [1,3,9] if n==6 or [2,4,6] if n==7 or [1,3,9] if n==8 else [1,5,8]][0])] for n in range(1,10)]
-    tbl = Table(rel, colWidths=[60, 140, 140])
-    tbl.setStyle(TableStyle([("BACKGROUND",(0,0),(-1,0),GOLD),("TEXTCOLOR",(0,0),(-1,0),colors.white),
-        ("FONTSIZE",(0,0),(-1,-1),9),("GRID",(0,0),(-1,-1),0.5,colors.grey),("ALIGN",(0,0),(-1,-1),"CENTER"),
-        ("BACKGROUND",(0,1),(-1,-1),LGRAY)]))
-    e.append(tbl)
-    e.append(Spacer(1, 6))
-    e.append(Paragraph("A numerologia e ferramenta de autoconhecimento. Os numeros mostram tendencias, mas o livre arbitrio e seu maior poder.", JU))
-    e.append(Paragraph("(c) A1ELOS - Baseado no sistema pitagorico e na obra de Monique Cissay",
-        ParagraphStyle("F", fontName=FONTE, fontSize=8, textColor=GRAY, alignment=TA_CENTER, spaceBefore=8)))
+    e.append(Paragraph("A numerologia ilumina caminhos. O livre arbitrio e seu maior poder.", JU))
+    e.append(Paragraph("(c) A1ELOS — Baseado no sistema pitagorico e na obra de Monique Cissay",
+        ParagraphStyle("F", fontName=FONTE, fontSize=8, textColor=GRAY, alignment=TA_CENTER, spaceBefore=6)))
     doc.build(e)
     return path
     
