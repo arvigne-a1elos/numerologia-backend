@@ -155,7 +155,7 @@ def calc_grid(nome):
     g = {i: 0 for i in range(1, 10)}
     for ch in nome.upper().replace(" ", ""):
         v = t.get(ch, 0)
-        if 1 &lt;= v &lt;= 9:
+        if < **5
             g[v] += 1
     return g
 
@@ -232,7 +232,7 @@ def gerar_numeros(sigla, cargo, qtd=5):
             if en == alvo:
                 n = ss + dl
                 if n not in tent:
-                    if 0 &lt; x &lt; 10 and alvo != r1(sm):
+                    if < **5
                         continue
                     tent.add(n)
                     st = sm + sum(int(d) for d in dl)
@@ -256,9 +256,7 @@ def gerar_numeros(sigla, cargo, qtd=5):
     res.extend(busca(8))
     if len(res) &lt; qtd:
         res.extend(busca(3))
-    if len(res) &lt; qtd:
-        for e in [7, 1, 9, 5, 6, 4, 2]:
-            if len(res) >= qtd:
+    if len(res) < **5
                 break
             res.extend(busca(e))
     return res[:qtd]
