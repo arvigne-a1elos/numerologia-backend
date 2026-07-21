@@ -165,6 +165,7 @@ TXT_BASE = {
     11: "Mestre Inspirador. Intuitivo e iluminado.",
     22: "Mestre Construtor. Realizador de grandes obras.",
 }
+
 # ═══════════════════════════════════════════
 # FUNÇÕES DE APOIO
 # ═══════════════════════════════════════════
@@ -435,39 +436,113 @@ def gerar_numeros_eleitorais(sigla: int, cargo: str, quantidade: int = 5) -> lis
             resultados.extend(buscar_por_energia(energia))
     
     return resultados[:quantidade]
-    # ═══════════════════════════════════════════
+
+# ═══════════════════════════════════════════
 # PDF 1: MAPA EXPRESS (R$ 8)
 # 5 números principais + frase explicativa
 # 1 página, PDF simples por email
 # ═══════════════════════════════════════════
 
 def pdf8(data: dict, nome: str, bd: str) -> str:
-    """Mapa Express em 1 página com espaçamento reduzido."""
+    """
+    Gera o PDF do Mapa Numerológico Express (R$ 8).
+    Contém os 5 números principais com frases explicativas curtas.
+    Retorna o caminho do arquivo gerado.
+    """
     path = f"/tmp/p8_{uuid.uuid4().hex[:8]}.pdf"
-    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50, topMargin=30, bottomMargin=25)
-    e = []
-    TX = {1: "Lider", 2: "Diplomata", 3: "Criativo", 4: "Pratico", 5: "Livre", 6: "Amoroso", 7: "Sabio", 8: "Prospero", 9: "Humanitario", 11: "Mestre", 22: "Mestre"}
-    e.append(Paragraph("M A P A   N U M E R O L O G I C O   E X P R E S S",
-        ParagraphStyle("T", fontName=FN, fontSize=18, textColor=GOLD, alignment=TA_CENTER, spaceAfter=8, leading=24)))
-    e.append(Paragraph(nome.upper(), ParagraphStyle("N", fontName=FN, fontSize=13, alignment=TA_CENTER, textColor=DARK, spaceAfter=2)))
-    e.append(Paragraph(bd, ParagraphStyle("D", fontName=FONTE, fontSize=10, alignment=TA_CENTER, textColor=GRAY, spaceAfter=10)))
-    td = [["Numero", "Valor"]] + [[l, str(data[k])] for k, l in
-        [("life_path","Caminho de Vida"),("expression","Expressao"),("soul_urge","Mot.Alma"),("personality","Personalidade"),("destiny","Destino")]]
-    tbl = Table(td, colWidths=[200, 150])
-    tbl.setStyle(TableStyle([("BACKGROUND",(0,0),(-1,0),GOLD),("TEXTCOLOR",(0,0),(-1,0),colors.white),
-        ("FONTSIZE",(0,0),(-1,-1),11),("FONTNAME",(0,0),(-1,-1),FONTE),("GRID",(0,0),(-1,-1),0.5,colors.grey),
-        ("ALIGN",(1,0),(1,-1),"CENTER"),("BACKGROUND",(0,1),(-1,-1),LGRAY),("TEXTCOLOR",(0,1),(-1,-1),DARK),
-        ("TOPPADDING",(0,0),(-1,-1),3),("BOTTOMPADDING",(0,0),(-1,-1),3)]))
-    e.append(tbl)
-    e.append(Spacer(1, 8))
-    TXL = {1: "Lider nato", 2: "Diplomata nato", 3: "Criativo nato", 4: "Pratico e disciplinado",
-           5: "Livre e versatil", 6: "Amoroso e responsavel", 7: "Sabio e analitico",
-           8: "Prospero e realizador", 9: "Humanitario e generoso", 11: "Mestre Inspirador", 22: "Mestre Construtor"}
-    for k, l in [("life_path","Vida"),("expression","Expressao"),("soul_urge","Alma"),("personality","Personal."),("destiny","Destino")]:
-        v = data[k]
-        e.append(Paragraph(f"<b>{l} {v}:</b> {TXL.get(v,'')}",
-            ParagraphStyle("X", fontName=FONTE, fontSize=10, leading=13, textColor=DARK, spaceAfter=3)))
-    doc.build(e)
+    doc = SimpleDocTemplate(
+        path, pagesize=A4,
+        leftMargin=50, rightMargin=50,
+        topMargin=45, bottomMargin=45
+    )
+    elementos = []
+
+    # ── Estilos ──
+    estilo_titulo = ParagraphStyle(
+        "T", fontName=FN, fontSize=TAM_T,
+        textColor=GOLD, alignment=TA_CENTER,
+        spaceAfter=ET, leading=TAM_T * 1.5
+    )
+    estilo_subtitulo = ParagraphStyle(
+        "S", fontName=FONTE, fontSize=18,
+        textColor=GOLD, alignment=TA_CENTER,
+        spaceAfter=ET, leading=27
+    )
+    estilo_nome = ParagraphStyle(
+        "N", fontName=FN, fontSize=TAM_C + 2,
+        alignment=TA_CENTER, textColor=DARK,
+        spaceAfter=4
+    )
+    estilo_data = ParagraphStyle(
+        "D", fontName=FONTE, fontSize=TAM_C - 2,
+        alignment=TA_CENTER, textColor=GRAY,
+        spaceAfter=EL
+    )
+    estilo_frase = ParagraphStyle(
+        "F", fontName=FONTE, fontSize=TAM_C - 1,
+        leading=EL * 0.9, textColor=DARK,
+        spaceAfter=EL * 0.4
+    )
+    estilo_footer = ParagraphStyle(
+        "FF", fontName=FONTE, fontSize=10,
+        textColor=GRAY, alignment=TA_CENTER,
+        spaceBefore=EL * 2
+    )
+
+    # ── Conteúdo ──
+    elementos.append(Spacer(1, 30))
+    elementos.append(Paragraph("MAPA NUMEROLOGICO EXPRESS", estilo_titulo))
+    elementos.append(Paragraph(f"{nome.upper()}", estilo_nome))
+    elementos.append(Paragraph(f"{bd}", estilo_data))
+
+    # Tabela: Número | Valor | Significado
+    tabela_dados = [
+        ["Numero", "Valor", "Significado"],
+        ["Caminho de Vida", str(data["life_path"]), TXT_BASE.get(data["life_path"], "")],
+        ["Expressao", str(data["expression"]), TXT_BASE.get(data["expression"], "")],
+        ["Motivacao da Alma", str(data["soul_urge"]), TXT_BASE.get(data["soul_urge"], "")],
+        ["Personalidade", str(data["personality"]), TXT_BASE.get(data["personality"], "")],
+        ["Destino", str(data["destiny"]), TXT_BASE.get(data["destiny"], "")],
+    ]
+
+    tbl = Table(tabela_dados, colWidths=[120, 45, 285])
+    tbl.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), GOLD),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTSIZE", (0, 0), (-1, -1), TAM_C - 2),
+        ("FONTNAME", (0, 0), (-1, -1), FONTE),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+        ("ALIGN", (1, 0), (1, -1), "CENTER"),
+        ("BACKGROUND", (0, 1), (-1, -1), LGRAY),
+        ("TEXTCOLOR", (0, 1), (-1, -1), DARK),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("TOPPADDING", (0, 0), (-1, -1), 6),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+    ]))
+    elementos.append(tbl)
+    elementos.append(Spacer(1, EL))
+
+    # Frases individuais para cada número
+    for chave, rotulo in [
+        ("life_path", "Caminho de Vida"),
+        ("expression", "Expressao"),
+        ("soul_urge", "Motivacao da Alma"),
+        ("personality", "Personalidade"),
+        ("destiny", "Destino"),
+    ]:
+        valor = data[chave]
+        frase = TXT_BASE.get(valor, "")
+        elementos.append(Paragraph(
+            f"<b>{rotulo} {valor}</b>: {frase}",
+            estilo_frase
+        ))
+
+    elementos.append(Paragraph(
+        "(c) A1ELOS Assessoria e Consultoria",
+        estilo_footer
+    ))
+
+    doc.build(elementos)
     return path
 
 # ═══════════════════════════════════════════
@@ -477,106 +552,501 @@ def pdf8(data: dict, nome: str, bd: str) -> str:
 # ═══════════════════════════════════════════
 
 def pdf17(data: dict, nome: str, bd_str: str) -> str:
-    """Mapa Completo com espaçamento reduzido entre seções."""
+    """
+    Gera o PDF do Mapa Numerológico Completo (R$ 17).
+    Contém análise detalhada: Perfil, Ciclos, Desafios,
+    Realizações, Ano Pessoal, Grade, Tabela de Relações.
+    Baseado nas obras de Monique Cissay (pág 159).
+    Retorna o caminho do arquivo gerado.
+    """
     path = f"/tmp/p17_{uuid.uuid4().hex[:8]}.pdf"
-    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=45, rightMargin=45, topMargin=35, bottomMargin=30)
+    doc = SimpleDocTemplate(
+        path, pagesize=A4,
+        leftMargin=50, rightMargin=50,
+        topMargin=45, bottomMargin=45
+    )
     e = []
-    JU = ParagraphStyle("J", fontName=FONTE, fontSize=11, leading=14, textColor=DARK, spaceAfter=4)
-    SEC = ParagraphStyle("S", fontName=FN, fontSize=14, textColor=GOLD, alignment=0, spaceBefore=8, spaceAfter=6, leading=18)
-    lp = data["life_path"]
-    e.append(Spacer(1, 15))
-    e.append(Paragraph("M A P A   N U M E R O L O G I C O   C O M P L E T O",
-        ParagraphStyle("T", fontName=FN, fontSize=18, textColor=GOLD, alignment=TA_CENTER, spaceAfter=6, leading=24)))
-    e.append(Paragraph(nome.upper(), ParagraphStyle("N", fontName=FN, fontSize=13, alignment=TA_CENTER, textColor=DARK, spaceAfter=2)))
-    e.append(Paragraph(bd_str, ParagraphStyle("D", fontName=FONTE, fontSize=10, alignment=TA_CENTER, textColor=GRAY, spaceAfter=8)))
-    e.append(Spacer(1, 4))
 
-    # Perfil
-    e.append(Paragraph("<b>Perfil Numerologico</b>", SEC))
-    e.append(Paragraph(f"{nome.split()[0]}, sua combinacao: Vida {lp}, Expressao {data['expression']}, Motivacao {data['soul_urge']}, Personalidade {data['personality']}, Destino {data['destiny']}.", JU))
-    TX = {1: "Lider nato, pioneiro, original", 2: "Diplomata, sensivel, cooperativo", 3: "Criativo, comunicador, otimista",
-          4: "Pratico, disciplinado, confiavel", 5: "Livre, versatil, aventureiro", 6: "Amoroso, responsavel, protetor",
-          7: "Sabio, analitico, espiritual", 8: "Poderoso, realizador, prospero", 9: "Humanitario, generoso, sabio",
-          11: "Mestre Inspirador", 22: "Mestre Construtor"}
-    e.append(Paragraph(f"<b>Caminho de Vida {lp}:</b> {TX.get(lp, '')}", JU))
+    # ── Estilos ──
+    TIT = ParagraphStyle(
+        "T", fontName=FN, fontSize=TAM_T,
+        textColor=GOLD, alignment=TA_CENTER,
+        spaceAfter=ET, leading=TAM_T * 1.5
+    )
+    SEC = ParagraphStyle(
+        "S", fontName=FN, fontSize=18,
+        textColor=GOLD, alignment=0,
+        spaceBefore=EL, spaceAfter=ET, leading=27
+    )
+    JU = ParagraphStyle(
+        "J", fontName=FONTE, fontSize=TAM_C - 1,
+        leading=EL * 0.9, textColor=DARK,
+        spaceAfter=EL * 0.4
+    )
+    B = ParagraphStyle(
+        "B", fontName=FN, fontSize=TAM_C - 1,
+        leading=EL * 0.95, textColor=DARK,
+        spaceAfter=EL * 0.3
+    )
+    NOME = ParagraphStyle(
+        "N", fontName=FN, fontSize=TAM_C + 2,
+        alignment=TA_CENTER, textColor=DARK,
+        spaceAfter=4
+    )
+    DATA = ParagraphStyle(
+        "D", fontName=FONTE, fontSize=TAM_C - 2,
+        alignment=TA_CENTER, textColor=GRAY,
+        spaceAfter=EL
+    )
+
+    lp = data["life_path"]
+    ex = data["expression"]
+    sa = data["soul_urge"]
+    pe = data["personality"]
+    de = data["destiny"]
+    nome_p = nome.split()[0] if " " in nome else nome
+
+    # ═══ CAPA ═══
+    e.append(Spacer(1, 30))
+    e.append(Paragraph("M A P A   N U M E R O L O G I C O", TIT))
+    e.append(Paragraph(
+        "C O M P L E T O",
+        ParagraphStyle(
+            "U", fontName=FONTE, fontSize=18,
+            textColor=GOLD, alignment=TA_CENTER,
+            spaceAfter=ET, leading=27
+        )
+    ))
+    e.append(Paragraph(nome.upper(), NOME))
+    e.append(Paragraph(bd_str, DATA))
+    e.append(Paragraph(
+        "Baseado no sistema pitagorico e na obra de Monique Cissay",
+        ParagraphStyle(
+            "D2", fontName=FONTE, fontSize=TAM_C - 2,
+            alignment=TA_CENTER, textColor=GRAY,
+            spaceAfter=EL
+        )
+    ))
+
+    # Tabela principal
+    th = [
+        ["Numero", "Valor"],
+        ["Caminho de Vida", str(lp)],
+        ["Expressao", str(ex)],
+        ["Motivacao da Alma", str(sa)],
+        ["Personalidade", str(pe)],
+        ["Destino", str(de)],
+    ]
+    tbl = Table(th, colWidths=[200, 150])
+    tbl.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), GOLD),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTSIZE", (0, 0), (-1, -1), TAM_C - 2),
+        ("FONTNAME", (0, 0), (-1, -1), FONTE),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+        ("ALIGN", (1, 0), (1, -1), "CENTER"),
+        ("BACKGROUND", (0, 1), (-1, -1), LGRAY),
+        ("TEXTCOLOR", (0, 1), (-1, -1), DARK),
+    ]))
+    e.append(tbl)
+    e.append(Spacer(1, EL))
+
+    # ═══ PERFIL ═══
+    e.append(Paragraph("<b>Seu Perfil Numerologico</b>", SEC))
+    e.append(Paragraph(
+        f"{nome_p}, sua combinacao unica: "
+        f"Vida {lp}, Expressao {ex}, Motivacao {sa}, "
+        f"Personalidade {pe}, Destino {de}.",
+        JU
+    ))
+    e.append(Paragraph(
+        f"<b>Caminho de Vida {lp}:</b> {TXT_BASE.get(lp, '')}",
+        JU
+    ))
     e.append(PageBreak())
 
-    # Analise Detalhada
+    # ═══ ANÁLISE DETALHADA (Monique Cissay) ═══
     e.append(Paragraph("<b>Analise Detalhada</b>", SEC))
-    SIG = {1:("Individualidade","Original, criativo, lider nato, independente, pioneiro","Egoista, arrogante, dominador, impulsivo","Desenvolver humildade e trabalho em equipe"),
-           2:("Associacao","Diplomatico, sensivel, cooperativo, pacificador, intuitivo","Indeciso, carente, submisso, hipersensivel","Desenvolver autoconfianca e independencia"),
-           3:("Criacao","Criativo, comunicativo, otimista, carismatico, talentoso","Superficial, disperso, exagerado, dramatico","Desenvolver foco e disciplina"),
-           4:("Trabalho","Pratico, disciplinado, confiavel, leal, persistente","Rigido, teimoso, lento para mudar","Desenvolver flexibilidade e leveza"),
-           5:("Liberdade","Livre, versatil, aventureiro, inteligente, curioso","Impulsivo, irresponsavel, ansioso, inconsequente","Equilibrar liberdade com responsabilidade"),
-           6:("Familia","Responsavel, amoroso, protetor, justo, compassivo","Superprotetor, intrometido, sacrifica-se demais","Amar sem controlar. Cuidar de si tambem"),
-           7:("Sabedoria","Sabio, analitico, espiritual, perfeccionista, profundo","Frio, sarcastico, isolado, desconfiado","Equilibrar razao e emocao. Compartilhar"),
-           8:("Poder","Poderoso, realizador, prospero, estrategista, visionario","Materialista, autoritario, workaholic","Usar o poder com integridade"),
-           9:("Humanidade","Humanitario, generoso, compassivo, sabio, altruista","Melancolico, disperso, vitimista, apegado ao passado","Perdoar e deixar ir"),
-           11:("Mestre Inspirador","Intuitivo, iluminado, inspirador, visionario, carismatico","Ansioso, nervoso, distante, fanatico","Equilibrar espiritual e material"),
-           22:("Mestre Construtor","Realizador, visionario pratico, construtor de grandes obras","Ambicioso excessivo, estressado, prepotente","Construir sem escravizar-se")}
-    for v in [lp, data["expression"], data["soul_urge"], data["personality"], data["destiny"]]:
-        d = SIG.get(v, ("","","",""))
-        e.append(Paragraph(f"<b>{d[0]} ({v}):</b> {d[1]}", JU))
-        e.append(Paragraph(f"<i>Ponto negativo:</i> {d[2]} | <i>Licao:</i> {d[3]}", JU))
 
-    # Caminho de Vida
-    e.append(Paragraph("<b>Caminho de Vida</b>", SEC))
-    CAM = {1:"Abrir caminhos e liderar",2:"Servir como ponte entre pessoas",3:"Comunicar e inspirar",
-           4:"Construir bases solidas",5:"Evoluir e experimentar",6:"Harmonizar e servir",
-           7:"Buscar a verdade",8:"Prosperar e realizar",9:"Servir a humanidade",
-           11:"Iluminar consciencias",22:"Realizar grandes obras"}
-    e.append(Paragraph(f"Sua missao: {CAM.get(lp, '')}", JU))
+    SIG = {
+        1: (
+            "Individualidade",
+            "Sol, Fogo, Amarelo. Original, criativo, lider nato, "
+            "independente, pioneiro, corajoso.",
+            "Egoista, arrogante, dominador, impulsivo, solitario.",
+            "Desenvolver humildade e trabalho em equipe. "
+            "Aprender a ouvir e compartilhar."
+        ),
+        2: (
+            "Associacao",
+            "Lua, Agua, Verde. Diplomatico, sensivel, cooperativo, "
+            "pacificador, intuitivo, paciente.",
+            "Indeciso, carente, submisso, hipersensivel, vitimista.",
+            "Desenvolver autoconfianca e independencia emocional. "
+            "Confiar em si mesmo."
+        ),
+        3: (
+            "Criacao",
+            "Jupiter, Ar, Violeta. Criativo, comunicativo, otimista, "
+            "carismatico, talentoso, expansivo.",
+            "Superficial, disperso, exagerado, dramatico, criticão.",
+            "Desenvolver foco e profundidade na expressao. "
+            "Canalizar a criatividade com disciplina."
+        ),
+        4: (
+            "Trabalho",
+            "Urano, Terra, Azul. Pratico, disciplinado, confiavel, "
+            "leal, persistente, organizado, honesto.",
+            "Rigido, teimoso, lento para mudar, materialista, preso.",
+            "Desenvolver flexibilidade e leveza. "
+            "Aceitar que mudanças sao necessarias."
+        ),
+        5: (
+            "Liberdade",
+            "Mercurio, Ar, Laranja. Livre, versatil, aventureiro, "
+            "inteligente, curioso, progressista.",
+            "Impulsivo, irresponsavel, ansioso, inconsequente, disperso.",
+            "Equilibrar liberdade com responsabilidade. "
+            "Comprometer-se sem se sentir preso."
+        ),
+        6: (
+            "Familia",
+            "Venus, Terra, Rosa. Responsavel, amoroso, protetor, "
+            "justo, compassivo, dedicado.",
+            "Superprotetor, intrometido, ansioso com outros, "
+            "sacrifica-se demais.",
+            "Amar sem controlar. Respeitar o espaco alheio. "
+            "Cuidar de si tambem."
+        ),
+        7: (
+            "Sabedoria",
+            "Netuno, Agua, Indigo. Sabio, analitico, espiritual, "
+            "perfeccionista, profundo, intuitivo.",
+            "Frio, sarcastico, isolado, desconfiado, pessimista.",
+            "Equilibrar razao e emocao. Compartilhar conhecimento. "
+            "Confiar nos outros."
+        ),
+        8: (
+            "Poder",
+            "Saturno, Terra, Vermelho. Poderoso, realizador, prospero, "
+            "estrategista, visionario, autoridade.",
+            "Materialista, autoritario, workaholic, impaciente, "
+            "obsessivo por sucesso.",
+            "Usar o poder com integridade. Dinheiro e meio, nao fim. "
+            "Liderar com exemplo."
+        ),
+        9: (
+            "Humanidade",
+            "Marte, Fogo, Carmim. Humanitario, generoso, compassivo, "
+            "sabio, altruista, tolerante.",
+            "Melancolico, disperso, vitimista, apegado ao passado.",
+            "Perdoar e deixar ir. Confiar no fluxo da vida. "
+            "Desapegar para evoluir."
+        ),
+        11: (
+            "Mestre Inspirador",
+            "Intuitivo, iluminado, inspirador, visionario, "
+            "carismatico, sensivel.",
+            "Ansioso, nervoso, distante, fanatico, desligado da realidade.",
+            "Equilibrar espiritual e material. "
+            "Ancorar a inspiracao no mundo pratico."
+        ),
+        22: (
+            "Mestre Construtor",
+            "Realizador, visionario pratico, construtor de grandes obras, "
+            "lider nato.",
+            "Ambicioso excessivo, estressado, prepotente, "
+            "escravizado pelo trabalho.",
+            "Construir sem escravizar-se. "
+            "Delegar e confiar na equipe."
+        ),
+    }
 
-    # Ciclos
+    for valor, rotulo in [
+        (lp, "Caminho de Vida"),
+        (ex, "Expressao"),
+        (sa, "Motivacao da Alma"),
+        (pe, "Personalidade"),
+        (de, "Destino"),
+    ]:
+        dados = SIG.get(valor, ("", "", "", ""))
+        nome_num = dados[0]
+        positivo = dados[1]
+        negativo = dados[2]
+        licao = dados[3]
+
+        e.append(Paragraph(
+            f"<b>{rotulo} {valor} — {nome_num}</b>", B
+        ))
+        e.append(Paragraph(f"<b>Positivo:</b> {positivo}", JU))
+        e.append(Paragraph(f"<b>Negativo:</b> {negativo}", JU))
+        e.append(Paragraph(f"<b>Licao:</b> {licao}", JU))
+
+    e.append(PageBreak())
+
+    # ═══ CAMINHO DE VIDA ═══
+    CAM = {
+        1: ("Realizacao", "Abrir caminhos, liderar e inovar."),
+        2: ("Cooperacao", "Servir como ponte entre pessoas."),
+        3: ("Alegria", "Comunicar e inspirar."),
+        4: ("Trabalho", "Construir bases solidas."),
+        5: ("Liberdade", "Evoluir e experimentar."),
+        6: ("Conciliacao", "Harmonizar e servir."),
+        7: ("Sabedoria", "Buscar a verdade."),
+        8: ("Justica", "Prosperar e realizar."),
+        9: ("Humanitarismo", "Servir a humanidade."),
+        11: ("Inspiracao", "Iluminar consciencias."),
+        22: ("Construcao", "Realizar grandes obras."),
+    }
+    kw, desc_cam = CAM.get(lp, ("", ""))
+    e.append(Paragraph(f"<b>Caminho de Vida {lp} — {kw}</b>", SEC))
+    e.append(Paragraph(f"Sua missao de vida e: {desc_cam}", JU))
+    e.append(Paragraph(
+        "Este numero representa o caminho que voce escolheu "
+        "para esta encarnacao. E sua bussola existencial.",
+        JU
+    ))
+
+    # ═══ CICLOS DA VIDA (pág 159 Monique Cissay) ═══
     e.append(Paragraph("<b>Ciclos da Vida</b>", SEC))
     fe = max(36 - min(lp, 36), 25)
-    e.append(Paragraph(f"Formativo (0-{fe}a) - Produtivo ({fe+1}-{fe+27}a) - Colheita ({fe+28}+a)", JU))
+    c1n = r1(lp + ex)
+    c2n = r1(ex + sa)
+    c3n = r1(sa + pe)
 
-    # Desafios
+    e.append(Paragraph(
+        f"<b>1. Ciclo Formativo (0-{fe} anos) — Regente {c1n}:</b> "
+        "Periodo de aprendizado e formacao. As influencias externas "
+        "moldam suas bases emocionais e intelectuais.",
+        JU
+    ))
+    e.append(Paragraph(
+        f"<b>2. Ciclo Produtivo ({fe+1}-{fe+27} anos) — Regente {c2n}:</b> "
+        "Periodo de realizacao profissional e pessoal. "
+        "Suas acoes geram resultados concretos.",
+        JU
+    ))
+    e.append(Paragraph(
+        f"<b>3. Ciclo de Colheita ({fe+28}+ anos) — Regente {c3n}:</b> "
+        "Periodo de sabedoria e consolidacao. "
+        "Voce colhe os frutos do que plantou.",
+        JU
+    ))
+
+    e.append(PageBreak())
+
+    # ═══ DESAFIOS ═══
+    e.append(Paragraph("<b>Desafios da Vida</b>", SEC))
+    e.append(Paragraph(
+        "Na numerologia, os desafios representam obstaculos "
+        "que precisamos superar para evoluir espiritualmente.",
+        JU
+    ))
+
     bb = dp.parse(bd_str.split(" ")[0] if " " in bd_str else bd_str).date()
     d, m, a = bb.day, bb.month, bb.year
-    e.append(Paragraph("<b>Desafios</b>", SEC))
-    d1, d2 = r1(abs(d-m)), r1(abs(m-r1(a)))
-    dp_ = r1(abs(d1-d2))
-    DES = {0:"Equilibrio natural",1:"Superar o egoismo",2:"Vencer a timidez",3:"Desenvolver foco",
-           4:"Desenvolver flexibilidade",5:"Desenvolver responsabilidade",6:"Aprender a confiar",
-           7:"Desenvolver fe",8:"Desenvolver etica",9:"Aprender a desapegar"}
-    e.append(Paragraph(f"Menor 1 ({d1}): {DES.get(d1,'')} | Menor 2 ({d2}): {DES.get(d2,'')} | Principal ({dp_}): {DES.get(dp_,'')}", JU))
 
-    # Realizacoes
+    d1 = r1(abs(d - m))
+    d2 = r1(abs(m - r1(a)))
+    dp_ = r1(abs(d1 - d2))
+
+    DES = {
+        0: "Equilibrio natural. Voce nasceu com harmonia interna.",
+        1: "Superar o egoismo e desenvolver lideranca servidora.",
+        2: "Vencer a timidez e desenvolver autoconfianca.",
+        3: "Desenvolver foco e disciplina na comunicacao.",
+        4: "Desenvolver flexibilidade e adaptabilidade.",
+        5: "Desenvolver responsabilidade e compromisso.",
+        6: "Aprender a confiar e nao controlar tudo.",
+        7: "Desenvolver fe e compartilhar conhecimento.",
+        8: "Desenvolver etica e integridade no poder.",
+        9: "Aprender a concluir ciclos e desapegar.",
+    }
+
+    e.append(Paragraph(
+        f"<b>Desafio Menor 1 (Dia x Mes) {d1}:</b> {DES.get(d1, '')}",
+        JU
+    ))
+    e.append(Paragraph(
+        f"<b>Desafio Menor 2 (Mes x Ano) {d2}:</b> {DES.get(d2, '')}",
+        JU
+    ))
+    e.append(Paragraph(
+        f"<b>Desafio Principal {dp_}:</b> {DES.get(dp_, '')} "
+        "Este e seu maior desafio nesta vida.",
+        JU
+    ))
+
+    # Realizações
     e.append(Paragraph("<b>Realizacoes</b>", SEC))
-    e.append(Paragraph(f"1({r1(d+m)}) 2({r1(d+a)}) 3({r1(r1(d+m)+r1(d+a))}) 4({r1(d+m+a)})", JU))
+    r1v = r1(d + m)
+    r2v = r1(d + a)
+    r3v = r1(r1v + r2v)
+    r4v = r1(d + m + a)
 
-    # Ano Pessoal
+    e.append(Paragraph(
+        f"<b>1a Realizacao ({r1v}) — Juventude:</b> "
+        "Sua primeira grande realizacao, na fase inicial da vida.",
+        JU
+    ))
+    e.append(Paragraph(
+        f"<b>2a Realizacao ({r2v}) — Vida Adulta:</b> "
+        "Sua realizacao na fase produtiva e profissional.",
+        JU
+    ))
+    e.append(Paragraph(
+        f"<b>3a Realizacao ({r3v}) — Maturidade:</b> "
+        "Sua realizacao na fase de colheita e sabedoria.",
+        JU
+    ))
+    e.append(Paragraph(
+        f"<b>4a Realizacao ({r4v}) — Legado:</b> "
+        "Sua realizacao permanente, sua contribuicao ao mundo.",
+        JU
+    ))
+
+    e.append(PageBreak())
+
+    # ═══ ANO PESSOAL ═══
     e.append(Paragraph("<b>Ano Pessoal</b>", SEC))
-    ap = r1(d + m + datetime.utcnow().year)
-    AP_TXT = {1:"Novos comecos",2:"Parcerias",3:"Criatividade",4:"Trabalho",5:"Mudancas",
-              6:"Familia",7:"Reflexao",8:"Prosperidade",9:"Conclusao"}
-    e.append(Paragraph(f"{datetime.utcnow().year}: Ano {ap} - {AP_TXT.get(ap,'')}", JU))
+    ano_atual = datetime.utcnow().year
+    ap = r1(d + m + ano_atual)
 
-    # Grade
+    AP_TXT = {
+        1: "Ano de novos comecos, lideranca e independencia.",
+        2: "Ano de parcerias, paciencia e cooperacao.",
+        3: "Ano de criatividade, expansao social e alegria.",
+        4: "Ano de trabalho, disciplina e construcao.",
+        5: "Ano de mudancas, liberdade e aventura.",
+        6: "Ano de familia, responsabilidade e harmonia.",
+        7: "Ano de reflexao, espiritualidade e estudo.",
+        8: "Ano de poder, prosperidade e realizacao material.",
+        9: "Ano de conclusao, desapego e preparacao para o novo ciclo.",
+    }
+
+    e.append(Paragraph(
+        f"Seu ano pessoal para {ano_atual} e <b>{ap}</b>. "
+        f"{AP_TXT.get(ap, '')}",
+        JU
+    ))
+    e.append(Paragraph(
+        "O Ano Pessoal revela a energia predominante do seu ano, "
+        "contado a partir do seu mes e dia de nascimento.",
+        JU
+    ))
+
+    # ═══ GRADE DE INCLUSÃO ═══
     e.append(Paragraph("<b>Grade de Inclusao</b>", SEC))
-    grid = calc_grid(nome)
-    pres = [str(n) for n in range(1,10) if grid.get(n,0)>0]
-    aus = [str(n) for n in range(1,10) if grid.get(n,0)==0]
-    e.append(Paragraph(f"Presentes: {', '.join(pres) or '-'} | Carencias: {', '.join(aus) or '-'}", JU))
+    e.append(Paragraph(
+        "A Grade revela quais numeros estao presentes ou ausentes "
+        "em seu nome, indicando talentos naturais e areas "
+        "que precisam ser desenvolvidas.",
+        JU
+    ))
 
-    # Final
-    e.append(Paragraph("<b>Tabela de Relacoes</b>", SEC))
-    rel = [["Numero","Harmoniza","Conflita"]] + [[str(n),", ".join([str(x) for x in [3,5,7] if n==1 or [4,6,8] if n==2 or [1,5,9] if n==3 or [2,6,8] if n==4 or [1,3,7] if n==5 or [2,4,8] if n==6 or [1,5,9] if n==7 or [2,4,6] if n==8 else [3,6,9]][0]),", ".join([str(x) for x in [2,4,8] if n==1 or [1,5,7] if n==2 or [4,6,8] if n==3 or [1,3,5] if n==4 or [2,4,9] if n==5 or [1,3,9] if n==6 or [2,4,6] if n==7 or [1,3,9] if n==8 else [1,5,8]][0])] for n in range(1,10)]
-    tbl = Table(rel, colWidths=[60, 140, 140])
-    tbl.setStyle(TableStyle([("BACKGROUND",(0,0),(-1,0),GOLD),("TEXTCOLOR",(0,0),(-1,0),colors.white),
-        ("FONTSIZE",(0,0),(-1,-1),9),("GRID",(0,0),(-1,-1),0.5,colors.grey),("ALIGN",(0,0),(-1,-1),"CENTER"),
-        ("BACKGROUND",(0,1),(-1,-1),LGRAY)]))
-    e.append(tbl)
-    e.append(Spacer(1, 6))
-    e.append(Paragraph("A numerologia e ferramenta de autoconhecimento. Os numeros mostram tendencias, mas o livre arbitrio e seu maior poder.", JU))
-    e.append(Paragraph("(c) A1ELOS - Baseado no sistema pitagorico e na obra de Monique Cissay",
-        ParagraphStyle("F", fontName=FONTE, fontSize=8, textColor=GRAY, alignment=TA_CENTER, spaceBefore=8)))
+    grid = calc_grid(nome)
+    presentes = [str(n) for n in range(1, 10) if grid.get(n, 0) > 0]
+    ausentes = [str(n) for n in range(1, 10) if grid.get(n, 0) == 0]
+
+    # Grade visual
+    grade_html = []
+    for n in range(1, 10):
+        qtd = grid.get(n, 0)
+        simbolo = "⬛" if qtd == 0 else "🟨" if qtd == 1 else "🟧" if qtd == 2 else "🟥"
+        grade_html.append(f"{n}: {simbolo} ({qtd}x)")
+
+    e.append(Paragraph(
+        f"<b>Presentes:</b> {', '.join(presentes) or 'nenhum'}. "
+        "Talentos naturais que voce ja possui.",
+        JU
+    ))
+    e.append(Paragraph(
+        f"<b>Carencias:</b> {', '.join(ausentes) or 'nenhum'}. "
+        "Habilidades a serem desenvolvidas.",
+        JU
+    ))
+
+    e.append(PageBreak())
+
+    # ═══ TABELA DE RELAÇÕES (Monique Cissay, pág 159) ═══
+    e.append(Paragraph("<b>Tabela de Relacoes entre Numeros</b>", SEC))
+    e.append(Paragraph(
+        "Baseada na obra de Monique Cissay, esta tabela mostra "
+        "quais numeros harmonizam ou conflitam entre si. "
+        "Util para entender dinamicas pessoais e interpessoais.",
+        JU
+    ))
+
+    rel = [
+        ["Numero", "Harmoniza com", "Conflita com"],
+        ["1", "3, 5, 7", "2, 4, 8"],
+        ["2", "4, 6, 8", "1, 5, 7"],
+        ["3", "1, 5, 9", "4, 6, 8"],
+        ["4", "2, 6, 8", "1, 3, 5"],
+        ["5", "1, 3, 7", "2, 4, 9"],
+        ["6", "2, 4, 8", "1, 3, 9"],
+        ["7", "1, 5, 9", "2, 4, 6"],
+        ["8", "2, 4, 6", "1, 3, 9"],
+        ["9", "3, 6, 9", "1, 5, 8"],
+    ]
+
+    tbl_rel = Table(rel, colWidths=[80, 170, 170])
+    tbl_rel.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), GOLD),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTSIZE", (0, 0), (-1, -1), TAM_C - 2),
+        ("FONTNAME", (0, 0), (-1, -1), FONTE),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("BACKGROUND", (0, 1), (-1, -1), LGRAY),
+        ("TEXTCOLOR", (0, 1), (-1, -1), DARK),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+    ]))
+    e.append(tbl_rel)
+    e.append(Spacer(1, EL))
+
+    # ═══ RELAÇÃO PESSOAL ═══
+    e.append(Paragraph("<b>Sua Relacao Numerologica Pessoal</b>", SEC))
+    e.append(Paragraph(
+        f"Seu Caminho de Vida ({lp}) harmoniza com os numeros "
+        f"{rel[lp][1] if lp <= 9 else '1, 5, 7'} e "
+        f"conflita com {rel[lp][2] if lp <= 9 else '2, 4, 6'}. "
+        "Use estas informacoes para escolher parceiros, "
+        "socios e colaboradores.",
+        JU
+    ))
+
+    # ═══ NOTA FINAL ═══
+    e.append(Spacer(1, EL))
+    e.append(Paragraph("<b>Nota Final</b>", SEC))
+    e.append(Paragraph(
+        "A numerologia e uma ferramenta de autoconhecimento. "
+        "Os numeros mostram tendencias e potenciais, mas o "
+        "livre arbitrio e sempre seu maior poder. "
+        "Use este conhecimento para fazer escolhas mais "
+        "conscientes em sua vida pessoal e profissional.",
+        JU
+    ))
+    e.append(Paragraph(
+        "Lembre-se: os numeros indicam o caminho, "
+        "mas voce quem decide como percorre-lo.",
+        JU
+    ))
+
+    e.append(Paragraph(
+        "(c) A1ELOS Assessoria e Consultoria — "
+        "Baseado no sistema pitagorico e na obra de Monique Cissay",
+        ParagraphStyle(
+            "FF", fontName=FONTE, fontSize=8,
+            textColor=GRAY, alignment=TA_CENTER,
+            spaceBefore=EL * 2
+        )
+    ))
+
     doc.build(e)
     return path
-    
-    # ═══════════════════════════════════════════
+
+# ═══════════════════════════════════════════
 # PDF 3: VALIDAÇÃO DE NOME DE URNA (R$ 26)
 # Análise letra a letra, energia de cada opção,
 # sugestões com cargo se nenhum atingir 8
@@ -1114,7 +1584,8 @@ def enviar_email(
     except Exception as e:
         logger.error(f"Falha ao enviar email para {para}: {e}")
         return False
-        # ═══════════════════════════════════════════
+
+# ═══════════════════════════════════════════
 # ROTA 1: PAGAMENTO URNA — CRIA SESSÃO STRIPE
 # POST /api/pay/urna-session
 # ═══════════════════════════════════════════
