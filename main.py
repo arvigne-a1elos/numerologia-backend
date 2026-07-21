@@ -2,7 +2,7 @@ import os, logging, uuid, stripe, base64, traceback
 from datetime import datetime
 from typing import Optional
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy import create_engine, Column, String, Integer, Float, DateTime
@@ -13,7 +13,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib import colors
-from reportlab.lib.enums import TA_JUSTIFY, TA_CENTER, TA_LEFT
+from reportlab.lib.enums import TA_CENTER, TA_LEFT
 import dateutil.parser as dp
 
 logging.basicConfig(level=logging.INFO)
@@ -27,7 +27,8 @@ BASE_URL = os.getenv("BASE_URL", "https://numerologia-api-wd2q.onrender.com")
 DB_URL = os.getenv("DATABASE_URL", "sqlite:///./numerologia.db")
 
 logger.info(f"Stripe={bool(STRIPE_KEY)} SendGrid={bool(SENDGRID_KEY)}")
-if STRIPE_KEY: stripe.api_key = STRIPE_KEY
+if STRIPE_KEY:
+    stripe.api_key = STRIPE_KEY
 
 engine = create_engine(DB_URL, connect_args={"check_same_thread": False})
 Base = declarative_base()
@@ -185,36 +186,35 @@ def gerar_numeros(sigla, cargo, qtd=5):
             res.extend(busca(e))
     return res[:qtd]
 
+# Dicionários para PDF completo
 SIG = {
-    1: ("Individualidade", "Original, criativo, lider nato, independente. Energia do comeco, do impulso criador.", "Egoista, arrogante, dominador, impulsivo.", "Desenvolver humildade e saber trabalhar em equipe."),
-    2: ("Associacao", "Diplomatico, sensivel, cooperativo, pacificador.", "Indeciso, carente, submisso, hipersensivel.", "Desenvolver autoconfianca e independencia emocional."),
-    3: ("Criacao", "Criativo, comunicativo, otimista, carismatico.", "Superficial, disperso, exagerado, dramatico.", "Desenvolver foco e profundidade na expressao."),
-    4: ("Trabalho", "Pratico, disciplinado, confiavel, leal, persistente.", "Rigido, teimoso, lento para mudar.", "Desenvolver flexibilidade e leveza."),
-    5: ("Liberdade", "Livre, versatil, aventureiro, progressista.", "Impulsivo, irresponsavel, ansioso.", "Equilibrar liberdade com responsabilidade."),
-    6: ("Familia", "Responsavel, amoroso, protetor, justo.", "Superprotetor, intrometido.", "Amar sem controlar. Respeitar o espaco alheio."),
-    7: ("Sabedoria", "Sabio, analitico, espiritual, intuitivo.", "Frio, sarcastico, isolado, desconfiado.", "Equilibrar razao e emocao. Compartilhar conhecimento."),
-    8: ("Poder", "Poderoso, realizador, prospero, estrategista.", "Materialista, autoritario, workaholic.", "Usar o poder com integridade."),
-    9: ("Humanidade", "Humanitario, generoso, compassivo, sabio.", "Melancolico, disperso, vitimista.", "Perdoar e deixar ir."),
-    11: ("Mestre Inspirador", "Intuitivo, iluminado, inspirador, visionario.", "Ansioso, nervoso, distante.", "Equilibrar mundo espiritual com o material."),
-    22: ("Mestre Construtor", "Realizador, visionario pratico.", "Ambicioso excessivo, estressado.", "Construir sem escravizar-se ao trabalho.")
+    1: ("Individualidade", "Original, criativo, lider nato, independente.", "Egoista, arrogante, dominador.", "Desenvolver humildade e saber trabalhar em equipe."),
+    2: ("Associacao", "Diplomatico, sensivel, cooperativo.", "Indeciso, carente, submisso.", "Desenvolver autoconfianca e independencia emocional."),
+    3: ("Criacao", "Criativo, comunicativo, otimista.", "Superficial, disperso.", "Desenvolver foco e profundidade."),
+    4: ("Trabalho", "Pratico, disciplinado, confiavel.", "Rigido, teimoso.", "Desenvolver flexibilidade e leveza."),
+    5: ("Liberdade", "Livre, versatil, aventureiro.", "Impulsivo, irresponsavel.", "Equilibrar liberdade com responsabilidade."),
+    6: ("Familia", "Responsavel, amoroso, protetor.", "Superprotetor, intrometido.", "Amar sem controlar."),
+    7: ("Sabedoria", "Sabio, analitico, espiritual.", "Frio, isolado.", "Compartilhar conhecimento."),
+    8: ("Poder", "Poderoso, realizador, prospero.", "Materialista, autoritario.", "Usar o poder com integridade."),
+    9: ("Humanidade", "Humanitario, generoso, compassivo.", "Melancolico, disperso.", "Perdoar e deixar ir."),
+    11: ("Mestre Inspirador", "Intuitivo, iluminado.", "Ansioso, distante.", "Equilibrar espiritual e material."),
+    22: ("Mestre Construtor", "Realizador, visionario.", "Ambicioso excessivo.", "Construir sem escravizar-se.")
 }
-
 CAM = {
     1: ("Realizacao", "Sua missao e abrir caminhos, liderar e inovar."),
     2: ("Paz e Cooperacao", "Sua missao e cooperar, equilibrar e servir como ponte."),
     3: ("Alegria e Criacao", "Sua missao e comunicar, criar e inspirar alegria."),
     4: ("Acao e Estrutura", "Sua missao e construir, organizar e criar estrutura."),
     5: ("Evolucao e Liberdade", "Sua missao e experimentar, mudar e evoluir."),
-    6: ("Conciliacao e Responsabilidade", "Sua missao e servir, cuidar e harmonizar."),
-    7: ("Sabedoria e Perfeicao", "Sua missao e buscar a verdade."),
-    8: ("Justica e Prosperidade", "Sua missao e manifestar abundancia com sabedoria."),
-    9: ("Sabedoria e Humanitarismo", "Sua missao e servir a humanidade."),
-    11: ("Inspiracao Divina", "Sua missao e iluminar e elevar a consciencia."),
-    22: ("Construcao em Grande Escala", "Sua missao e realizar grandes obras.")
+    6: ("Conciliacao", "Sua missao e servir, cuidar e harmonizar."),
+    7: ("Sabedoria", "Sua missao e buscar a verdade."),
+    8: ("Justica e Prosperidade", "Sua missao e manifestar abundancia."),
+    9: ("Humanitarismo", "Sua missao e servir a humanidade."),
+    11: ("Inspiracao", "Sua missao e iluminar."),
+    22: ("Construcao", "Sua missao e realizar grandes obras.")
 }
-
 DES = {0: "Equilibrio natural.", 1: "Superar o egoismo.", 2: "Vencer a timidez.", 3: "Evitar a dispersao.", 4: "Superar a rigidez.", 5: "Controlar os excessos.", 6: "Evitar a superprotecao.", 7: "Vencer o isolamento.", 8: "Equilibrar ambicao com etica.", 9: "Superar o desapego."}
-VIB = {1: "Nasceu sob vibracao 1. Lider nato.", 2: "Nasceu sob vibracao 2. Sensivel, diplomatico.", 3: "Nasceu sob vibracao 3. Comunicativo, criativo.", 4: "Nasceu sob vibracao 4. Trabalhador, disciplinado.", 5: "Nasceu sob vibracao 5. Livre, versatil.", 6: "Nasceu sob vibracao 6. Amoroso, responsavel.", 7: "Nasceu sob vibracao 7. Sabio, introspectivo.", 8: "Nasceu sob vibracao 8. Poderoso, realizador.", 9: "Nasceu sob vibracao 9. Humanitario, generoso."}
+VIB = {1: "Nasceu sob vibracao 1. Lider nato.", 2: "Nasceu sob vibracao 2. Sensivel.", 3: "Nasceu sob vibracao 3. Comunicativo.", 4: "Nasceu sob vibracao 4. Trabalhador.", 5: "Nasceu sob vibracao 5. Livre.", 6: "Nasceu sob vibracao 6. Amoroso.", 7: "Nasceu sob vibracao 7. Sabio.", 8: "Nasceu sob vibracao 8. Poderoso.", 9: "Nasceu sob vibracao 9. Humanitario."}
 
 def pdf8(data, nome, bd):
     path = f"/tmp/p8_{uuid.uuid4().hex[:8]}.pdf"
@@ -304,7 +304,7 @@ def pdf_eleitoral(ss, cl, sugestoes, ne=None):
     e.append(Spacer(1, 25)); e.append(Paragraph("NUMERO ELEITORAL - ANALISE COMPLETA", TIT))
     e.append(Paragraph(f"Cargo: {cl} | Sigla: {ss}", ParagraphStyle("D", fontName=FONTE, fontSize=TAM_C-2, alignment=TA_CENTER, textColor=GRAY, spaceAfter=EL)))
     e.append(Paragraph("<b>Como calculamos o numero eleitoral?</b>", SEC))
-    e.append(Paragraph("Na numerologia eleitoral, cada numero possui uma vibracao que influencia a campanha e o mandato.", J))
+    e.append(Paragraph("Na numerologia eleitoral, cada numero possui uma vibracao.", J))
     e.append(Paragraph(f"Para {cl}, os dois primeiros digitos sao fixos (sigla {ss}, soma {int(ss[0])+int(ss[1])}).", J))
     e.append(Paragraph("<b>Por que a energia 8 e a ideal?</b>", SEC))
     e.append(Paragraph("O numero 8 representa Poder, Prosperidade e Realizacao material.", J))
@@ -319,10 +319,6 @@ def pdf_eleitoral(ss, cl, sugestoes, ne=None):
         if ids: e.append(Spacer(1, EL*0.5))
         e.append(Paragraph("<b>Opcoes Alternativas:</b>", ParagraphStyle("B", fontName=FN, fontSize=TAM_C-1, leading=EL*0.95, textColor=DARK, spaceAfter=EL*0.3)))
         for s in fbs: e.append(Paragraph(f"{s['numero']} - Energia {s['energia']} - {s.get('nome_energia', '')}", ParagraphStyle("X2", fontName=FONTE, fontSize=TAM_C-1, leading=EL*0.9, textColor=DARK, spaceAfter=EL*0.2)))
-    if ne:
-        e.append(Paragraph("Analise do Numero Existente", SEC))
-        e.append(Paragraph(f"<b>Numero informado: {ne['numero']}</b>", ParagraphStyle("B", fontName=FN, fontSize=TAM_C-1, leading=EL*0.95, textColor=DARK, spaceAfter=EL*0.3)))
-        e.append(Paragraph(f"<b>Energia: {ne['energia']}</b> - {ne.get('interpretacao', '')}", ParagraphStyle("X3", fontName=FONTE, fontSize=TAM_C, leading=EL, textColor=DARK, spaceAfter=EL*0.3)))
     e.append(Paragraph("Atencao: Verifique a disponibilidade do numero com seu partido.", ParagraphStyle("AV", fontName=FONTE, fontSize=TAM_C-2, leading=EL*0.7, textColor=GRAY, spaceAfter=EL)))
     e.append(Paragraph("(c) A1ELOS", ParagraphStyle("F", fontName=FONTE, fontSize=8, textColor=GRAY, alignment=TA_CENTER)))
     doc.build(e); return path
@@ -337,6 +333,22 @@ def enviar_email(para, assunto, corpo, anexo=None):
             mail.attachment = Attachment(FileContent(enc), FileName("Documento_A1ELOS.pdf"), FileType("application/pdf"), Disposition("attachment"))
         sg.send(mail); logger.info(f"Email enviado p/ {para}"); return True
     except Exception as e: logger.error(f"Falha email: {e}"); return False
+
+def pagina_sucesso(pdf_path, nome, produto_nome):
+    """Gera página HTML com PDF embutido para download direto"""
+    pdf_b64 = ""
+    if pdf_path and os.path.exists(pdf_path):
+        with open(pdf_path, "rb") as f:
+            pdf_b64 = base64.b64encode(f.read()).decode()
+    return f"""<html><body style='background:#0a0a0a;color:#fff;font-family:sans-serif;margin:0;padding:20px;text-align:center'>
+<div style='max-width:800px;margin:0 auto'>
+<h1 style='color:#C9A94E;font-family:serif'>✅ Confirmado!</h1>
+<p style='color:#888'>Ola <b style='color:#fff'>{nome}</b>, seu {produto_nome} foi gerado.</p>
+{'<a href="data:application/pdf;base64,' + pdf_b64 + '" download="Documento_A1ELOS.pdf" style="display:inline-block;padding:16px 40px;background:#C9A94E;color:#000;text-decoration:none;border-radius:50px;font-weight:700;font-size:1.1rem;margin:20px 0">📥 BAIXAR PDF AGORA</a>' if pdf_b64 else '<p style="color:#e74c3c">Erro ao gerar PDF.</p>'}
+<p style='color:#888;font-size:.85rem'>O PDF tambem foi enviado para seu email.<br>Verifique o spam se nao encontrar.</p>
+<p style='color:#555;font-size:.75rem'>O link de download e temporario - salve o arquivo agora.</p>
+<a href='/' style='display:inline-block;padding:12px 30px;border:1px solid #C9A94E;color:#C9A94E;text-decoration:none;border-radius:50px;margin-top:10px'>Voltar ao Inicio</a>
+</div></body></html>"""
 
 @app.post("/calculate")
 def calculate(req: PayReq):
@@ -368,8 +380,8 @@ def pay_stripe(req: PayReq):
     return {"payment_url": cs.url, "id": cs.id, "methods": ["card"]}
 
 @app.get("/api/pay/success")
-def pay_success(req: Request):
-    sid = req.query_params.get("session_id", "")
+def pay_success(request: Request):
+    sid = request.query_params.get("session_id", "")
     if not sid: return HTMLResponse(ERR.format(msg="Sessao invalida"))
     try:
         s = stripe.checkout.Session.retrieve(sid)
@@ -384,13 +396,18 @@ def pay_success(req: Request):
     except: return HTMLResponse(ERR.format(msg="Falha pagamento"))
     try:
         data = calc(name, bd)
-        if product == "pdf17": pf = pdf17(data, name, bd); subj = "Mapa Completo!"
-        else: pf = pdf8(data, name, bd); subj = "Mapa Express!"
-        sent = False
-        if pf: sent = enviar_email(email, subj, f"Ola {name},\n\nPDF anexo.\n\nA1ELOS", pf)
-        if pf and os.path.exists(pf): os.remove(pf)
-        if sent: return HTMLResponse(OK)
-        return HTMLResponse(ERR.format(msg="Erro no envio."))
+        if product == "pdf17":
+            pf = pdf17(data, name, bd); subj = "Mapa Completo!"; prod_nome = "Mapa Numerologico Completo"
+        else:
+            pf = pdf8(data, name, bd); subj = "Mapa Express!"; prod_nome = "Mapa Numerologico Express"
+        # Tenta enviar email como backup
+        if pf:
+            enviar_email(email, subj, f"Ola {name},\n\nPDF anexo.\n\nA1ELOS", pf)
+        # Mostra pagina com download direto do PDF
+        html = pagina_sucesso(pf, name, prod_nome)
+        if pf and os.path.exists(pf):
+            os.remove(pf)
+        return HTMLResponse(html)
     except: logger.error(traceback.format_exc()); return HTMLResponse(ERR.format(msg="Erro. Contate arvigne@gmail.com"))
 
 @app.post("/api/pay/urna-session")
@@ -420,8 +437,9 @@ def pay_urna_success(request: Request):
         cl = CARGO_INFO.get(cr, {}).get("label", cr)
         pf = pdf_urna(nc, cl, res, sugs); pn = nc.split()[0] if nc else ""
         enviar_email(em, "Validacao Nome - A1ELOS", f"Ola {pn},\n\nPDF anexo.\nVerifique spam.\n\nA1ELOS", pf)
+        html = pagina_sucesso(pf, nc, "Validacao de Nome de Urna")
         if pf and os.path.exists(pf): os.remove(pf)
-        return HTMLResponse(URNA_OK)
+        return HTMLResponse(html)
     except: logger.error(traceback.format_exc()); return HTMLResponse(ERR.format(msg="Erro ao gerar. Contate arvigne@gmail.com"))
 
 @app.post("/api/pay/eleitoral-session")
@@ -454,8 +472,9 @@ def pay_eleitoral_success(request: Request):
     try:
         pf = pdf_eleitoral(ss, cl2, sugs, ni)
         enviar_email(em, "Numero Eleitoral - A1ELOS", f"Ola,\n\nPDF com sugestoes para {cl2} anexo.\nVerifique spam.\n\nA1ELOS", pf)
+        html = pagina_sucesso(pf, f"Candidato {cl2}", f"Numero Eleitoral para {cl2}")
         if pf and os.path.exists(pf): os.remove(pf)
-        return HTMLResponse(ELET_OK)
+        return HTMLResponse(html)
     except: logger.error(traceback.format_exc()); return HTMLResponse(ERR.format(msg="Erro ao gerar. Contate arvigne@gmail.com"))
 
 @app.get("/api/pay/cancel")
