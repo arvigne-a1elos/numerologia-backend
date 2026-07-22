@@ -525,6 +525,49 @@ def pay_success(request: Request):
         logger.error(f"Erro success: {e}")
         return HTMLResponse("ERRO ao gerar PDF")
 
+@app.get("/api/pay/success")
+def pay_success(request: Request):
+    sid = request.query_params.get("session_id", "")
+    if not sid:
+        return HTMLResponse("ERRO: sessao invalida")
+    try:
+        s = stripe.checkout.Session.retrieve(sid)
+        meta = getattr(s, "metadata", {}) or {}
+        if hasattr(meta, "to_dict"):
+            meta = meta.to_dict()
+        name = meta.get("name", "Cliente")
+        email = meta.get("email", "") or getattr(s, "customer_email", "")
+        bd = meta.get("birth_date", "")
+        prod = meta.get("product", "pdf8")
+        total = int(getattr(s, "amount_total", 0) or 0)
+        product = "pdf17" if (prod == "pdf17" or total >= 1200) else "pdf8"
+        if not bd:
+            bd = "2000-01-01"
+    except Exception:
+        return HTMLResponse("ERRO: falha pagamento")
+    try:
+        data = calc(name, bd)
+        if product == "pdf17":
+            pf = pdf17(data, name, bd)
+            pn = "Mapa Completo"
+        else:
+            pf = pdf8(data, name, bd)
+            pn = "Mapa Express"
+        # Tenta email como backup silencioso
+        if pf and email:
+            try:
+                enviar_email(email, f"Seu {pn}!", f"Ola {name},\n\nPDF anexo.", pf)
+            except:
+                pass
+        # Mostra página com download direto
+        html = pagina_sucesso(pf, name, pn)
+        if pf and os.path.exists(pf):
+            os.remove(pf)
+        return HTMLResponse(html)
+    except Exception as e:
+        logger.error(f"Erro success: {e}")
+        return HTMLResponse("ERRO ao gerar PDF")
+
 @app.get("/api/pay/cancel")
 def pay_cancel():
     return HTMLResponse("<h1>Cancelado</h1><a href='/'>Voltar</a>")
