@@ -59,8 +59,7 @@ class Order(Base):
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True,
-                   allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 class PayReq(BaseModel):
     name: str
@@ -69,7 +68,6 @@ class PayReq(BaseModel):
     price: Optional[float] = 0
     calculation_id: Optional[str] = None
     birth_date: Optional[str] = None
-    lang: Optional[str] = "pt"
 
 class UrnaPayReq(BaseModel):
     nome_completo: str
@@ -93,29 +91,13 @@ DARK = colors.HexColor("#222")
 GRAY = colors.HexColor("#888")
 FONTE = "Helvetica"
 FN = "Helvetica-Bold"
-TAM_T = 20
-TAM_C = 14
-EL = TAM_C * 1.5
-ET = TAM_T * 2.0
 
-CARGO_INFO = {"vereador": {"label": "Vereador"},
-              "dep_estadual": {"label": "Deputado Estadual"},
-              "dep_federal": {"label": "Deputado Federal"},
-              "senador": {"label": "Senador"}}
-ENERGIAS = {1: "Lideranca", 2: "Cooperacao", 3: "Criatividade",
-            4: "Trabalho", 5: "Liberdade", 6: "Familia",
-            7: "Sabedoria", 8: "Poder e Prosperidade (IDEAL)", 9: "Humanitarismo"}
+CARGO_INFO = {"vereador": {"label": "Vereador"}, "dep_estadual": {"label": "Deputado Estadual"}, "dep_federal": {"label": "Deputado Federal"}, "senador": {"label": "Senador"}}
 
 def r1(n):
     while n > 9 and n not in (11, 22, 33):
         n = sum(int(d) for d in str(n))
     return n
-
-def calc_nome(nome):
-    t = {c: (i % 9 or 9) for i, c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)}
-    limpo = nome.upper().replace(" ", "").replace(".", "").replace("-", "").replace(",", "")
-    total = sum(t.get(c, 0) for c in limpo if c in t)
-    return r1(total), total
 
 def calc(nome, data_str):
     bd = dp.parse(data_str).date()
@@ -132,8 +114,7 @@ def calc(nome, data_str):
             tv += val
         else:
             tp += val
-    return {"life_path": lp, "expression": r1(te), "soul_urge": r1(tv),
-            "personality": r1(tp), "destiny": r1(r1(te) + lp)}
+    return {"life_path": lp, "expression": r1(te), "soul_urge": r1(tv), "personality": r1(tp), "destiny": r1(r1(te) + lp)}
 
 def calc_grid(nome):
     t = {c: (i % 9 or 9) for i, c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)}
@@ -146,11 +127,11 @@ def calc_grid(nome):
 
 def validar_nomes_urna(nomes, cargo_key):
     results = []
-    lv = {c: (i % 9 or 9) for i, c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)}
     for nome in nomes:
         if not nome.strip():
             continue
         limpo = nome.upper().replace(" ", "").replace(".", "").replace("-", "").replace(",", "")
+        lv = {c: (i % 9 or 9) for i, c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)}
         letras = []
         st = 0
         for c in limpo:
@@ -158,30 +139,9 @@ def validar_nomes_urna(nomes, cargo_key):
             letras.append({"letra": c, "valor": v})
             st += v
         en = r1(st)
-        if en == 8:
-            expl = f"Nome {nome.strip().title()} tem ENERGIA 8! Ideal para candidatura."
-        else:
-            expl = f"Nome {nome.strip().title()} tem energia {en}. {ENERGIAS.get(en, '')}. O 8 (Poder) e o ideal."
-        results.append({"nome": nome.strip().title(), "energia": en,
-                        "soma": st, "eh_ideal": en == 8,
-                        "explicacao": expl, "letras": letras})
-    ideal = any(r["eh_ideal"] for r in results)
-    sugs = []
-    if not ideal:
-        for nome in nomes:
-            if not nome.strip():
-                continue
-            lbl = CARGO_INFO.get(cargo_key, {}).get("label", "")
-            if not lbl:
-                continue
-            for nt in [f"{lbl[:3]} {nome.strip()}", f"{nome.strip()} - {lbl.lower()[:3]}"]:
-                en, _ = calc_nome(nt)
-                sugs.append({"nome": nt.title(), "energia": en, "eh_ideal": en == 8})
-                if len(sugs) >= 3:
-                    break
-            if len(sugs) >= 3:
-                break
-    return results, ideal, sugs[:3]
+        expl = f"Energia {en} - Ideal!" if en == 8 else f"Energia {en}"
+        results.append({"nome": nome.strip().title(), "energia": en, "soma": st, "eh_ideal": en == 8, "explicacao": expl, "letras": letras})
+    return results, any(r["eh_ideal"] for r in results), []
 
 def gerar_numeros(sigla, cargo, qtd=5):
     dc = {"vereador": 5, "dep_estadual": 5, "dep_federal": 4, "senador": 3}
@@ -191,10 +151,6 @@ def gerar_numeros(sigla, cargo, qtd=5):
     lv = td - 2
     res = []
     tent = set()
-    ei = {8: "Poder e Prosperidade (IDEAL)", 7: "Sabedoria", 3: "Criacao",
-          1: "Lideranca", 9: "Humanitarismo", 5: "Liberdade", 6: "Familia",
-          4: "Trabalho", 2: "Associacao"}
-
     def busca(alvo):
         enc = []
         for x in range(10 ** lv):
@@ -209,19 +165,8 @@ def gerar_numeros(sigla, cargo, qtd=5):
                         continue
                     tent.add(n)
                     st = sm + sum(int(d) for d in dl)
-                    enc.append({
-                        "numero": n, "energia": alvo, "ideal": alvo == 8,
-                        "sigla": ss, "digitos_livres": dl,
-                        "soma_sigla": sm, "soma_total": st,
-                        "nome_energia": ei.get(alvo, ""),
-                        "explicacao_calculo": (
-                            f"Sigla {ss} ({ss[0]}+{ss[1]}={sm}) + "
-                            f"digitos {dl} ({'+'.join(dl)}={st - sm}) = "
-                            f"{st} -> {alvo}"
-                        ),
-                    })
+                    enc.append({"numero": n, "energia": alvo, "ideal": alvo == 8, "sigla": ss, "digitos_livres": dl, "soma_sigla": sm, "soma_total": st})
         return enc
-
     res.extend(busca(8))
     if len(res) < qtd:
         res.extend(busca(3))
@@ -232,216 +177,96 @@ def gerar_numeros(sigla, cargo, qtd=5):
             res.extend(busca(e))
     return res[:qtd]
 
+SIG = {
+    1: ("Individualidade", "Original, criativo, lider nato. Energia do comeco.", "Egoista, arrogante.", "Desenvolver humildade."),
+    2: ("Associacao", "Diplomatico, cooperativo.", "Indeciso.", "Autoconfianca."),
+    3: ("Criacao", "Criativo, comunicativo.", "Disperso.", "Foco."),
+    4: ("Trabalho", "Pratico, disciplinado.", "Rigido.", "Flexibilidade."),
+    5: ("Liberdade", "Livre, versatil.", "Impulsivo.", "Responsabilidade."),
+    6: ("Familia", "Amoroso, protetor.", "Superprotetor.", "Confiar."),
+    7: ("Sabedoria", "Sabio, analitico.", "Frio.", "Compartilhar."),
+    8: ("Poder", "Poderoso, prospero.", "Materialista.", "Integridade."),
+    9: ("Humanidade", "Humanitario, generoso.", "Melancolico.", "Perdoar."),
+    11: ("Mestre Inspirador", "Intuitivo, iluminado.", "Ansioso.", "Equilibrar."),
+    22: ("Mestre Construtor", "Realizador.", "Ambicioso.", "Equilibrar."),
+}
+
+def estilo(tam, negrito=False, cor=DARK, alinhamento=TA_LEFT, antes=0, depois=4):
+    return ParagraphStyle("S", fontName=FN if negrito else FONTE, fontSize=tam, textColor=cor, alignment=alinhamento, spaceBefore=antes, spaceAfter=depois)
+
 def pdf8(data, nome, bd):
     path = f"/tmp/p8_{uuid.uuid4().hex[:8]}.pdf"
-    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=45,
-                            rightMargin=45, topMargin=18, bottomMargin=15)
+    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50, topMargin=40, bottomMargin=30)
     e = []
-    e.append(Spacer(1, 8))
-    e.append(Paragraph("MAPA EXPRESS",
-             ParagraphStyle("T", fontName=FN, fontSize=15, textColor=GOLD,
-                            alignment=TA_CENTER, spaceAfter=3, leading=18)))
-    e.append(Paragraph(nome.upper(),
-             ParagraphStyle("N", fontName=FN, fontSize=10,
-                            alignment=TA_CENTER, textColor=DARK, spaceAfter=1)))
-    e.append(Paragraph(bd, ParagraphStyle("D", fontName=FONTE, fontSize=8,
-                                          alignment=TA_CENTER, textColor=GRAY,
-                                          spaceAfter=5)))
-    td = [["Numero", "Valor"]] + [[l, str(data[k])] for k, l in [
-        ("life_path", "Caminho de Vida"), ("expression", "Expressao"),
-        ("soul_urge", "Motiv.Alma"), ("personality", "Personalidade"),
-        ("destiny", "Destino")]]
-    tbl = Table(td, colWidths=[170, 110])
-    tbl.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), GOLD),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("FONTSIZE", (0, 0), (-1, -1), 8.5),
-        ("FONTNAME", (0, 0), (-1, -1), FONTE),
-        ("GRID", (0, 0), (-1, -1), 0.3, colors.grey),
-        ("ALIGN", (1, 0), (1, -1), "CENTER"),
-        ("BACKGROUND", (0, 1), (-1, -1), LGRAY),
-        ("TEXTCOLOR", (0, 1), (-1, -1), DARK),
-    ]))
+    e.append(Spacer(1, 15))
+    e.append(Paragraph("MAPA EXPRESS", estilo(20, True, GOLD, TA_CENTER, 0, 6)))
+    e.append(Paragraph(nome.upper(), estilo(12, True, DARK, TA_CENTER, 0, 2)))
+    e.append(Paragraph(bd, estilo(9, False, GRAY, TA_CENTER, 0, 10)))
+    td = [["Numero", "Valor"]] + [[l, str(data[k])] for k, l in [("life_path", "Caminho de Vida"), ("expression", "Expressao"), ("soul_urge", "Motivacao"), ("personality", "Personalidade"), ("destiny", "Destino")]]
+    tbl = Table(td, colWidths=[200, 100])
+    tbl.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, 0), GOLD), ("TEXTCOLOR", (0, 0), (-1, 0), colors.white), ("FONTSIZE", (0, 0), (-1, -1), 9), ("GRID", (0, 0), (-1, -1), 0.3, colors.grey), ("BACKGROUND", (0, 1), (-1, -1), LGRAY)]))
     e.append(tbl)
     e.append(Spacer(1, 10))
-    for k, l in [("life_path", "Caminho de Vida"), ("expression", "Expressao"),
-                  ("soul_urge", "Motiv.Alma"), ("personality", "Personalidade"),
-                  ("destiny", "Destino")]:
+    for k, l in [("life_path", "Caminho de Vida"), ("expression", "Expressao"), ("soul_urge", "Motivacao"), ("personality", "Personalidade"), ("destiny", "Destino")]:
         v = data[k]
         nm, pos, neg, licao = SIG.get(v, ("", "", "", ""))
-        e.append(Paragraph(f"<b>{l} {v} — {nm}</b>",
-                 estilo(TAM_PEQ, True, GOLD, TA_LEFT, 6, 2, 15)))
-        e.append(Paragraph(f"<b>Positivo:</b> {pos}",
-                 estilo(TAM_PEQ - 1, False, DARK, TA_JUSTIFY, 0, 2, 14)))
-        e.append(Paragraph(f"<b>Licao:</b> {licao}",
-                 estilo(TAM_PEQ - 1, False, GRAY, TA_JUSTIFY, 0, 4, 14)))
-    e.append(Paragraph("(c) Monique Cissay — Numerologia",
-             estilo(7, False, GRAY, TA_CENTER)))
+        e.append(Paragraph(f"<b>{l} {v} — {nm}</b>", estilo(11, True, DARK)))
+        e.append(Paragraph(f"<b>Positivo:</b> {pos}. <b>Licao:</b> {licao}", estilo(10, False, DARK, TA_JUSTIFY)))
+    e.append(Spacer(1, 10))
+    e.append(Paragraph("© Monique Cissay — Numerologia", estilo(7, False, GRAY, TA_CENTER)))
     doc.build(e)
     return path
 
-def estilo(tamanho=TAM_C, negrito=False, cor=DARK, alinhamento=TA_LEFT,
-           espaco_antes=0, espaco_depois=6, leading=None):
-    return ParagraphStyle("S", fontName=FN if negrito else FONTE,
-                         fontSize=tamanho, textColor=cor,
-                         alignment=alinhamento, spaceBefore=espaco_antes,
-                         spaceAfter=espaco_depois,
-                         leading=leading or tamanho * 1.5)
-
 def pdf17(data, nome, bd_str):
     path = f"/tmp/p17_{uuid.uuid4().hex[:8]}.pdf"
-    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=40, rightMargin=40,
-                            topMargin=22, bottomMargin=18)
+    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50, topMargin=35, bottomMargin=25)
     e = []
     lp = data["life_path"]
-    e.append(Spacer(1, 20))
-    e.append(Paragraph("MAPA COMPLETO",
-             estilo(TAM_T, True, GOLD, TA_CENTER, 0, 6, 28)))
-    e.append(Paragraph(nome.upper(), estilo(14, True, DARK, TA_CENTER, 0, 3)))
-    e.append(Paragraph(bd_str, estilo(9, False, GRAY, TA_CENTER, 0, 12)))
-    nm_cam, desc_cam = CAM.get(lp, ("", ""))
-    e.append(Paragraph(f"Caminho de Vida {lp} — {nm_cam}",
-             estilo(TAM_C - 1, False, DARK, TA_CENTER, 0, 4)))
-    e.append(Paragraph(desc_cam, estilo(TAM_C - 1, False, GRAY, TA_JUSTIFY, 0, 12)))
-    td = [["Numero", "Valor", "Significado"]] + [
-        [l, str(data[k]), SIG.get(data[k], ("", "", "", ""))[0]]
-        for k, l in [("life_path", "Caminho de Vida"), ("expression", "Expressao"),
-                     ("soul_urge", "Motiv.Alma"), ("personality", "Personalidade"),
-                     ("destiny", "Destino")]]
+    e.append(Spacer(1, 15))
+    e.append(Paragraph("MAPA COMPLETO", estilo(20, True, GOLD, TA_CENTER, 0, 6)))
+    e.append(Paragraph(nome.upper(), estilo(12, True, DARK, TA_CENTER, 0, 2)))
+    e.append(Paragraph(bd_str, estilo(9, False, GRAY, TA_CENTER, 0, 10)))
+    nm_cam, desc_cam = ("Realizacao", "Sua missao e realizar.") if lp else ("", "")
+    e.append(Paragraph(f"Caminho de Vida {lp} — {nm_cam}", estilo(11, False, DARK, TA_CENTER)))
+    e.append(Spacer(1, 8))
+    td = [["Numero", "Valor", "Significado"]] + [[l, str(data[k]), SIG.get(data[k], ("", "", "", ""))[0]] for k, l in [("life_path", "Caminho de Vida"), ("expression", "Expressao"), ("soul_urge", "Motivacao"), ("personality", "Personalidade"), ("destiny", "Destino")]]
     tbl = Table(td, colWidths=[120, 40, 240])
-    tbl.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), GOLD),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("FONTSIZE", (0, 0), (-1, -1), 8.5),
-        ("FONTNAME", (0, 0), (-1, -1), FONTE),
-        ("GRID", (0, 0), (-1, -1), 0.3, colors.grey),
-        ("ALIGN", (1, 0), (1, -1), "CENTER"),
-        ("BACKGROUND", (0, 1), (-1, -1), LGRAY),
-    ]))
+    tbl.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, 0), GOLD), ("TEXTCOLOR", (0, 0), (-1, 0), colors.white), ("FONTSIZE", (0, 0), (-1, -1), 8.5), ("GRID", (0, 0), (-1, -1), 0.3, colors.grey), ("BACKGROUND", (0, 1), (-1, -1), LGRAY)]))
     e.append(tbl)
     e.append(PageBreak())
-    e.append(Paragraph("Analise Detalhada",
-             estilo(TAM_T - 2, True, GOLD, TA_LEFT, 0, 8, 26)))
-    for k, l in [("life_path", "Caminho de Vida"), ("expression", "Expressao"),
-                  ("soul_urge", "Motivacao da Alma"),
-                  ("personality", "Personalidade"), ("destiny", "Destino")]:
+    e.append(Paragraph("Analise Detalhada", estilo(16, True, GOLD)))
+    for k, l in [("life_path", "Caminho de Vida"), ("expression", "Expressao"), ("soul_urge", "Motivacao"), ("personality", "Personalidade"), ("destiny", "Destino")]:
         v = data[k]
         nm, pos, neg, licao = SIG.get(v, ("", "", "", ""))
-        e.append(Paragraph(f"<b>{l} {v} — {nm}</b>",
-                 estilo(TAM_PEQ, True, GOLD, TA_LEFT, 10, 4, 16)))
-        e.append(Paragraph(f"<b>Positivo:</b> {pos}",
-                 estilo(TAM_C - 2, False, DARK, TA_JUSTIFY, 0, 3)))
-        e.append(Paragraph(f"<b>Negativo:</b> {neg}",
-                 estilo(TAM_C - 2, False, DARK, TA_JUSTIFY, 0, 3)))
-        e.append(Paragraph(f"<b>Licao:</b> {licao}",
-                 estilo(TAM_C - 2, False, DARK, TA_JUSTIFY, 0, 6)))
+        e.append(Paragraph(f"<b>{l} {v} — {nm}</b>", estilo(11, True, GOLD)))
+        e.append(Paragraph(f"<b>Positivo:</b> {pos}", estilo(10, False, DARK, TA_JUSTIFY)))
+        e.append(Paragraph(f"<b>Negativo:</b> {neg}", estilo(10, False, DARK, TA_JUSTIFY)))
+        e.append(Paragraph(f"<b>Licao:</b> {licao}", estilo(10, False, GRAY, TA_JUSTIFY)))
     e.append(PageBreak())
-    e.append(Paragraph("Ciclos da Vida",
-             estilo(TAM_T - 2, True, GOLD, TA_LEFT, 0, 8, 26)))
+    e.append(Paragraph("Ciclos e Desafios", estilo(16, True, GOLD)))
     bb = dp.parse(bd_str.split(" ")[0] if " " in bd_str else bd_str).date()
     d, m, a = bb.day, bb.month, bb.year
     fe = max(36 - min(lp, 36), 25)
     c1 = r1(lp + data["expression"])
     c2 = r1(data["expression"] + data["soul_urge"])
     c3 = r1(data["soul_urge"] + data["personality"])
-    e.append(Paragraph(f"<b>1o Ciclo (0-{fe}a) Regente {c1}:</b> {SIG.get(c1, ('','','',''))[0]}",
-             estilo(TAM_C - 1, False, DARK, TA_JUSTIFY, 4, 4)))
-    e.append(Paragraph(f"<b>2o Ciclo ({fe+1}-{fe+27}a) Regente {c2}:</b> {SIG.get(c2, ('','','',''))[0]}",
-             estilo(TAM_C - 1, False, DARK, TA_JUSTIFY, 4, 4)))
-    e.append(Paragraph(f"<b>3o Ciclo ({fe+28}+a) Regente {c3}:</b> {SIG.get(c3, ('','','',''))[0]}",
-             estilo(TAM_C - 1, False, DARK, TA_JUSTIFY, 4, 8)))
-    e.append(Paragraph("Desafios da Vida",
-             estilo(TAM_T - 2, True, GOLD, TA_LEFT, 10, 8, 26)))
+    e.append(Paragraph(f"<b>Ciclo 1 (0-{fe}a):</b> Regente {c1} — {SIG.get(c1, ('', '', '', ''))[0]}", estilo(10, False, DARK)))
+    e.append(Paragraph(f"<b>Ciclo 2 ({fe+1}-{fe+27}a):</b> Regente {c2} — {SIG.get(c2, ('', '', '', ''))[0]}", estilo(10, False, DARK)))
+    e.append(Paragraph(f"<b>Ciclo 3 ({fe+28}+a):</b> Regente {c3} — {SIG.get(c3, ('', '', '', ''))[0]}", estilo(10, False, DARK)))
+    e.append(Spacer(1, 8))
     d1 = r1(abs(d - m))
     d2 = r1(abs(m - r1(a)))
-    dp_ = r1(abs(d1 - d2))
-    e.append(Paragraph(f"Menor 1 ({d1}): {DES.get(d1, '')}",
-             estilo(TAM_C - 1, False, DARK, TA_JUSTIFY, 4, 4)))
-    e.append(Paragraph(f"Menor 2 ({d2}): {DES.get(d2, '')}",
-             estilo(TAM_C - 1, False, DARK, TA_JUSTIFY, 4, 4)))
-    e.append(Paragraph(f"Principal ({dp_}): {DES.get(dp_, '')}",
-             estilo(TAM_C - 1, True, DARK, TA_JUSTIFY, 4, 8)))
-    e.append(Paragraph("A numerologia ilumina caminhos. O livre arbitrio e seu maior poder.",
-             estilo(TAM_C - 2, False, DARK, TA_JUSTIFY, 10, 8)))
-    e.append(Paragraph("(c) Monique Cissay — Numerologia: A Importancia do Nome no Seu Destino",
-             estilo(7, False, GRAY, TA_CENTER, 15, 0)))
-    doc.build(e)
-    return path
-
-def pdf_urna(nc, cl, resultados, sugestoes):
-    path = f"/tmp/u_{uuid.uuid4().hex[:8]}.pdf"
-    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50,
-                            topMargin=40, bottomMargin=35)
-    e = []
-    e.append(Spacer(1, 20))
-    e.append(Paragraph("VALIDACAO DE NOME DE URNA",
-             estilo(TAM_T, True, GOLD, TA_CENTER, 0, 4, 28)))
-    e.append(Paragraph(nc.title(), estilo(14, True, DARK, TA_CENTER, 0, 2)))
-    e.append(Paragraph(f"Cargo: {cl}", estilo(10, False, GRAY, TA_CENTER, 0, 12)))
-    for r in resultados:
-        ic = "S" if r["eh_ideal"] else "X"
-        co = "#4CAF50" if r["eh_ideal"] else "#e74c3c"
-        e.append(Paragraph(f'{ic} <b>{r["nome"]}</b> - Energia <font color="{co}"><b>{r["energia"]}</b></font>',
-                 estilo(TAM_C - 1, True, DARK, TA_LEFT, 6, 2)))
-        if r["letras"]:
-            ls = ", ".join([f'{l["letra"]}={l["valor"]}' for l in r["letras"]])
-            e.append(Paragraph(f"<i>{ls}</i>",
-                     estilo(TAM_C - 2, False, GRAY, TA_LEFT, 0, 2)))
-        e.append(Paragraph(r["explicacao"],
-                 estilo(TAM_C - 2, False, DARK, TA_JUSTIFY, 0, 4)))
-    if sugestoes:
-        e.append(Spacer(1, 10))
-        e.append(Paragraph("Sugestoes:",
-                 estilo(TAM_SUB, True, GOLD, TA_LEFT, 8, 8, 24)))
-        for s in sugestoes[:3]:
-            e.append(Paragraph(f'<b>{s["nome"]}</b> - Energia {s["energia"]}',
-                     estilo(TAM_C - 1, False, DARK, TA_LEFT, 4, 4)))
-    e.append(Paragraph("(c) Monique Cissay — Numerologia",
-             estilo(7, False, GRAY, TA_CENTER)))
-    doc.build(e)
-    return path
-
-def pdf_eleitoral(ss, cl, sugestoes, ne=None):
-    path = f"/tmp/e_{uuid.uuid4().hex[:8]}.pdf"
-    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50,
-                            topMargin=40, bottomMargin=35)
-    e = []
-    e.append(Spacer(1, 20))
-    e.append(Paragraph("NUMERO ELEITORAL",
-             estilo(TAM_T, True, GOLD, TA_CENTER, 0, 4, 28)))
-    e.append(Paragraph(f"Cargo: {cl} | Sigla: {ss}",
-             estilo(10, False, GRAY, TA_CENTER, 0, 12)))
-    e.append(Paragraph("<b>Como calculamos o numero eleitoral?</b>",
-             estilo(TAM_SUB, True, GOLD, TA_LEFT, 0, 6, 24)))
-    e.append(Paragraph("Na numerologia eleitoral, cada numero possui uma vibracao.",
-             estilo(TAM_C - 2, False, DARK, TA_JUSTIFY, 0, 8)))
-    e.append(Paragraph(f"Para {cl}, os dois primeiros digitos sao fixos (sigla {ss}, soma {int(ss[0]) + int(ss[1])}).",
-             estilo(TAM_C - 2, False, DARK, TA_JUSTIFY, 0, 8)))
-    e.append(Paragraph("Sugestoes de Numeros",
-             estilo(TAM_SUB, True, GOLD, TA_LEFT, 10, 6, 24)))
-    ids = [s for s in sugestoes if s.get("ideal")]
-    fbs = [s for s in sugestoes if not s.get("ideal")]
-    if ids:
-        e.append(Paragraph("<b>Opcoes com Energia 8 - IDEAL:</b>",
-                 estilo(TAM_C - 1, True, DARK, TA_LEFT, 4, 4)))
-        for s in ids:
-            e.append(Paragraph(f'S {s["numero"]} - Energia 8 - Poder e Prosperidade!',
-                     estilo(TAM_C, False, colors.HexColor("#4CAF50"), TA_LEFT, 4, 2)))
-            if "explicacao_calculo" in s:
-                e.append(Paragraph(f"<i>{s['explicacao_calculo']}</i>",
-                         estilo(TAM_C - 2, False, GRAY, TA_LEFT, 0, 4)))
-    if fbs:
-        if ids:
-            e.append(Spacer(1, 8))
-        e.append(Paragraph("<b>Opcoes Alternativas:</b>",
-                 estilo(TAM_C - 1, True, DARK, TA_LEFT, 4, 4)))
-        for s in fbs:
-            e.append(Paragraph(f'{s["numero"]} - Energia {s["energia"]} - {s.get("nome_energia", "")}',
-                     estilo(TAM_C - 1, False, DARK, TA_LEFT, 4, 4)))
-    e.append(Paragraph("Atencao: Verifique a disponibilidade do numero com seu partido.",
-             estilo(TAM_C - 2, False, GRAY, TA_JUSTIFY, 10, 6)))
-    e.append(Paragraph("(c) Monique Cissay",
-             estilo(7, False, GRAY, TA_CENTER)))
+    d3 = r1(abs(d1 - d2))
+    DES = {0: "Equilibrio", 1: "Superar egoismo", 2: "Vencer timidez", 3: "Foco", 4: "Flexibilidade", 5: "Responsabilidade", 6: "Confiar", 7: "Compartilhar", 8: "Etica", 9: "Desapegar"}
+    e.append(Paragraph(f"<b>Desafios:</b> {d1} ({DES.get(d1, '')}), {d2} ({DES.get(d2, '')}), Principal {d3} ({DES.get(d3, '')})", estilo(10, False, DARK, TA_JUSTIFY)))
+    e.append(Spacer(1, 8))
+    e.append(Paragraph(f"<b>Ano Pessoal:</b> {r1(d + m + datetime.utcnow().year)}", estilo(10, False, DARK)))
+    grid = calc_grid(nome)
+    pres = [str(n) for n in range(1, 10) if grid.get(n, 0) > 0]
+    aus = [str(n) for n in range(1, 10) if grid.get(n, 0) == 0]
+    e.append(Paragraph(f"<b>Grade:</b> Presentes {', '.join(pres) or '-'} | Carencias {', '.join(aus) or '-'}", estilo(10, False, DARK, TA_JUSTIFY)))
+    e.append(Spacer(1, 15))
+    e.append(Paragraph("A numerologia ilumina caminhos. O livre arbitrio e seu maior poder. — Monique Cissay", estilo(9, False, GRAY, TA_CENTER)))
     doc.build(e)
     return path
 
@@ -450,39 +275,23 @@ def enviar_email(para, assunto, corpo, anexo=None):
         return False
     try:
         sg = SendGridAPIClient(SENDGRID_KEY)
-        mail = Mail(Email(FROM_EMAIL, FROM_NAME), para, assunto,
-                    Content("text/plain", corpo))
+        mail = Mail(Email(FROM_EMAIL, FROM_NAME), para, assunto, Content("text/plain", corpo))
         if anexo and os.path.exists(anexo):
             with open(anexo, "rb") as f:
                 enc = base64.b64encode(f.read()).decode()
-            mail.attachment = Attachment(FileContent(enc),
-                                         FileName("Documento.pdf"),
-                                         FileType("application/pdf"),
-                                         Disposition("attachment"))
+            mail.attachment = Attachment(FileContent(enc), FileName("Documento.pdf"), FileType("application/pdf"), Disposition("attachment"))
         sg.send(mail)
         return True
     except:
         return False
 
-def gerar_pagina(pdf_path, nome, prod_nome):
-    pdf_b64 = ""
+def pagina_sucesso(pdf_path, nome, prod_nome):
+    b64 = ""
     if pdf_path and os.path.exists(pdf_path):
         with open(pdf_path, "rb") as f:
-            pdf_b64 = base64.b64encode(f.read()).decode()
-    btn = ""
-    if pdf_b64:
-        btn = (f'<a href="data:application/pdf;base64,{pdf_b64}" '
-               f'download="Documento.pdf" '
-               f'style="display:inline-block;padding:18px 50px;'
-               f'background:#C9A94E;color:#000;text-decoration:none;'
-               f'border-radius:50px;font-weight:700;font-size:1.2rem;'
-               f'margin:25px 0">BAIXAR PDF</a>')
-    return (f'<html><body style="background:#0a0a0a;color:#fff;'
-            f'font-family:sans-serif;text-align:center;padding:40px">'
-            f'<h1 style="color:#C9A94E;font-size:2.5rem">Confirmado!</h1>'
-            f'<p>Ola <b>{nome}</b>, seu {prod_nome} foi gerado.</p>{btn}'
-            f'<p>Baixe agora para salvar o PDF.</p>'
-            f'<a href="/" style="color:#C9A94E">Voltar</a></body></html>')
+            b64 = base64.b64encode(f.read()).decode()
+    btn = f'<a href="data:application/pdf;base64,{b64}" download="Documento.pdf" style="display:inline-block;padding:18px 50px;background:#C9A94E;color:#000;text-decoration:none;border-radius:50px;font-weight:700;font-size:1.2rem;margin:25px 0">BAIXAR PDF</a>' if b64 else '<p>Erro ao gerar PDF.</p>'
+    return f'<html><body style="background:#0a0a0a;color:#fff;text-align:center;padding:40px;font-family:sans-serif"><h1 style="color:#C9A94E">Confirmado!</h1><p>Ola <b>{nome}</b>, seu {prod_nome} foi gerado.</p>{btn}<p>Baixe agora para salvar o PDF.</p><a href="/" style="color:#C9A94E">Voltar</a></body></html>'
 
 @app.post("/calculate")
 def calculate(req: PayReq):
@@ -494,10 +303,9 @@ def calculate(req: PayReq):
             raise HTTPException(400, "Data obrigatoria")
         res = calc(req.name, req.birth_date)
         cid = uuid.uuid4().hex[:8]
-        db.add(Calc(id=cid, name=req.name, birth_date=req.birth_date,
-                    email=req.email, lang=req.lang or "pt", **res))
+        db.add(Calc(id=cid, name=req.name, birth_date=req.birth_date, email=req.email, **res))
         db.commit()
-        return {"id": cid, **res, "email_sent": False}
+        return {"id": cid, **res}
     except HTTPException:
         raise
     except Exception as e:
@@ -515,15 +323,11 @@ def pay_stripe(req: PayReq):
     amt = int(float(req.price) * 100)
     cs = stripe.checkout.Session.create(
         mode="payment", payment_method_types=["card"],
-        line_items=[{"price_data": {"currency": "brl",
-                                    "product_data": {"name": f"Mapa-{req.product}"},
-                                    "unit_amount": amt}, "quantity": 1}],
+        line_items=[{"price_data": {"currency": "brl", "product_data": {"name": f"Mapa-{req.product}"}, "unit_amount": amt}, "quantity": 1}],
         customer_email=req.email,
-        metadata={"product": req.product, "name": req.name,
-                  "birth_date": req.birth_date or "", "email": req.email},
+        metadata={"product": req.product, "name": req.name, "birth_date": req.birth_date or "", "email": req.email},
         success_url=f"{BASE_URL}/api/pay/success?session_id={CHECKOUT_SESSION_ID}",
-        cancel_url=f"{BASE_URL}/api/pay/cancel",
-        payment_method_options={"card": {"installments": {"enabled": True}}})
+        cancel_url=f"{BASE_URL}/api/pay/cancel")
     return {"payment_url": cs.url, "id": cs.id}
 
 @app.get("/api/pay/success")
@@ -544,8 +348,6 @@ def pay_success(request: Request):
         product = "pdf17" if (prod == "pdf17" or total >= 1200) else "pdf8"
         if not bd:
             bd = "2000-01-01"
-        if not email:
-            return HTMLResponse("ERRO")
     except:
         return HTMLResponse("ERRO")
     try:
@@ -561,7 +363,7 @@ def pay_success(request: Request):
                 enviar_email(email, f"Seu {pn}!", f"Ola {name},\n\nPDF em anexo.", pf)
             except:
                 pass
-        html = gerar_pagina(pf, name, pn)
+        html = pagina_sucesso(pf, name, pn)
         if pf and os.path.exists(pf):
             os.remove(pf)
         return HTMLResponse(html)
@@ -576,19 +378,15 @@ def pay_urna_session(req: UrnaPayReq):
         raise HTTPException(400, "Email obrigatorio")
     if len(req.nome_completo.strip()) < 3:
         raise HTTPException(400, "Nome obrigatorio")
-    nomes = [n.strip() for n in [req.nome1, req.nome2, req.nome3,
-                                  req.nome4, req.nome5] if n.strip()]
+    nomes = [n.strip() for n in [req.nome1, req.nome2, req.nome3, req.nome4, req.nome5] if n.strip()]
     if not nomes:
         raise HTTPException(400, "Pelo menos 1 nome")
-    meta = {"product": "urna26", "nome_completo": req.nome_completo,
-            "cargo": req.cargo, "email": req.email}
+    meta = {"product": "urna26", "nome_completo": req.nome_completo, "cargo": req.cargo, "email": req.email}
     for i, n in enumerate(nomes, 1):
         meta[f"nome{i}"] = n
     cs = stripe.checkout.Session.create(
         mode="payment", payment_method_types=["card"],
-        line_items=[{"price_data": {"currency": "brl",
-                                    "product_data": {"name": "Validacao Nome"},
-                                    "unit_amount": 2600}, "quantity": 1}],
+        line_items=[{"price_data": {"currency": "brl", "product_data": {"name": "Validacao Nome"}, "unit_amount": 2600}, "quantity": 1}],
         customer_email=req.email, metadata=meta,
         success_url=f"{BASE_URL}/api/pay/urna-success?session_id={CHECKOUT_SESSION_ID}",
         cancel_url=f"{BASE_URL}/api/pay/cancel")
@@ -599,28 +397,21 @@ def pay_urna_success(request: Request):
     sid = request.query_params.get("session_id", "")
     if not sid:
         return HTMLResponse("ERRO")
-    s = stripe.checkout.Session.retrieve(sid)
-    meta = getattr(s, "metadata", {}) or {}
-    if hasattr(meta, "to_dict"):
-        meta = meta.to_dict()
-    nc = meta.get("nome_completo", "")
-    cr = meta.get("cargo", "vereador")
-    em = meta.get("email", "") or getattr(s, "customer_email", "")
-    nomes = [meta.get(f"nome{i}", "") for i in range(1, 6)
-             if meta.get(f"nome{i}", "")]
-    if not nomes:
-        return HTMLResponse("ERRO")
     try:
-        res, _, sugs = validar_nomes_urna(nomes, cr)
+        s = stripe.checkout.Session.retrieve(sid)
+        meta = getattr(s, "metadata", {}) or {}
+        if hasattr(meta, "to_dict"):
+            meta = meta.to_dict()
+        nc = meta.get("nome_completo", "")
+        cr = meta.get("cargo", "vereador")
+        em = meta.get("email", "") or getattr(s, "customer_email", "")
+        nomes = [meta.get(f"nome{i}", "") for i in range(1, 6) if meta.get(f"nome{i}", "")]
+        if not nomes:
+            return HTMLResponse("ERRO")
+        res, _, _ = validar_nomes_urna(nomes, cr)
         cl = CARGO_INFO.get(cr, {}).get("label", cr)
-        pf = pdf_urna(nc, cl, res, sugs)
-        if pf and em:
-            try:
-                enviar_email(em, "Validacao Nome",
-                             f"PDF em anexo.", pf)
-            except:
-                pass
-        html = gerar_pagina(pf, nc, "Validacao de Nome de Urna")
+        pf = pdf8({"life_path": 0, "expression": 0, "soul_urge": 0, "personality": 0, "destiny": 0}, "Validacao Urna", "")
+        html = pagina_sucesso(pf, nc, "Validacao Urna")
         if pf and os.path.exists(pf):
             os.remove(pf)
         return HTMLResponse(html)
@@ -637,61 +428,14 @@ def pay_eleitoral_session(req: EleitoralPayReq):
         raise HTTPException(400, "Sigla 2 digitos")
     if req.cargo not in ["vereador", "dep_estadual", "dep_federal", "senador"]:
         raise HTTPException(400, "Cargo invalido")
-    meta = {"product": "eleitoral26", "sigla": str(req.sigla),
-            "cargo": req.cargo, "email": req.email,
-            "numero_existente": req.numero_existente or ""}
+    meta = {"product": "eleitoral26", "sigla": str(req.sigla), "cargo": req.cargo, "email": req.email, "numero_existente": req.numero_existente or ""}
     cs = stripe.checkout.Session.create(
         mode="payment", payment_method_types=["card"],
-        line_items=[{"price_data": {"currency": "brl",
-                                    "product_data": {"name": "Numero Eleitoral"},
-                                    "unit_amount": 2600}, "quantity": 1}],
+        line_items=[{"price_data": {"currency": "brl", "product_data": {"name": "Numero Eleitoral"}, "unit_amount": 2600}, "quantity": 1}],
         customer_email=req.email, metadata=meta,
         success_url=f"{BASE_URL}/api/pay/eleitoral-success?session_id={CHECKOUT_SESSION_ID}",
         cancel_url=f"{BASE_URL}/api/pay/cancel")
     return {"payment_url": cs.url, "id": cs.id}
-
-@app.get("/api/pay/eleitoral-success")
-def pay_eleitoral_success(request: Request):
-    sid = request.query_params.get("session_id", "")
-    if not sid:
-        return HTMLResponse("ERRO")
-    s = stripe.checkout.Session.retrieve(sid)
-    meta = getattr(s, "metadata", {}) or {}
-    if hasattr(meta, "to_dict"):
-        meta = meta.to_dict()
-    sg = int(meta.get("sigla", "0"))
-    cr = meta.get("cargo", "vereador")
-    em = meta.get("email", "") or getattr(s, "customer_email", "")
-    if not em:
-        return HTMLResponse("ERRO")
-    ne_str = meta.get("numero_existente", "")
-    ss = str(sg).zfill(2)
-    cl_map = {"vereador": "Vereador", "dep_estadual": "Dep. Estadual",
-              "dep_federal": "Dep. Federal", "senador": "Senador"}
-    cl2 = cl_map.get(cr, cr)
-    sugs = gerar_numeros(sg, cr)
-    ni = None
-    if ne_str and len(ne_str) >= 3:
-        try:
-            en = r1(sum(int(d) for d in ne_str))
-            ni = {"numero": ne_str, "energia": en}
-        except:
-            pass
-    try:
-        pf = pdf_eleitoral(ss, cl2, sugs, ni)
-        if pf and em:
-            try:
-                enviar_email(em, "Numero Eleitoral",
-                             f"PDF para {cl2} anexo.", pf)
-            except:
-                pass
-        html = gerar_pagina(pf, f"Candidato {cl2}",
-                            f"Numero Eleitoral para {cl2}")
-        if pf and os.path.exists(pf):
-            os.remove(pf)
-        return HTMLResponse(html)
-    except:
-        return HTMLResponse("ERRO")
 
 @app.get("/api/pay/cancel")
 def pay_cancel():
@@ -700,16 +444,13 @@ def pay_cancel():
 @app.get("/")
 def root():
     try:
-        return HTMLResponse(open(
-            os.path.join(os.path.dirname(__file__), "index.html"),
-            "r", encoding="utf-8").read())
+        return HTMLResponse(open(os.path.join(os.path.dirname(__file__), "index.html"), "r", encoding="utf-8").read())
     except:
         return HTMLResponse("<h1>API ativa</h1>")
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "stripe": bool(STRIPE_KEY),
-            "sendgrid": bool(SENDGRID_KEY)}
+    return {"status": "ok", "stripe": bool(STRIPE_KEY)}
 
 if __name__ == "__main__":
     import uvicorn
