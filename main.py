@@ -568,6 +568,47 @@ def pay_success(request: Request):
         logger.error(f"Erro success: {e}")
         return HTMLResponse("ERRO ao gerar PDF")
 
+@app.get("/api/pay/eleitoral-success")
+def pay_eleitoral_success(request: Request):
+    sid = request.query_params.get("session_id", "")
+    if not sid:
+        return HTMLResponse("ERRO")
+    try:
+        s = stripe.checkout.Session.retrieve(sid)
+        meta = getattr(s, "metadata", {}) or {}
+        if hasattr(meta, "to_dict"):
+            meta = meta.to_dict()
+        sg = int(meta.get("sigla", "0"))
+        cr = meta.get("cargo", "vereador")
+        em = meta.get("email", "") or getattr(s, "customer_email", "")
+        if not em:
+            return HTMLResponse("ERRO")
+        ne_str = meta.get("numero_existente", "")
+        ss = str(sg).zfill(2)
+        cl_map = {"vereador": "Vereador", "dep_estadual": "Dep. Estadual",
+                  "dep_federal": "Dep. Federal", "senador": "Senador"}
+        cl2 = cl_map.get(cr, cr)
+        sugs = gerar_numeros(sg, cr)
+        ni = None
+        if ne_str and len(ne_str) >= 3:
+            try:
+                en = r1(sum(int(d) for d in ne_str))
+                ni = {"numero": ne_str, "energia": en}
+            except:
+                pass
+        pf = pdf_eleitoral(ss, cl2, sugs, ni)
+        if pf and em:
+            try:
+                enviar_email(em, "Numero Eleitoral", f"PDF para {cl2}.", pf)
+            except:
+                pass
+        html = pagina_sucesso(pf, f"Candidato {cl2}", f"Numero Eleitoral")
+        if pf and os.path.exists(pf):
+            os.remove(pf)
+        return HTMLResponse(html)
+    except:
+        return HTMLResponse("ERRO")
+
 @app.get("/api/pay/cancel")
 def pay_cancel():
     return HTMLResponse("<h1>Cancelado</h1><a href='/'>Voltar</a>")
