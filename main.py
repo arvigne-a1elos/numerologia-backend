@@ -160,13 +160,7 @@ def validar_nomes_urna(nomes, cargo_key):
     for nome in nomes:
         if not nome.strip():
             continue
-        limpo = (
-            nome.upper()
-            .replace(" ", "")
-            .replace(".", "")
-            .replace("-", "")
-            .replace(",", "")
-        )
+        limpo = nome.upper().replace(" ", "").replace(".", "").replace("-", "").replace(",", "")
         letras = []
         st = 0
         for c in limpo:
@@ -261,10 +255,8 @@ def estilo(tam, negrito=False, cor=DARK, alinhamento=TA_LEFT, antes=0, depois=4)
 
 def pdf8(data, nome, bd):
     path = f"/tmp/p8_{uuid.uuid4().hex[:8]}.pdf"
-    doc = SimpleDocTemplate(
-        path, pagesize=A4, leftMargin=50, rightMargin=50,
-        topMargin=40, bottomMargin=30
-    )
+    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50,
+                            topMargin=40, bottomMargin=30)
     e = []
     e.append(Spacer(1, 15))
     e.append(Paragraph("MAPA EXPRESS", estilo(20, True, GOLD, TA_CENTER, 0, 6)))
@@ -289,16 +281,14 @@ def pdf8(data, nome, bd):
     ]))
     e.append(tbl)
     e.append(Spacer(1, 10))
-    e.append(Paragraph("(c) Monique Cissay — Numerologia", estilo(7, False, GRAY, TA_CENTER)))
+    e.append(Paragraph("(c) Monique Cissay", estilo(7, False, GRAY, TA_CENTER)))
     doc.build(e)
     return path
 
 def pdf17(data, nome, bd_str):
     path = f"/tmp/p17_{uuid.uuid4().hex[:8]}.pdf"
-    doc = SimpleDocTemplate(
-        path, pagesize=A4, leftMargin=50, rightMargin=50,
-        topMargin=35, bottomMargin=25
-    )
+    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50,
+                            topMargin=35, bottomMargin=25)
     e = []
     lp = data["life_path"]
     e.append(Spacer(1, 15))
@@ -336,18 +326,21 @@ def pdf17(data, nome, bd_str):
     d1 = r1(abs(d - m))
     d2 = r1(abs(m - r1(a)))
     dp_ = r1(abs(d1 - d2))
-    e.append(Paragraph(f"Desafios: {d1} | {d2} | Principal {dp_}", estilo(10, False, DARK)))
+    e.append(Paragraph(
+        f"Desafios: {d1} | {d2} | Principal {dp_}", estilo(10, False, DARK)))
     ap = r1(d + m + datetime.utcnow().year)
-    e.append(Paragraph(f"Ano Pessoal {datetime.utcnow().year}: {ap}", estilo(10, False, DARK)))
+    e.append(Paragraph(
+        f"Ano Pessoal {datetime.utcnow().year}: {ap}", estilo(10, False, DARK)))
     grid = calc_grid(nome)
     pres = [str(n) for n in range(1, 10) if grid.get(n, 0) > 0]
     aus = [str(n) for n in range(1, 10) if grid.get(n, 0) == 0]
     e.append(Paragraph(
-        f"Grade: Presentes {', '.join(pres) or '-'} | Carencias {', '.join(aus) or '-'}",
+        f"Grade: Presentes {', '.join(pres) or '-'} | "
+        f"Carencias {', '.join(aus) or '-'}",
         estilo(10, False, DARK),
     ))
     e.append(Spacer(1, 15))
-    e.append(Paragraph("(c) Monique Cissay — Numerologia", estilo(7, False, GRAY, TA_CENTER)))
+    e.append(Paragraph("(c) Monique Cissay", estilo(7, False, GRAY, TA_CENTER)))
     doc.build(e)
     return path
 
@@ -356,16 +349,15 @@ def enviar_email(para, assunto, corpo, anexo=None):
         return False
     try:
         sg = SendGridAPIClient(SENDGRID_KEY)
-        mail = Mail(Email(FROM_EMAIL, FROM_NAME), para, assunto, Content("text/plain", corpo))
+        mail = Mail(Email(FROM_EMAIL, FROM_NAME), para, assunto,
+                    Content("text/plain", corpo))
         if anexo and os.path.exists(anexo):
             with open(anexo, "rb") as f:
                 enc = base64.b64encode(f.read()).decode()
-            mail.attachment = Attachment(
-                FileContent(enc),
-                FileName("Documento.pdf"),
-                FileType("application/pdf"),
-                Disposition("attachment"),
-            )
+            mail.attachment = Attachment(FileContent(enc),
+                                         FileName("Documento.pdf"),
+                                         FileType("application/pdf"),
+                                         Disposition("attachment"))
         sg.send(mail)
         return True
     except Exception as e:
@@ -408,10 +400,8 @@ def calculate(req: PayReq):
             raise HTTPException(400, "Data obrigatoria")
         res = calc(req.name, req.birth_date)
         cid = uuid.uuid4().hex[:8]
-        db.add(Calc(
-            id=cid, name=req.name, birth_date=req.birth_date,
-            email=req.email, **res
-        ))
+        db.add(Calc(id=cid, name=req.name, birth_date=req.birth_date,
+                    email=req.email, **res))
         db.commit()
         return {"id": cid, **res}
     except HTTPException:
@@ -447,9 +437,14 @@ def pay_stripe(req: PayReq):
             "birth_date": req.birth_date or "",
             "email": req.email,
         },
-        success_url=f"{BASE_URL}/api/pay/success?session_id={CHECKOUT_SESSION_ID}",
+        success_url=(
+            f"{BASE_URL}/api/pay/success"
+            f"?session_id={CHECKOUT_SESSION_ID}"
+        ),
         cancel_url=f"{BASE_URL}/api/pay/cancel",
-        payment_method_options={"card": {"installments": {"enabled": True}}},
+        payment_method_options={
+            "card": {"installments": {"enabled": True}}
+        },
     )
     return {"payment_url": cs.url, "id": cs.id}
 
@@ -483,7 +478,8 @@ def pay_success(request: Request):
             pn = "Mapa Express"
         if pf and email:
             try:
-                enviar_email(email, f"Seu {pn}!", f"Ola {name},\n\nPDF anexo.", pf)
+                enviar_email(email, f"Seu {pn}!",
+                             f"Ola {name},\n\nPDF anexo.", pf)
             except Exception:
                 pass
         html = pagina_sucesso(pf, name, pn)
@@ -495,7 +491,9 @@ def pay_success(request: Request):
 
 @app.get("/api/pay/cancel")
 def pay_cancel():
-    return HTMLResponse("<h1>Cancelado</h1><a href='/'>Voltar</a>")
+    return HTMLResponse(
+        "<h1>Cancelado</h1><a href='/'>Voltar</a>"
+    )
 
 @app.get("/")
 def root():
