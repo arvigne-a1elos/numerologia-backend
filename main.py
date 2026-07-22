@@ -202,8 +202,7 @@ def pdf17(data, nome, bd_str):
     e.append(Paragraph(f"{datetime.utcnow().year}: Ano {ap} - {APT.get(ap, '')}.", JU))
     e.append(Paragraph("Grade de Inclusao", SEC))
     grid = calc_grid(nome)
-    pres = [str(n) for n in range(1, 10) if grid.get(n, 0) > 0]
-    aus = [str(n) for n in range(1, 10) if grid.get(n, 0) == 0]
+    pres = [str(n) for n in range(1, 10) if grid.get(n, 0) > 0]; aus = [str(n) for n in range(1, 10) if grid.get(n, 0) == 0]
     e.append(Paragraph(f"Presentes: {', '.join(pres) or '-'}. Carencias: {', '.join(aus) or '-'}.", JU))
     e.append(Paragraph("A numerologia ilumina caminhos. O livre arbitrio e seu maior poder.", JU))
     e.append(Paragraph("(c) A1ELOS", ParagraphStyle("F", fontName=FONTE, fontSize=6.5, textColor=GRAY, alignment=TA_CENTER, spaceBefore=3)))
@@ -267,11 +266,12 @@ def enviar_email(para, assunto, corpo, anexo=None):
     except Exception as e: logger.error(f"Falha email: {e}"); return False
 
 def pg_sucesso(pdf_path, nome, prod_nome):
+    """Pagina com download direto do PDF + tentativa de email como backup"""
     pdf_b64 = ""
     if pdf_path and os.path.exists(pdf_path):
         with open(pdf_path, "rb") as f: pdf_b64 = base64.b64encode(f.read()).decode()
-    btn = f'<a href="data:application/pdf;base64,{pdf_b64}" download="Documento_A1ELOS.pdf" style="display:inline-block;padding:16px 40px;background:#C9A94E;color:#000;text-decoration:none;border-radius:50px;font-weight:700;font-size:1.1rem;margin:20px 0">📥 BAIXAR PDF AGORA</a>' if pdf_b64 else '<p style="color:#e74c3c">Erro ao gerar PDF.</p>'
-    return f"""<html><body style='background:#0a0a0a;color:#fff;font-family:sans-serif;margin:0;padding:20px;text-align:center'><div style='max-width:800px;margin:0 auto'><h1 style='color:#C9A94E;font-family:serif'>✅ Confirmado!</h1><p style='color:#888'>Ola <b style='color:#fff'>{nome}</b>, seu {prod_nome} foi gerado.</p>{btn}<p style='color:#888;font-size:.85rem'>O PDF tambem foi enviado para seu email. Verifique o spam se nao encontrar.</p><a href='/' style='display:inline-block;padding:12px 30px;border:1px solid #C9A94E;color:#C9A94E;text-decoration:none;border-radius:50px;margin-top:10px'>Voltar ao Inicio</a></div></body></html>"""
+    btn = f'<a href="data:application/pdf;base64,{pdf_b64}" download="Documento_A1ELOS.pdf" style="display:inline-block;padding:18px 50px;background:#C9A94E;color:#000;text-decoration:none;border-radius:50px;font-weight:700;font-size:1.2rem;margin:25px 0;transition:.3s">📥 BAIXAR PDF AGORA</a>' if pdf_b64 else '<p style="color:#e74c3c">Erro ao gerar PDF. Contate arvigne@gmail.com</p>'
+    return f"""<html><body style='background:#0a0a0a;color:#fff;font-family:sans-serif;margin:0;padding:20px;text-align:center;min-height:100vh;display:flex;align-items:center;justify-content:center'><div style='max-width:600px'><h1 style='color:#C9A94E;font-family:serif;font-size:2.5rem'>✅ Confirmado!</h1><p style='color:#888;font-size:1.1rem;margin:20px 0'>Ola <b style='color:#fff'>{nome}</b>, seu <b style='color:#C9A94E'>{prod_nome}</b> foi gerado com sucesso.</p>{btn}<p style='color:#888;font-size:.85rem'>Clique no botao acima para baixar e salvar o PDF onde quiser.<br>O arquivo e temporario — baixe agora para nao perde-lo.</p><a href='/' style='display:inline-block;padding:12px 30px;border:1px solid #C9A94E;color:#C9A94E;text-decoration:none;border-radius:50px;margin-top:10px'>← Voltar ao Inicio</a></div></body></html>"""
 
 @app.post("/calculate")
 def calculate(req: PayReq):
@@ -283,13 +283,7 @@ def calculate(req: PayReq):
         cid = uuid.uuid4().hex[:8]
         db.add(Calc(id=cid, name=req.name, birth_date=req.birth_date, email=req.email, **res))
         db.commit()
-        if req.email:
-            try:
-                pf = pdf8(res, req.name, req.birth_date)
-                enviar_email(req.email, "Seu Mapa Express!", f"Ola {req.name},\n\nMapa gerado.\n\nA1ELOS", pf)
-                if os.path.exists(pf): os.remove(pf)
-            except: pass
-        return {"id": cid, **res, "email_sent": True}
+        return {"id": cid, **res, "email_sent": False}
     except HTTPException: raise
     except Exception as e: logger.error(f"Calc: {e}"); raise HTTPException(500, "Erro")
     finally: db.close()
@@ -319,9 +313,12 @@ def pay_success(request: Request):
     except: return HTMLResponse(ERR.format(msg="Falha pagamento"))
     try:
         data = calc(name, bd)
-        if product == "pdf17": pf = pdf17(data, name, bd); subj = "Mapa Completo!"; pn = "Mapa Numerologico Completo"
-        else: pf = pdf8(data, name, bd); subj = "Mapa Express!"; pn = "Mapa Numerologico Express"
-        if pf: enviar_email(email, subj, f"Ola {name},\n\nPDF anexo.\n\nA1ELOS", pf)
+        if product == "pdf17": pf = pdf17(data, name, bd); pn = "Mapa Numerologico Completo"
+        else: pf = pdf8(data, name, bd); pn = "Mapa Numerologico Express"
+        # Tenta email como backup silencioso
+        if pf and email:
+            try: enviar_email(email, f"Seu {pn}!", f"Ola {name},\n\nPDF anexo.\n\nA1ELOS", pf)
+            except: pass
         html = pg_sucesso(pf, name, pn)
         if pf and os.path.exists(pf): os.remove(pf)
         return HTMLResponse(html)
@@ -352,8 +349,10 @@ def pay_urna_success(request: Request):
     try:
         res, _, sugs = validar_nomes_urna(nomes, cr)
         cl = CARGO_INFO.get(cr, {}).get("label", cr)
-        pf = pdf_urna(nc, cl, res, sugs); pn = nc.split()[0] if nc else ""
-        enviar_email(em, "Validacao Nome - A1ELOS", f"Ola {pn},\n\nPDF anexo.\nVerifique spam.\n\nA1ELOS", pf)
+        pf = pdf_urna(nc, cl, res, sugs)
+        if pf and em:
+            try: enviar_email(em, "Validacao Nome - A1ELOS", f"Ola {nc.split()[0] if nc else ''},\n\nPDF anexo.\n\nA1ELOS", pf)
+            except: pass
         html = pg_sucesso(pf, nc, "Validacao de Nome de Urna")
         if pf and os.path.exists(pf): os.remove(pf)
         return HTMLResponse(html)
@@ -388,7 +387,9 @@ def pay_eleitoral_success(request: Request):
         except: pass
     try:
         pf = pdf_eleitoral(ss, cl2, sugs, ni)
-        enviar_email(em, "Numero Eleitoral - A1ELOS", f"Ola,\n\nPDF com sugestoes para {cl2} anexo.\nVerifique spam.\n\nA1ELOS", pf)
+        if pf and em:
+            try: enviar_email(em, "Numero Eleitoral - A1ELOS", f"Ola,\n\nPDF com sugestoes para {cl2} anexo.\n\nA1ELOS", pf)
+            except: pass
         html = pg_sucesso(pf, f"Candidato {cl2}", f"Numero Eleitoral para {cl2}")
         if pf and os.path.exists(pf): os.remove(pf)
         return HTMLResponse(html)
