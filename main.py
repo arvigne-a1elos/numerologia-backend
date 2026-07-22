@@ -70,22 +70,6 @@ class PayReq(BaseModel):
     calculation_id: Optional[str] = None
     birth_date: Optional[str] = None
 
-class UrnaPayReq(BaseModel):
-    nome_completo: str
-    cargo: str
-    nome1: str
-    nome2: str = ""
-    nome3: str = ""
-    nome4: str = ""
-    nome5: str = ""
-    email: str
-
-class EleitoralPayReq(BaseModel):
-    sigla: int
-    cargo: str
-    numero_existente: Optional[str] = ""
-    email: str
-
 GOLD = colors.HexColor("#B8860B")
 LGRAY = colors.HexColor("#f0f0f0")
 DARK = colors.HexColor("#222")
@@ -93,29 +77,10 @@ GRAY = colors.HexColor("#888")
 FONTE = "Helvetica"
 FN = "Helvetica-Bold"
 
-CARGO_INFO = {
-    "vereador": {"label": "Vereador"},
-    "dep_estadual": {"label": "Deputado Estadual"},
-    "dep_federal": {"label": "Deputado Federal"},
-    "senador": {"label": "Senador"},
-}
-
-ENERGIAS = {
-    1: "Lideranca", 2: "Cooperacao", 3: "Criatividade",
-    4: "Trabalho", 5: "Liberdade", 6: "Familia",
-    7: "Sabedoria", 8: "Poder e Prosperidade (IDEAL)", 9: "Humanitarismo",
-}
-
 def r1(n):
     while n > 9 and n not in (11, 22, 33):
         n = sum(int(d) for d in str(n))
     return n
-
-def calc_nome(nome):
-    t = {c: (i % 9 or 9) for i, c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)}
-    limpo = nome.upper().replace(" ", "").replace(".", "").replace("-", "").replace(",", "")
-    total = sum(t.get(c, 0) for c in limpo if c in t)
-    return r1(total), total
 
 def calc(nome, data_str):
     bd = dp.parse(data_str).date()
@@ -134,94 +99,6 @@ def calc(nome, data_str):
             tp += val
     return {"life_path": lp, "expression": r1(te), "soul_urge": r1(tv),
             "personality": r1(tp), "destiny": r1(r1(te) + lp)}
-
-def calc_grid(nome):
-    t = {c: (i % 9 or 9) for i, c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)}
-    g = {i: 0 for i in range(1, 10)}
-    for ch in nome.upper().replace(" ", ""):
-        v = t.get(ch, 0)
-        if 1 <= v <= 9:
-            g[v] += 1
-    return g
-
-def validar_nomes_urna(nomes, cargo_key):
-    results = []
-    lv = {c: (i % 9 or 9) for i, c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)}
-    for nome in nomes:
-        if not nome.strip():
-            continue
-        limpo = nome.upper().replace(" ", "").replace(".", "").replace("-", "").replace(",", "")
-        letras = []
-        st = 0
-        for c in limpo:
-            v = lv.get(c, 0)
-            letras.append({"letra": c, "valor": v})
-            st += v
-        en = r1(st)
-        if en == 8:
-            expl = f"Nome {nome.strip().title()} tem ENERGIA 8! Ideal para candidatura."
-        else:
-            expl = f"Nome {nome.strip().title()} tem energia {en}. {ENERGIAS.get(en, '')}."
-        results.append({"nome": nome.strip().title(), "energia": en,
-                        "soma": st, "eh_ideal": en == 8,
-                        "explicacao": expl, "letras": letras})
-    ideal = any(r["eh_ideal"] for r in results)
-    sugs = []
-    if not ideal:
-        for nome in nomes:
-            if not nome.strip():
-                continue
-            lbl = CARGO_INFO.get(cargo_key, {}).get("label", "")
-            if not lbl:
-                continue
-            for nt in [f"{lbl[:3]} {nome.strip()}", f"{nome.strip()} - {lbl.lower()[:3]}"]:
-                en, _ = calc_nome(nt)
-                sugs.append({"nome": nt.title(), "energia": en, "eh_ideal": en == 8})
-                if len(sugs) >= 3:
-                    break
-            if len(sugs) >= 3:
-                break
-    return results, ideal, sugs[:3]
-
-def gerar_numeros(sigla, cargo, qtd=5):
-    dc = {"vereador": 5, "dep_estadual": 5, "dep_federal": 4, "senador": 3}
-    td = dc.get(cargo, 5)
-    ss = str(sigla).zfill(2)[:2]
-    sm = int(ss[0]) + int(ss[1])
-    lv = td - 2
-    res = []
-    tent = set()
-
-    def busca(alvo):
-        enc = []
-        for x in range(10 ** lv):
-            if len(enc) + len(res) >= qtd:
-                break
-            dl = str(x).zfill(lv)
-            en = r1(sm + sum(int(d) for d in dl))
-            if en == alvo:
-                n = ss + dl
-                if n not in tent:
-                    if 0 < x < 10 and alvo != r1(sm):
-                        continue
-                    tent.add(n)
-                    st = sm + sum(int(d) for d in dl)
-                    enc.append({
-                        "numero": n, "energia": alvo, "ideal": alvo == 8,
-                        "sigla": ss, "digitos_livres": dl,
-                        "soma_sigla": sm, "soma_total": st,
-                    })
-        return enc
-
-    res.extend(busca(8))
-    if len(res) < qtd:
-        res.extend(busca(3))
-    if len(res) < qtd:
-        for e in [7, 1, 9, 5, 6, 4, 2]:
-            if len(res) >= qtd:
-                break
-            res.extend(busca(e))
-    return res[:qtd]
 
 def estilo(tam, negrito=False, cor=DARK, alinhamento=TA_LEFT, antes=0, depois=4):
     return ParagraphStyle("S", fontName=FN if negrito else FONTE,
@@ -252,51 +129,6 @@ def pdf8(data, nome, bd):
     ]))
     e.append(tbl)
     e.append(Spacer(1, 10))
-    e.append(Paragraph("(c) Monique Cissay", estilo(7, False, GRAY, TA_CENTER)))
-    doc.build(e)
-    return path
-
-def pdf17(data, nome, bd_str):
-    path = f"/tmp/p17_{uuid.uuid4().hex[:8]}.pdf"
-    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50,
-                            topMargin=35, bottomMargin=25)
-    e = []
-    lp = data["life_path"]
-    e.append(Spacer(1, 15))
-    e.append(Paragraph("MAPA COMPLETO", estilo(20, True, GOLD, TA_CENTER, 0, 6)))
-    e.append(Paragraph(nome.upper(), estilo(12, True, DARK, TA_CENTER, 0, 2)))
-    e.append(Paragraph(bd_str, estilo(9, False, GRAY, TA_CENTER, 0, 10)))
-    e.append(Paragraph(f"Caminho de Vida {lp}", estilo(11, False, DARK, TA_CENTER)))
-    e.append(Spacer(1, 8))
-    td = [["Numero", "Valor"]] + [[l, str(data[k])] for k, l in [
-        ("life_path", "Caminho de Vida"), ("expression", "Expressao"),
-        ("soul_urge", "Motivacao"), ("personality", "Personalidade"),
-        ("destiny", "Destino")]]
-    tbl = Table(td, colWidths=[200, 100])
-    tbl.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), GOLD),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("FONTSIZE", (0, 0), (-1, -1), 9),
-        ("GRID", (0, 0), (-1, -1), 0.3, colors.grey),
-        ("BACKGROUND", (0, 1), (-1, -1), LGRAY),
-    ]))
-    e.append(tbl)
-    e.append(Spacer(1, 10))
-    bb = dp.parse(bd_str.split(" ")[0] if " " in bd_str else bd_str).date()
-    d, m, a = bb.day, bb.month, bb.year
-    fe = max(36 - min(lp, 36), 25)
-    e.append(Paragraph(f"Ciclo 1 (0-{fe}a) | Ciclo 2 ({fe+1}-{fe+27}a) | Ciclo 3 ({fe+28}+a)", estilo(10, False, DARK)))
-    d1 = r1(abs(d - m))
-    d2 = r1(abs(m - r1(a)))
-    dp_ = r1(abs(d1 - d2))
-    e.append(Paragraph(f"Desafios: {d1} | {d2} | Principal {dp_}", estilo(10, False, DARK)))
-    ap = r1(d + m + datetime.utcnow().year)
-    e.append(Paragraph(f"Ano Pessoal {datetime.utcnow().year}: {ap}", estilo(10, False, DARK)))
-    grid = calc_grid(nome)
-    pres = [str(n) for n in range(1, 10) if grid.get(n, 0) > 0]
-    aus = [str(n) for n in range(1, 10) if grid.get(n, 0) == 0]
-    e.append(Paragraph(f"Grade: Presentes {', '.join(pres) or '-'} | Carencias {', '.join(aus) or '-'}", estilo(10, False, DARK)))
-    e.append(Spacer(1, 15))
     e.append(Paragraph("(c) Monique Cissay", estilo(7, False, GRAY, TA_CENTER)))
     doc.build(e)
     return path
@@ -394,7 +226,7 @@ def pay_success(request: Request):
     try:
         data = calc(name, bd)
         if product == "pdf17":
-            pf = pdf17(data, name, bd)
+            pf = pdf8(data, name, bd)
             pn = "Mapa Completo"
         else:
             pf = pdf8(data, name, bd)
