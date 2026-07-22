@@ -486,7 +486,7 @@ def pay_stripe(req: PayReq):
 def pay_success(request: Request):
     sid = request.query_params.get("session_id", "")
     if not sid:
-        return HTMLResponse("ERRO")
+        return HTMLResponse("ERRO: sessao invalida")
     try:
         s = stripe.checkout.Session.retrieve(sid)
         meta = getattr(s, "metadata", {}) or {}
@@ -501,7 +501,7 @@ def pay_success(request: Request):
         if not bd:
             bd = "2000-01-01"
     except Exception:
-        return HTMLResponse("ERRO")
+        return HTMLResponse("ERRO: falha pagamento")
     try:
         data = calc(name, bd)
         if product == "pdf17":
@@ -510,17 +510,20 @@ def pay_success(request: Request):
         else:
             pf = pdf8(data, name, bd)
             pn = "Mapa Express"
+        # Tenta email como backup silencioso
         if pf and email:
             try:
                 enviar_email(email, f"Seu {pn}!", f"Ola {name},\n\nPDF anexo.", pf)
-            except Exception:
+            except:
                 pass
+        # Mostra página com download direto
         html = pagina_sucesso(pf, name, pn)
         if pf and os.path.exists(pf):
             os.remove(pf)
         return HTMLResponse(html)
-    except Exception:
-        return HTMLResponse("ERRO")
+    except Exception as e:
+        logger.error(f"Erro success: {e}")
+        return HTMLResponse("ERRO ao gerar PDF")
 
 @app.get("/api/pay/cancel")
 def pay_cancel():
