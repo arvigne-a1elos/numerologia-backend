@@ -135,7 +135,7 @@ def calc_grid(nome):
     g = {i: 0 for i in range(1, 10)}
     for ch in nome.upper().replace(" ", ""):
         v = t.get(ch, 0)
-        if 1 &lt;= v &lt;= 9:
+        if 1 <= v <= 9:
             g[v] += 1
     return g
 
@@ -197,7 +197,7 @@ def gerar_numeros(sigla, cargo, qtd=5):
             if en == alvo:
                 n = ss + dl
                 if n not in tent:
-                    if 0 &lt; x &lt; 10 and alvo != r1(sm):
+                    if 0 < x < 10 and alvo != r1(sm):
                         continue
                     tent.add(n)
                     st = sm + sum(int(d) for d in dl)
@@ -209,9 +209,9 @@ def gerar_numeros(sigla, cargo, qtd=5):
         return enc
 
     res.extend(busca(8))
-    if len(res) &lt; qtd:
+    if len(res) < qtd:
         res.extend(busca(3))
-    if len(res) &lt; qtd:
+    if len(res) < qtd:
         for e in [7, 1, 9, 5, 6, 4, 2]:
             if len(res) >= qtd:
                 break
@@ -308,16 +308,16 @@ def pdf_urna(nc, cl, resultados, sugestoes):
     for r in resultados:
         ic = "S" if r["eh_ideal"] else "X"
         co = "#4CAF50" if r["eh_ideal"] else "#e74c3c"
-        e.append(Paragraph(f'{ic} <b>{r["nome"]}</b> - Energia <font color="{co}"><b>{r["energia"]}</b></font>', estilo(11, True, DARK)))
+        e.append(Paragraph(f'{ic} {r["nome"]} - Energia {r["energia"]}', estilo(11, True, DARK)))
         if r["letras"]:
             ls = ", ".join([f'{l["letra"]}={l["valor"]}' for l in r["letras"]])
-            e.append(Paragraph(f"<i>{ls} -> {r['soma']} -> {r['energia']}</i>", estilo(9, False, GRAY)))
+            e.append(Paragraph(f"{ls} -> {r['soma']} -> {r['energia']}", estilo(9, False, GRAY)))
         e.append(Paragraph(r["explicacao"], estilo(10, False, DARK)))
     if sugestoes:
         e.append(Spacer(1, 10))
         e.append(Paragraph("Sugestoes:", estilo(16, True, GOLD)))
         for s in sugestoes[:3]:
-            e.append(Paragraph(f'<b>{s["nome"]}</b> - Energia {s["energia"]}', estilo(11, False, DARK)))
+            e.append(Paragraph(f'{s["nome"]} - Energia {s["energia"]}', estilo(11, False, DARK)))
     e.append(Paragraph("(c) A1ELOS", estilo(7, False, GRAY, TA_CENTER)))
     doc.build(e)
     return path
@@ -334,17 +334,17 @@ def pdf_eleitoral(ss, cl, sugestoes, ne=None):
     ids = [s for s in sugestoes if s.get("ideal")]
     fbs = [s for s in sugestoes if not s.get("ideal")]
     if ids:
-        e.append(Paragraph("<b>Opcoes com Energia 8 - IDEAL:</b>", estilo(11, True, DARK)))
+        e.append(Paragraph("Opcoes com Energia 8 - IDEAL:", estilo(11, True, DARK)))
         for s in ids:
-            e.append(Paragraph(f'S {s["numero"]} - Energia 8!', estilo(11, False, colors.HexColor("#4CAF50"))))
+            e.append(Paragraph(f'{s["numero"]} - Energia 8!', estilo(11, False, colors.HexColor("#4CAF50"))))
     if fbs:
         if ids:
             e.append(Spacer(1, 8))
-        e.append(Paragraph("<b>Opcoes Alternativas:</b>", estilo(11, True, DARK)))
+        e.append(Paragraph("Opcoes Alternativas:", estilo(11, True, DARK)))
         for s in fbs:
             e.append(Paragraph(f'{s["numero"]} - Energia {s["energia"]}', estilo(11, False, DARK)))
     if ne:
-        e.append(Paragraph(f'Numero informado: {ne["numero"]} - Energia: {ne["energia"]}', estilo(11, False, DARK)))
+        e.append(Paragraph(f'Numero: {ne["numero"]} - Energia: {ne["energia"]}', estilo(11, False, DARK)))
     e.append(Paragraph("(c) A1ELOS", estilo(7, False, GRAY, TA_CENTER)))
     doc.build(e)
     return path
@@ -391,7 +391,7 @@ def pagina_sucesso(pdf_path, nome, prod_nome):
 def calculate(req: PayReq):
     db = Session()
     try:
-        if len(req.name.strip()) &lt; 2:
+        if len(req.name.strip()) < 2:
             raise HTTPException(400, "Nome curto")
         if not req.birth_date:
             raise HTTPException(400, "Data obrigatoria")
@@ -413,7 +413,7 @@ def calculate(req: PayReq):
 def pay_stripe(req: PayReq):
     if not STRIPE_KEY:
         raise HTTPException(503, "Stripe nao configurado")
-    if not req.price or req.price &lt;= 0:
+    if not req.price or req.price <= 0:
         raise HTTPException(400, "Preco invalido")
     amt = int(float(req.price) * 100)
     cs = stripe.checkout.Session.create(
@@ -475,7 +475,7 @@ def pay_urna_session(req: UrnaPayReq):
         raise HTTPException(503, "Stripe nao configurado")
     if not req.email:
         raise HTTPException(400, "Email obrigatorio")
-    if len(req.nome_completo.strip()) &lt; 3:
+    if len(req.nome_completo.strip()) < 3:
         raise HTTPException(400, "Nome obrigatorio")
     nomes = [n.strip() for n in [req.nome1, req.nome2, req.nome3,
                                   req.nome4, req.nome5] if n.strip()]
@@ -533,7 +533,7 @@ def pay_eleitoral_session(req: EleitoralPayReq):
         raise HTTPException(503, "Stripe nao configurado")
     if not req.email:
         raise HTTPException(400, "Email obrigatorio")
-    if req.sigla &lt; 10 or req.sigla > 99:
+    if req.sigla < 10 or req.sigla > 99:
         raise HTTPException(400, "Sigla 2 digitos")
     if req.cargo not in ["vereador", "dep_estadual", "dep_federal", "senador"]:
         raise HTTPException(400, "Cargo invalido")
