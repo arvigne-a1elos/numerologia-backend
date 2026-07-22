@@ -160,7 +160,13 @@ def validar_nomes_urna(nomes, cargo_key):
     for nome in nomes:
         if not nome.strip():
             continue
-        limpo = nome.upper().replace(" ", "").replace(".", "").replace("-", "").replace(",", "")
+        limpo = (
+            nome.upper()
+            .replace(" ", "")
+            .replace(".", "")
+            .replace("-", "")
+            .replace(",", "")
+        )
         letras = []
         st = 0
         for c in limpo:
@@ -264,7 +270,6 @@ def pdf8(data, nome, bd):
     e.append(Paragraph("MAPA EXPRESS", estilo(20, True, GOLD, TA_CENTER, 0, 6)))
     e.append(Paragraph(nome.upper(), estilo(12, True, DARK, TA_CENTER, 0, 2)))
     e.append(Paragraph(bd, estilo(9, False, GRAY, TA_CENTER, 0, 10)))
-
     td = [["Numero", "Valor"]] + [
         [l, str(data[k])] for k, l in [
             ("life_path", "Caminho de Vida"),
@@ -302,7 +307,6 @@ def pdf17(data, nome, bd_str):
     e.append(Paragraph(bd_str, estilo(9, False, GRAY, TA_CENTER, 0, 10)))
     e.append(Paragraph(f"Caminho de Vida {lp}", estilo(11, False, DARK, TA_CENTER)))
     e.append(Spacer(1, 8))
-
     td = [["Numero", "Valor"]] + [
         [l, str(data[k])] for k, l in [
             ("life_path", "Caminho de Vida"),
@@ -322,7 +326,6 @@ def pdf17(data, nome, bd_str):
     ]))
     e.append(tbl)
     e.append(Spacer(1, 10))
-
     bb = dp.parse(bd_str.split(" ")[0] if " " in bd_str else bd_str).date()
     d, m, a = bb.day, bb.month, bb.year
     fe = max(36 - min(lp, 36), 25)
@@ -395,40 +398,6 @@ def pagina_sucesso(pdf_path, nome, prod_nome):
         f'</body></html>'
     )
 
-def pagina_sucesso(pdf_path, nome, prod_nome):
-    """Gera página HTML com PDF embutido para download direto"""
-    b64 = ""
-    if pdf_path and os.path.exists(pdf_path):
-        with open(pdf_path, "rb") as f:
-            b64 = base64.b64encode(f.read()).decode()
-    btn = ""
-    if b64:
-        btn = (
-            f'<a href="data:application/pdf;base64,{b64}" '
-            f'download="Documento.pdf" '
-            f'style="display:inline-block;padding:18px 50px;'
-            f'background:#C9A94E;color:#000;text-decoration:none;'
-            f'border-radius:50px;font-weight:700;font-size:1.2rem;'
-            f'margin:25px 0">📥 BAIXAR PDF AGORA</a>'
-        )
-    return (
-        f'<html><body style="background:#0a0a0a;color:#fff;'
-        f'text-align:center;padding:40px;font-family:sans-serif">'
-        f'<h1 style="color:#C9A94E;font-size:2.5rem">✅ Confirmado!</h1>'
-        f'<p style="font-size:1.1rem;margin:20px 0">'
-        f'Ola <b style="color:#fff">{nome}</b>, '
-        f'seu <b style="color:#C9A94E">{prod_nome}</b> foi gerado.</p>'
-        f'{btn}'
-        f'<p style="color:#888;font-size:.85rem">'
-        f'Clique acima para baixar e salvar o PDF.</p>'
-        f'<a href="/" style="display:inline-block;padding:12px 30px;'
-        f'border:1px solid #C9A94E;color:#C9A94E;text-decoration:none;'
-        f'border-radius:50px;margin-top:10px">← Voltar</a>'
-        f'</body></html>'
-    )
-
-
-
 @app.post("/calculate")
 def calculate(req: PayReq):
     db = Session()
@@ -488,7 +457,7 @@ def pay_stripe(req: PayReq):
 def pay_success(request: Request):
     sid = request.query_params.get("session_id", "")
     if not sid:
-        return HTMLResponse("ERRO: sessao invalida")
+        return HTMLResponse("ERRO")
     try:
         s = stripe.checkout.Session.retrieve(sid)
         meta = getattr(s, "metadata", {}) or {}
@@ -503,7 +472,7 @@ def pay_success(request: Request):
         if not bd:
             bd = "2000-01-01"
     except Exception:
-        return HTMLResponse("ERRO: falha pagamento")
+        return HTMLResponse("ERRO")
     try:
         data = calc(name, bd)
         if product == "pdf17":
@@ -512,92 +481,16 @@ def pay_success(request: Request):
         else:
             pf = pdf8(data, name, bd)
             pn = "Mapa Express"
-        # Tenta email como backup silencioso
         if pf and email:
             try:
                 enviar_email(email, f"Seu {pn}!", f"Ola {name},\n\nPDF anexo.", pf)
-            except:
+            except Exception:
                 pass
-        # Mostra página com download direto
         html = pagina_sucesso(pf, name, pn)
         if pf and os.path.exists(pf):
             os.remove(pf)
         return HTMLResponse(html)
-    except Exception as e:
-        logger.error(f"Erro success: {e}")
-        return HTMLResponse("ERRO ao gerar PDF")
-
-@app.get("/api/pay/urna-success")
-def pay_urna_success(request: Request):
-    sid = request.query_params.get("session_id", "")
-    if not sid:
-        return HTMLResponse("ERRO")
-    try:
-        s = stripe.checkout.Session.retrieve(sid)
-        meta = getattr(s, "metadata", {}) or {}
-        if hasattr(meta, "to_dict"):
-            meta = meta.to_dict()
-        nc = meta.get("nome_completo", "")
-        cr = meta.get("cargo", "vereador")
-        em = meta.get("email", "") or getattr(s, "customer_email", "")
-        nomes = [meta.get(f"nome{i}", "") for i in range(1, 6)
-                 if meta.get(f"nome{i}", "")]
-        if not nomes:
-            return HTMLResponse("ERRO")
-        res, _, sugs = validar_nomes_urna(nomes, cr)
-        cl = CARGO_INFO.get(cr, {}).get("label", cr)
-        pf = pdf_urna(nc, cl, res, sugs)
-        if pf and em:
-            try:
-                enviar_email(em, "Validacao Nome", f"PDF anexo.", pf)
-            except:
-                pass
-        html = pagina_sucesso(pf, nc, "Validacao de Nome de Urna")
-        if pf and os.path.exists(pf):
-            os.remove(pf)
-        return HTMLResponse(html)
-    except:
-        return HTMLResponse("ERRO")
-
-@app.get("/api/pay/eleitoral-success")
-def pay_eleitoral_success(request: Request):
-    sid = request.query_params.get("session_id", "")
-    if not sid:
-        return HTMLResponse("ERRO")
-    try:
-        s = stripe.checkout.Session.retrieve(sid)
-        meta = getattr(s, "metadata", {}) or {}
-        if hasattr(meta, "to_dict"):
-            meta = meta.to_dict()
-        sg = int(meta.get("sigla", "0"))
-        cr = meta.get("cargo", "vereador")
-        em = meta.get("email", "") or getattr(s, "customer_email", "")
-        if not em:
-            return HTMLResponse("ERRO")
-        ne_str = meta.get("numero_existente", "")
-        ss = str(sg).zfill(2)
-        cl_map = {"vereador": "Vereador", "dep_estadual": "Dep. Estadual",
-                  "dep_federal": "Dep. Federal", "senador": "Senador"}
-        cl2 = cl_map.get(cr, cr)
-        sugs = gerar_numeros(sg, cr)
-        ni = None
-        if ne_str and len(ne_str) >= 3:
-            try:
-                en = r1(sum(int(d) for d in ne_str))
-                ni = {"numero": ne_str, "energia": en}
-            except:
-                pass
-        pf = pdf_eleitoral(ss, cl2, sugs, ni)
-        if pf and em:
-            try:
-                enviar_email(em, "Numero Eleitoral", f"PDF para {cl2}.", pf)
-            except:
-                pass
-        html = pagina_sucesso(pf, f"Candidato {cl2}", f"Numero Eleitoral")
-        if pf and os.path.exists(pf):
-            os.remove(pf)
-        return HTMLResponse(html)
-    except:
+    except Exception:
         return HTMLResponse("ERRO")
 
 @app.get("/api/pay/cancel")
