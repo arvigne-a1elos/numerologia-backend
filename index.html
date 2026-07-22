@@ -1,235 +1,434 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Mapa Numerológico</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-:root{--gold:#C9A94E;--gold2:#b8942e;--dark:#0a0a0a;--card:#111;--gray:#a0a0a0;--gray2:#555;--red:#e74c3c;--green:#4CAF50;--orange:#e67e22}
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',sans-serif;background:var(--dark);color:#fff;overflow-x:hidden;line-height:1.6}
-.lang-wrapper{position:fixed;top:0;width:100%;z-index:1100;background:rgba(10,10,10,0.95);backdrop-filter:blur(12px);border-bottom:1px solid #222;padding:8px 0}
-.lang-container{max-width:1200px;margin:0 auto;display:flex;justify-content:center;gap:4px;flex-wrap:wrap}
-.lang-btn{background:transparent;border:1px solid #333;color:#aaa;padding:4px 7px;border-radius:6px;cursor:pointer;font-size:10px;transition:.3s;white-space:nowrap}
-.lang-btn:hover,.lang-btn.active{border-color:var(--gold);color:var(--gold)}
-nav.sections{position:fixed;top:43px;width:100%;z-index:1000;background:rgba(10,10,10,0.85);backdrop-filter:blur(8px);border-bottom:1px solid #222;padding:10px 0;display:flex;justify-content:center;gap:20px;flex-wrap:wrap}
-nav.sections a{color:#888;text-decoration:none;font-size:.75rem;text-transform:uppercase;letter-spacing:1px;transition:.3s}
-nav.sections a:hover{color:var(--gold)}
-.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:130px 20px 60px;background:radial-gradient(circle at center,#1a1a1a 0%,#0a0a0a 100%)}
-.hero-logo{width:140px;height:140px;margin-bottom:25px;border-radius:50%;border:2px solid var(--gold)}
-h1{font-family:'Playfair Display',serif;font-size:clamp(2rem,6vw,4rem);color:var(--gold);margin-bottom:10px}
-.hero-sub{font-size:1.2rem;color:var(--gray);margin-bottom:30px;max-width:700px}
-.hero-btns{display:flex;gap:15px;flex-wrap:wrap;justify-content:center}
-.btn{display:inline-block;padding:14px 32px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0a0a;text-decoration:none;font-weight:700;border-radius:50px;cursor:pointer;border:none;text-transform:uppercase;font-size:.8rem;transition:.3s;font-family:'Inter',sans-serif}
-.btn:hover{transform:translateY(-2px);box-shadow:0 5px 20px rgba(201,169,78,0.35)}
-.btn-sm{padding:10px 20px;font-size:.7rem}
-.btn-outline{background:transparent;color:var(--gold);border:1px solid var(--gold)}
-.btn-block{width:100%}
-.btn-gateway{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:12px;font-size:.85rem;font-weight:600;border:1px solid #333;background:var(--card);color:#fff;cursor:pointer;transition:.3s;font-family:'Inter',sans-serif}
-.btn-gateway:hover{border-color:var(--gold);color:var(--gold)}
-.btn-gateway.active{border-color:var(--gold);background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0a0a}
-section{padding:80px 20px;max-width:1100px;margin:0 auto}
-.section-hidden{display:none}
-.form-box{background:var(--card);padding:40px;border-radius:20px;border:1px solid #222;max-width:600px;margin:0 auto}
-.form-group{margin-bottom:20px;text-align:left}
-.form-group label{display:block;font-size:.8rem;color:#888;margin-bottom:8px}
-.form-group input,.form-group select{width:100%;padding:12px;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;outline:none;font-size:1rem;font-family:'Inter',sans-serif}
-.form-group input:focus,.form-group select:focus{border-color:var(--gold)}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
-.result-card{display:none;margin-top:40px;animation:fadeIn .8s ease}
-.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px}
-.num-box{background:#1a1a1a;padding:20px;border-radius:15px;border:1px solid #222;text-align:center}
-.num-box .val{font-family:'Playfair Display',serif;font-size:2.5rem;color:var(--gold)}
-.num-box .label{font-size:.7rem;text-transform:uppercase;color:#777;margin-top:5px}
-.prod-table{width:100%;border-collapse:collapse;margin-top:40px;font-size:.85rem}
-.prod-table th{text-align:left;padding:15px;border-bottom:2px solid var(--gold);color:var(--gold)}
-.prod-table td{padding:15px;border-bottom:1px solid #222;vertical-align:middle}
-.prod-table tr:hover{background:rgba(255,255,255,0.02)}
-.tag-s8{display:inline-block;background:#1a3a1a;color:var(--green);padding:2px 8px;border-radius:12px;font-size:.65rem;border:1px solid var(--green);white-space:nowrap}
-.tag-breve{display:inline-block;background:#1a1a1a;color:#888;padding:2px 8px;border-radius:12px;font-size:.65rem;border:1px solid #333;white-space:nowrap}
-.prod-card{background:var(--card);border:1px solid #222;border-radius:15px;padding:25px;margin-top:40px}
-.prod-card h3{color:var(--gold);font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:10px}
-.prod-card .price{color:var(--gold);font-size:1.5rem;font-weight:700;margin-bottom:5px}
-.prod-card .desc{color:#888;font-size:.85rem;margin-bottom:15px}
-.gateway-selector{display:flex;gap:10px;flex-wrap:wrap;margin:15px 0}
-.gateway-label{font-size:.75rem;color:#888;margin-bottom:8px;display:block}
-.tab-bar{display:flex;gap:4px;margin-bottom:25px;background:#1a1a1a;border-radius:12px;padding:4px;flex-wrap:wrap}
-.tab-btn{flex:1;min-width:80px;padding:10px;text-align:center;border-radius:10px;background:transparent;color:#888;cursor:pointer;border:none;font-size:.75rem;font-weight:500;transition:.3s;font-family:'Inter',sans-serif}
-.tab-btn.active{background:var(--gold);color:#0a0a0a}
-.energy-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;margin-top:40px}
-.energy-card{background:var(--card);border:1px solid #222;padding:25px;border-radius:15px;text-align:center}
-.energy-card h4{color:var(--gold);font-family:'Playfair Display',serif;font-size:2rem;margin-bottom:10px}
-@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-@keyframes slideDown{from{opacity:0;max-height:0}to{opacity:1;max-height:2000px}}
-.slide-section{animation:slideDown .6s ease;overflow:hidden}
-footer{padding:60px 20px;text-align:center;border-top:1px solid #222;color:#444;font-size:.8rem}
-.gold-bar{width:60px;height:3px;background:var(--gold);margin:0 auto 30px;border-radius:3px}
-.pay-methods{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
-.pay-method{background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:6px 12px;font-size:.7rem;color:#888}
-@media(max-width:768px){.form-grid{grid-template-columns:1fr}}
-</style>
-</head>
-<body>
-<div class="lang-wrapper"><div class="lang-container" id="langSelector"></div></div>
-<nav class="sections">
-<a href="#inicio" data-i18n="nav_home">Início</a>
-<a href="#calc" data-i18n="nav_map">Mapa</a>
-<a href="#produtos" data-i18n="nav_prod">Produtos</a>
-<a href="#urna" data-i18n="nav_urna">Urna</a>
-<a href="#eleitoral" data-i18n="nav_elec">Eleitoral</a>
-<a href="#energias" data-i18n="nav_energy">Energias</a>
-</nav>
-<section id="inicio" class="hero">
-<img src="https://generated-images.adapta.one/arvigne%40gmail.com/019f56cb-b9e4-7644-9dd8-5d14c5261d46/2026-07-14T13-27-24-531Z_Original_user_intent_A_premium_minimalist_logo_s.png" class="hero-logo" alt="A1ELOS">
-<h1 data-i18n="hero_title">MAPA NUMEROLÓGICO</h1>
-<p class="hero-sub" data-i18n="hero_sub">A ciência dos números aplicada ao seu destino, negócios e carreira política</p>
-<div class="hero-btns">
-<button class="btn" onclick="document.getElementById('calc').scrollIntoView({behavior:'smooth'})" data-i18n="hero_btn1">Gerar Mapa Grátis</button>
-<a href="#produtos" class="btn btn-outline" data-i18n="hero_btn2">Ver Produtos</a>
-<a href="#eleitoral" class="btn btn-outline" data-i18n="hero_btn3">Soluções Eleitorais</a>
-</div>
-</section>
-<section id="calc">
-<div class="form-box">
-<h2 style="text-align:center;margin-bottom:30px;font-family:'Playfair Display';color:var(--gold)" data-i18n="calc_title">Calcule seu Mapa</h2>
-<form id="mainForm" onsubmit="event.preventDefault(); calculate()">
-<div class="form-group"><label data-i18n="label_name">Nome Completo</label><input type="text" id="mainName" required></div>
-<div class="form-grid">
-<div class="form-group"><label data-i18n="label_date">Data de Nascimento</label><input type="date" id="mainDate" required></div>
-<div class="form-group"><label data-i18n="label_email">Email</label><input type="email" id="mainEmail" required></div>
-</div>
-<button type="submit" class="btn btn-block" id="calcBtn" data-i18n="btn_calc">Calcular Agora</button>
-</form>
-<div id="calcResult" class="result-card">
-<div id="calcResultGrid" class="result-grid"></div>
-<div class="gold-bar" style="margin-top:40px"></div>
-<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
-<button class="btn btn-sm" onclick="payExpress()" data-i18n="btn_express">📄 Mapa Express PDF — R$ 8</button>
-<button class="btn btn-sm" onclick="payCompleto()" data-i18n="btn_completo">📚 Mapa Completo PDF — R$ 17</button>
-</div>
-</div>
-</div>
-</section>
-<section id="produtos">
-<h2 style="text-align:center;color:var(--gold);font-family:'Playfair Display';margin-bottom:10px" data-i18n="prod_title">Tabela de Preços</h2>
-<div class="gold-bar"></div>
-<p style="text-align:center;color:#888;max-width:700px;margin:0 auto 30px" data-i18n="prod_sub">Todos os preços somam 8 — a energia do poder e da prosperidade</p>
-<!-- Seletor de Gateway -->
-<div style="max-width:600px;margin:0 auto 30px;text-align:center">
-<label class="gateway-label" data-i18n="gateway_label">Forma de Pagamento:</label>
-<div class="gateway-selector" style="justify-content:center">
-<button class="btn-gateway active" data-gateway="stripe" onclick="setGateway('stripe',this)">💳 Cartão (Stripe)</button>
-<button class="btn-gateway" data-gateway="mercadopago" onclick="setGateway('mercadopago',this)">🇧🇷 Pix/Boleto (M.Pago)</button>
-</div>
-</div>
-<table class="prod-table"><thead><tr><th data-i18n="th_prod">Produto</th><th data-i18n="th_price">Preço</th><th data-i18n="th_energy">Soma 8</th><th data-i18n="th_action">Ação</th></tr></thead><tbody id="prodTableBody"></tbody></table>
-<div id="prodCards"></div>
-</section>
-<section id="urna" class="section-hidden">
-<div class="form-box slide-section">
-<h2 style="text-align:center;margin-bottom:10px;font-family:'Playfair Display';color:var(--gold)" data-i18n="urna_title">Validação do Nome de Urna</h2>
-<p style="text-align:center;color:#888;margin-bottom:30px;font-size:.9rem" data-i18n="urna_desc">5 tentativas + cálculo letra a letra + sugestões com cargo + PDF sigiloso — R$ 26</p>
-<form id="urnaForm" onsubmit="event.preventDefault(); payUrna()">
-<div class="form-group"><label data-i18n="urna_name">Nome Completo</label><input type="text" id="urnaFullName" required></div>
-<div class="form-group"><label data-i18n="urna_cargo">Cargo</label><select id="urnaCargo" required><option value="vereador">Vereador</option><option value="dep_estadual">Dep. Estadual</option><option value="dep_federal">Dep. Federal</option><option value="senador">Senador</option></select></div>
-<div class="form-group"><label data-i18n="urna_email">Email</label><input type="email" id="urnaEmail" required></div>
-<p style="color:#888;font-size:.8rem;margin-bottom:15px" data-i18n="urna_5names">Insira até 5 opções:</p>
-<div class="form-group"><label>Nome 1</label><input type="text" id="urnaNome1" required></div>
-<div class="form-group"><label>Nome 2</label><input type="text" id="urnaNome2"></div>
-<div class="form-group"><label>Nome 3</label><input type="text" id="urnaNome3"></div>
-<div class="form-group"><label>Nome 4</label><input type="text" id="urnaNome4"></div>
-<div class="form-group"><label>Nome 5</label><input type="text" id="urnaNome5"></div>
-<button type="submit" class="btn btn-block" style="font-size:1rem;padding:16px" id="urnaBtn">🔒 Pagar R$ 26</button>
-</form>
-</div>
-</section>
-<section id="eleitoral" class="section-hidden">
-<div class="form-box slide-section">
-<h2 style="text-align:center;margin-bottom:10px;font-family:'Playfair Display';color:var(--gold)" data-i18n="elec_title">Cálculo do Número Eleitoral</h2>
-<p style="text-align:center;color:#888;margin-bottom:10px;font-size:.9rem" data-i18n="elec_desc">Sugestões com energia 8 — R$ 26</p>
-<p style="text-align:center;color:#555;margin-bottom:20px;font-size:.8rem;font-style:italic" data-i18n="elec_mask">Por lei eleitoral, números não podem ser divulgados publicamente.</p>
-<div class="tab-bar">
-<button class="tab-btn active" onclick="setCargo('vereador',this)">Vereador (5)</button>
-<button class="tab-btn" onclick="setCargo('dep_estadual',this)">Dep. Estadual (5)</button>
-<button class="tab-btn" onclick="setCargo('dep_federal',this)">Dep. Federal (4)</button>
-<button class="tab-btn" onclick="setCargo('senador',this)">Senador (3)</button>
-</div>
-<form id="eleitoralForm" onsubmit="event.preventDefault(); payEleitoral()">
-<div class="form-group"><label data-i18n="elec_sigla">Sigla (2 dígitos)</label><input type="number" id="eleitoralSigla" min="10" max="99" placeholder="XX" required></div>
-<div class="form-group"><label data-i18n="elec_existente">Número existente (opcional)</label><input type="text" id="eleitoralNumero" placeholder="XXXXX"></div>
-<div class="form-group"><label data-i18n="elec_email">Email</label><input type="email" id="eleitoralEmail" required></div>
-<input type="hidden" id="eleitoralCargo" value="vereador">
-<button type="submit" class="btn btn-block" style="font-size:1rem;padding:16px" id="eleitoralBtn">🔒 Pagar R$ 26</button>
-</form>
-</div>
-</section>
-<section id="energias">
-<h2 style="text-align:center;color:var(--gold);font-family:'Playfair Display';margin-bottom:10px" data-i18n="energy_title">Significado das Energias</h2>
-<div class="gold-bar"></div>
-<p style="text-align:center;color:#888;max-width:700px;margin:0 auto 20px" data-i18n="energy_desc">Cada número carrega uma vibração específica que influencia diferentes áreas da vida.</p>
-<div class="energy-grid" id="energyGrid"></div>
-</section>
-<footer><p>© A1ELOS Assessoria e Consultoria — <span data-i18n="footer_text">A ciência dos números aplicada ao seu sucesso</span></p></footer>
-<script>
-// ═══ 12 IDIOMAS ═══
-const LANGS=[{code:'pt',label:'🇧🇷 PT',name:'Português'},{code:'en',label:'🇺🇸 EN',name:'English'},{code:'es',label:'🇪🇸 ES',name:'Español'},{code:'fr',label:'🇫🇷 FR',name:'Français'},{code:'de',label:'🇩🇪 DE',name:'Deutsch'},{code:'it',label:'🇮🇹 IT',name:'Italiano'},{code:'ja',label:'🇯🇵 JP',name:'日本語'},{code:'zh',label:'🇨🇳 ZH',name:'中文'},{code:'ko',label:'🇰🇷 KO',name:'한국어'},{code:'ru',label:'🇷🇺 RU',name:'Русский'},{code:'ar',label:'🇸🇦 AR',name:'العربية'},{code:'nl',label:'🇳🇱 NL',name:'Nederlands'}];
-const PRODUTOS=[
-{id:'express',emoji:'🔮',nome:'Mapa Express (tela)',desc:'5 números na tela. Grátis.',preco:'Grátis',soma:0,link:'#calc',btn:'Calcular',status:'ativo'},
-{id:'express_pdf',emoji:'📄',nome:'Mapa Express PDF',desc:'5 números com análise do livro. 1 página.',preco:'R$ 8',soma:'8',btn:'Adquirir R$ 8',status:'ativo'},
-{id:'completo',emoji:'📚',nome:'Mapa Completo PDF',desc:'10+ páginas: Grade, Ciclos, Desafios, Tabela Relações.',preco:'R$ 17',soma:'1+7=8',btn:'Adquirir R$ 17',status:'ativo'},
-{id:'urna',emoji:'🗳️',nome:'Validação Nome de Urna',desc:'5 nomes + letra a letra + PDF sigiloso.',preco:'R$ 26',soma:'3+5=8',link:'#urna',btn:'Acessar',status:'ativo'},
-{id:'eleitoral',emoji:'🔢',nome:'Cálculo Nº Eleitoral',desc:'5 números energia 8 + explicação.',preco:'R$ 26',soma:'2+6=8',link:'#eleitoral',btn:'Acessar',status:'ativo'},
-{id:'empresarial',emoji:'💼',nome:'Validação Empresarial',desc:'Análise empresarial + PDF.',preco:'R$ 26',soma:'2+6=8',btn:'Em breve',status:'breve'},
-{id:'artistico',emoji:'🎭',nome:'Validação Nome Artístico',desc:'Análise artística + PDF.',preco:'R$ 26',soma:'2+6=8',btn:'Em breve',status:'breve'},
-{id:'casal',emoji:'👥',nome:'Mapa Casal Completo',desc:'2 mapas + compatibilidade.',preco:'R$ 44',soma:'4+4=8',btn:'Em breve',status:'breve'},
-{id:'premium',emoji:'🌟',nome:'Mapa Premium Família',desc:'Até 4 pessoas + PDF.',preco:'R$ 197',soma:'1+9+7=17→8',btn:'Em breve',status:'breve'}
-];
-const i18n={};const KEYS=['nav_home','nav_map','nav_prod','nav_urna','nav_elec','nav_energy','hero_title','hero_sub','hero_btn1','hero_btn2','hero_btn3','calc_title','label_name','label_date','label_email','btn_calc','btn_express','btn_completo','prod_title','prod_sub','gateway_label','th_prod','th_price','th_energy','th_action','urna_title','urna_desc','urna_name','urna_cargo','urna_email','urna_5names','elec_title','elec_desc','elec_mask','elec_sigla','elec_existente','elec_email','energy_title','energy_desc','footer_text'];
-const TRAD={
-pt:'Início|Mapa|Produtos|Urna|Eleitoral|Energias|MAPA NUMEROLÓGICO|A ciência dos números aplicada ao seu destino, negócios e carreira política|Gerar Mapa Grátis|Ver Produtos|Soluções Eleitorais|Calcule seu Mapa|Nome Completo|Data de Nascimento|Email|Calcular Agora|📄 Mapa Express — R$ 8|📚 Mapa Completo — R$ 17|Tabela de Preços|Todos os preços somam 8 — energia do poder|Forma de Pagamento:|Produto|Preço|Soma 8|Ação|Validação do Nome de Urna|5 tentativas + cálculo letra a letra + PDF — R$ 26|Nome Completo|Cargo|Email|Insira até 5 opções:|Cálculo do Número Eleitoral|Sugestões com energia 8 — R$ 26|Por lei eleitoral, números não podem ser divulgados publicamente.|Sigla (2 dígitos)|Número existente (opcional)|Email|Significado das Energias|Cada número carrega uma vibração específica.|A ciência dos números aplicada ao seu sucesso',
-en:'Home|Map|Products|Ballot Name|Electoral|Energies|NUMEROLOGICAL MAP|The science of numbers for your destiny, business and political career|Generate Free Map|View Products|Electoral Solutions|Calculate Your Map|Full Name|Birth Date|Email|Calculate Now|📄 Express Map — R$ 8|📚 Full Map — R$ 17|Price Table|All prices sum to 8 — energy of power|Payment Method:|Product|Price|Sum 8|Action|Ballot Name Validation|5 attempts + letter-by-letter + PDF — R$ 26|Full Name|Position|Email|Enter up to 5 options:|Electoral Number|Energy 8 suggestions — R$ 26|By law, numbers cannot be publicly displayed.|Party Number (2 digits)|Existing number (optional)|Email|Meaning of Energies|Each number carries a specific vibration.|The science of numbers for your success',
-es:'Inicio|Mapa|Productos|Urna|Electoral|Energías|MAPA NUMEROLÓGICO|La ciencia de los números para tu destino, negocios y carrera política|Generar Mapa Gratis|Ver Productos|Soluciones Electorales|Calcula tu Mapa|Nombre Completo|Fecha de Nacimiento|Email|Calcular Ahora|📄 Mapa Express — R$ 8|📚 Mapa Completo — R$ 17|Tabla de Precios|Todos los precios suman 8 — energía del poder|Método de Pago:|Producto|Precio|Suma 8|Acción|Validación de Nombre de Urna|5 intentos + cálculo letra a letra + PDF — R$ 26|Nombre Completo|Cargo|Email|Ingresa hasta 5 opciones:|Número Electoral|Sugerencias con energía 8 — R$ 26|Por ley, los números no pueden ser divulgados públicamente.|Número del Partido (2 dígitos)|Número existente (opcional)|Email|Significado de las Energías|Cada número tiene una vibración específica.|La ciencia de los números para tu éxito'
-};
-// Inicializar i18n
-for(var lang in TRAD){i18n[lang]={};var vals=TRAD[lang].split('|');for(var i=0;i<KEYS.length;i++){i18n[lang][KEYS[i]]=vals[i]||TRAD.pt.split('|')[i]||''}}
-function t(k){var l=localStorage.getItem('a1elos-lang')||'pt';return(i18n[l]||i18n.pt)[k]||i18n.pt[k]||k}
-function applyLang(){var l=localStorage.getItem('a1elos-lang')||'pt';document.querySelectorAll('[data-i18n]').forEach(function(el){el.textContent=t(el.dataset.i18n)});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===l)});document.documentElement.dir=(l==='ar')?'rtl':'ltr'}
-function setLang(code){localStorage.setItem('a1elos-lang',code);applyLang();renderProdTable();renderProdCards();renderEnergyGrid()}
-// Idioma
-(function(){var c=document.getElementById('langSelector');if(!c)return;LANGS.forEach(function(l){var b=document.createElement('button');b.className='lang-btn'+((localStorage.getItem('a1elos-lang')||'pt')===l.code?' active':'');b.dataset.lang=l.code;b.textContent=l.label;b.title=l.name;b.onclick=function(){setLang(l.code)};c.appendChild(b)})})();
-// Gateway
-var currentGateway='stripe';
-function setGateway(g,b){currentGateway=g;document.querySelectorAll('.btn-gateway').forEach(function(x){x.classList.remove('active')});if(b)b.classList.add('active')}
-// Produtos
-function renderProdTable(){var tb=document.getElementById('prodTableBody');if(!tb)return;tb.innerHTML='';PRODUTOS.forEach(function(p){var tr=document.createElement('tr');var sc=p.status==='ativo'?'tag-s8':'tag-breve';var sl=p.status==='ativo'?(p.soma?'✅ Soma '+p.soma:'✅'):'📅 Em breve';var bh='';if(p.status==='ativo'){if(p.link){bh='<a href="'+p.link+'" class="btn btn-sm">'+p.btn+'</a>'}else if(p.id==='express_pdf'){bh='<button class="btn btn-sm" onclick="payExpress()">'+p.btn+'</button>'}else if(p.id==='completo'){bh='<button class="btn btn-sm" onclick="payCompleto()">'+p.btn+'</button>'}}tr.innerHTML='<td>'+p.emoji+' '+p.nome+'<br><span style="font-size:.75rem;color:#888">'+p.desc+'</span></td><td style="font-weight:700;color:var(--gold)">'+p.preco+'</td><td><span class="'+sc+'">'+sl+'</span></td><td>'+bh+'</td>';tb.appendChild(tr)})}
-function renderProdCards(){var container=document.getElementById('prodCards');if(!container)return;container.innerHTML='';PRODUTOS.forEach(function(p){var card=document.createElement('div');card.className='prod-card';var st=p.status==='ativo'?'<span class="tag-s8">✅ Ativo'+(p.soma?' | Soma '+p.soma:'')+'</span>':'<span class="tag-breve">📅 Em breve</span>';var bh='';if(p.status==='ativo'){if(p.id==='express_pdf')bh='<button class="btn btn-sm" onclick="payExpress()">'+p.btn+'</button>';else if(p.id==='completo')bh='<button class="btn btn-sm" onclick="payCompleto()">'+p.btn+'</button>';else if(p.link)bh='<a href="'+p.link+'" class="btn btn-sm">'+p.btn+'</a>'}card.innerHTML='<h3>'+p.emoji+' '+p.nome+'</h3><div class="price">'+p.preco+'</div><div class="desc">'+p.desc+'</div><div style="margin-bottom:12px">'+st+'</div>'+bh;container.appendChild(card)})}
-// Energias
-var ENERGY_DATA=[
-{n:1,pt:'Liderança, independência, originalidade',en:'Leadership, independence, originality'},
-{n:2,pt:'Cooperação, diplomacia, sensibilidade',en:'Cooperation, diplomacy, sensitivity'},
-{n:3,pt:'Criatividade, comunicação, alegria',en:'Creativity, communication, joy'},
-{n:4,pt:'Trabalho, disciplina, estabilidade',en:'Work, discipline, stability'},
-{n:5,pt:'Liberdade, aventura, versatilidade',en:'Freedom, adventure, versatility'},
-{n:6,pt:'Família, amor, responsabilidade',en:'Family, love, responsibility'},
-{n:7,pt:'Sabedoria, espiritualidade, análise',en:'Wisdom, spirituality, analysis'},
-{n:8,pt:'Poder, prosperidade, realização (IDEAL)',en:'Power, prosperity, achievement (IDEAL)'},
-{n:9,pt:'Humanitarismo, comp放松ão, generosidade',en:'Humanitarianism, compassion, generosity'}
-];
-function renderEnergyGrid(){var g=document.getElementById('energyGrid');if(!g)return;var l=localStorage.getItem('a1elos-lang')||'pt';g.innerHTML='';ENERGY_DATA.forEach(function(e){var txt=e[l]||e.pt;var c=document.createElement('div');c.className='energy-card';c.innerHTML='<h4>'+e.n+'</h4><p style="color:var(--gray);font-size:.9rem">'+txt+'</p>';g.appendChild(c)})}
-function showSection(id){var el=document.getElementById(id);if(!el)return;el.classList.remove('section-hidden');el.scrollIntoView({behavior:'smooth',block:'start'})}
-// Calcular
-async function calculate(){var n=document.getElementById('mainName').value.trim();var d=document.getElementById('mainDate').value;var e=document.getElementById('mainEmail').value.trim();var btn=document.getElementById('calcBtn');var rd=document.getElementById('calcResult'),rg=document.getElementById('calcResultGrid');var rg=document.getElementById('calcResultGrid');if(!n||!d||!e){alert('Preencha todos os campos');return}btn.textContent='Calculando...';btn.disabled=true;if(rd)rd.style.display='none';try{var r=await fetch('/calculate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,birth_date:d,email:e,product:'pdf8',lang:localStorage.getItem('a1elos-lang')||'pt'})});var data=await r.json();var items=[{key:'life_path',label:'Vida'},{key:'expression',label:'Expressão'},{key:'soul_urge',label:'Motivação'},{key:'personality',label:'Personalidade'},{key:'destiny',label:'Destino'}];rg.innerHTML='';items.forEach(function(i){var b=document.createElement('div');b.className='num-box';b.innerHTML='<div class="val">'+data[i.key]+'</div><div class="label">'+i.label+'</div>';rg.appendChild(b)});if(rd){rd.style.display='block';rd.scrollIntoView({behavior:'smooth'})}}catch(ex){rg.innerHTML='<p style="color:#e74c3c;text-align:center">Erro ao calcular.</p>';if(rd)rd.style.display='block'}btn.textContent=t('btn_calc');btn.disabled=false}
-// Pay helper
-async function payStripe(body){var r=await fetch('/api/pay/stripe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});var data=await r.json();if(data.payment_url)window.location.href=data.payment_url;else alert('Erro ao criar pagamento')}
-async function payMercadoPago(body){var r=await fetch('/api/pay/mercadopago',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});var data=await r.json();if(data.payment_url)window.location.href=data.payment_url;else alert('Erro ao criar pagamento')}
-async function payCommon(body){if(currentGateway==='stripe'){await payStripe(body)}else{await payMercadoPago(body)}}
-async function payExpress(){var n=document.getElementById('mainName').value.trim();var d=document.getElementById('mainDate').value;var e=document.getElementById('mainEmail').value.trim();if(!n||!d||!e){alert('Preencha nome, data e email primeiro');return}await payCommon({name:n,birth_date:d,email:e,product:'pdf8',price:8,lang:localStorage.getItem('a1elos-lang')||'pt'})}
-async function payCompleto(){var n=document.getElementById('mainName').value.trim();var d=document.getElementById('mainDate').value;var e=document.getElementById('mainEmail').value.trim();if(!n||!d||!e){alert('Preencha nome, data e email primeiro');return}await payCommon({name:n,birth_date:d,email:e,product:'pdf17',price:17,lang:localStorage.getItem('a1elos-lang')||'pt'})}
-async function payUrna(){var fn=document.getElementById('urnaFullName').value.trim();var cr=document.getElementById('urnaCargo').value;var em=document.getElementById('urnaEmail').value.trim();var n1=document.getElementById('urnaNome1').value.trim();var n2=document.getElementById('urnaNome2').value.trim();var n3=document.getElementById('urnaNome3').value.trim();var n4=document.getElementById('urnaNome4').value.trim();var n5=document.getElementById('urnaNome5').value.trim();if(!fn||fn.length<3){alert('Nome obrigatório');return}if(!em){alert('Email obrigatório');return}if(!n1){alert('Pelo menos Nome 1');return}var btn=document.getElementById('urnaBtn');btn.textContent='Redirecionando...';btn.disabled=true;try{var r=await fetch('/api/pay/urna-session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome_completo:fn,cargo:cr,email:em,nome1:n1,nome2:n2,nome3:n3,nome4:n4,nome5:n5})});var data=await r.json();if(data.payment_url)window.location.href=data.payment_url;else{alert('Erro');btn.textContent='🔒 Pagar R$ 26';btn.disabled=false}}catch(ex){alert('Erro');btn.textContent='🔒 Pagar R$ 26';btn.disabled=false}}
-var selCargo='vereador';function setCargo(c,b){selCargo=c;document.getElementById('eleitoralCargo').value=c;document.querySelectorAll('.tab-btn').forEach(function(x){x.classList.remove('active')});if(b)b.classList.add('active')}
-async function payEleitoral(){var s=parseInt(document.getElementById('eleitoralSigla').value);var ne=document.getElementById('eleitoralNumero').value.trim();var em=document.getElementById('eleitoralEmail').value.trim();if(!s||s<10||s>99){alert('Sigla: 2 dígitos (10-99)');return}if(!em){alert('Email obrigatório');return}var btn=document.getElementById('eleitoralBtn');btn.textContent='Redirecionando...';btn.disabled=true;try{var r=await fetch('/api/pay/eleitoral-session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sigla:s,cargo:selCargo,numero_existente:ne||'',email:em})});var data=await r.json();if(data.payment_url)window.location.href=data.payment_url;else{alert('Erro');btn.textContent='🔒 Pagar R$ 26';btn.disabled=false}}catch(ex){alert('Erro');btn.textContent='🔒 Pagar R$ 26';btn.disabled=false}}
-document.addEventListener('DOMContentLoaded',function(){applyLang();renderProdTable();renderProdCards();renderEnergyGrid();if(window.location.hash==='#urna'||window.location.hash==='#eleitoral'){showSection(window.location.hash.replace('#',''))}});
-</script>
-</body>
-</html>
+import os, logging, uuid, stripe, base64, traceback
+from datetime import datetime
+from typing import Optional
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from sqlalchemy import create_engine, Column, String, Integer, Float, DateTime
+from sqlalchemy.orm import sessionmaker, declarative_base
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail, Email, To, Content, Attachment, FileContent, FileName, FileType, Disposition
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER, TA_LEFT
+import dateutil.parser as dp
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+STRIPE_KEY = os.getenv("STRIPE_SECRET_KEY", "")
+SENDGRID_KEY = os.getenv("SENDGRID_API_KEY", "")
+FROM_EMAIL = os.getenv("FROM_EMAIL", "arvigne@gmail.com")
+FROM_NAME = "Mapa Numerologico | A1ELOS"
+BASE_URL = os.getenv("BASE_URL", "https://numerologia-api-wd2q.onrender.com")
+DB_URL = os.getenv("DATABASE_URL", "sqlite:///./numerologia.db")
+
+logger.info(f"Stripe={bool(STRIPE_KEY)} SendGrid={bool(SENDGRID_KEY)}")
+if STRIPE_KEY: stripe.api_key = STRIPE_KEY
+
+engine = create_engine(DB_URL, connect_args={"check_same_thread": False})
+Base = declarative_base()
+Session = sessionmaker(bind=engine)
+
+class Calc(Base):
+    __tablename__ = "calculations"
+    id = Column(String, primary_key=True)
+    name = Column(String); birth_date = Column(String); email = Column(String, nullable=True)
+    life_path = Column(Integer); expression = Column(Integer); soul_urge = Column(Integer)
+    personality = Column(Integer); destiny = Column(Integer)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Order(Base):
+    __tablename__ = "orders"
+    id = Column(String, primary_key=True); email = Column(String); product = Column(String)
+    price = Column(Float); status = Column(String, default="pending")
+    payment_id = Column(String, nullable=True); created_at = Column(DateTime, default=datetime.utcnow)
+
+Base.metadata.create_all(bind=engine)
+app = FastAPI()
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+
+class PayReq(BaseModel):
+    name: str; email: str; product: Optional[str] = "pdf8"; price: Optional[float] = 0
+    calculation_id: Optional[str] = None; birth_date: Optional[str] = None; lang: Optional[str] = "pt"
+
+class UrnaPayReq(BaseModel):
+    nome_completo: str; cargo: str; nome1: str; nome2: str = ""; nome3: str = ""; nome4: str = ""; nome5: str = ""; email: str
+
+class EleitoralPayReq(BaseModel):
+    sigla: int; cargo: str; numero_existente: Optional[str] = ""; email: str
+
+GOLD = colors.HexColor("#B8860B"); LGRAY = colors.HexColor("#f0f0f0"); DARK = colors.HexColor("#222"); GRAY = colors.HexColor("#888")
+FONTE = "Helvetica"; FN = "Helvetica-Bold"; TAM_T = 20; TAM_C = 14; EL = TAM_C * 1.5; ET = TAM_T * 2.0
+CARGO_INFO = {"vereador": {"label": "Vereador"}, "dep_estadual": {"label": "Deputado Estadual"}, "dep_federal": {"label": "Deputado Federal"}, "senador": {"label": "Senador"}}
+ENERGIAS = {1: "Lideranca", 2: "Cooperacao", 3: "Criatividade", 4: "Trabalho", 5: "Liberdade", 6: "Familia", 7: "Sabedoria", 8: "Poder e Prosperidade (IDEAL)", 9: "Humanitarismo"}
+
+def r1(n):
+    while n > 9 and n not in (11, 22, 33): n = sum(int(d) for d in str(n))
+    return n
+
+def calc_nome(nome):
+    t = {c: (i % 9 or 9) for i, c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)}
+    limpo = nome.upper().replace(" ", "").replace(".", "").replace("-", "").replace(",", "")
+    total = sum(t.get(c, 0) for c in limpo if c in t)
+    return r1(total), total
+
+def calc(nome, data_str):
+    bd = dp.parse(data_str).date(); lp = r1(bd.day + bd.month + bd.year)
+    t = {c: (i % 9 or 9) for i, c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)}
+    nu = nome.upper().replace(" ", ""); te = 0; tv = 0; tp = 0
+    for ch in nu:
+        val = t.get(ch, 0); te += val
+        if ch in "AEIOU": tv += val; else: tp += val
+    return {"life_path": lp, "expression": r1(te), "soul_urge": r1(tv), "personality": r1(tp), "destiny": r1(r1(te)+lp)}
+
+def calc_grid(nome):
+    t = {c: (i % 9 or 9) for i, c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)}
+    g = {i: 0 for i in range(1, 10)}
+    for ch in nome.upper().replace(" ", ""):
+        v = t.get(ch, 0)
+        if 1 &lt;= v &lt;= 9: g[v] += 1
+    return g
+
+def validar_nomes_urna(nomes, cargo_key):
+    results = []; lv = {c: (i % 9 or 9) for i, c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)}
+    for nome in nomes:
+        if not nome.strip(): continue
+        limpo = nome.upper().replace(" ", "").replace(".", "").replace("-", "").replace(",", "")
+        letras = []; st = 0
+        for c in limpo: v = lv.get(c, 0); letras.append({"letra": c, "valor": v}); st += v
+        en = r1(st)
+        if en == 8: expl = f"Nome {nome.strip().title()} tem ENERGIA 8! Ideal para candidatura."
+        else: expl = f"Nome {nome.strip().title()} tem energia {en}. {ENERGIAS.get(en, '')}. O 8 (Poder) e o ideal."
+        results.append({"nome": nome.strip().title(), "energia": en, "soma": st, "eh_ideal": en == 8, "explicacao": expl, "letras": letras})
+    ideal = any(r["eh_ideal"] for r in results); sugs = []
+    if not ideal:
+        for nome in nomes:
+            if not nome.strip(): continue
+            lbl = CARGO_INFO.get(cargo_key, {}).get("label", "")
+            if not lbl: continue
+            for nt in [f"{lbl[:3]} {nome.strip()}", f"{nome.strip()} - {lbl.lower()[:3]}"]:
+                en, _ = calc_nome(nt); sugs.append({"nome": nt.title(), "energia": en, "eh_ideal": en == 8})
+                if len(sugs) >= 3: break
+            if len(sugs) >= 3: break
+    return results, ideal, sugs[:3]
+
+def gerar_numeros(sigla, cargo, qtd=5):
+    dc = {"vereador": 5, "dep_estadual": 5, "dep_federal": 4, "senador": 3}
+    td = dc.get(cargo, 5); ss = str(sigla).zfill(2)[:2]; sm = int(ss[0])+int(ss[1]); lv = td-2
+    res = []; tent = set()
+    ei = {8: "Poder e Prosperidade (IDEAL)", 7: "Sabedoria", 3: "Criacao", 1: "Lideranca", 9: "Humanitarismo", 5: "Liberdade", 6: "Familia", 4: "Trabalho", 2: "Associacao"}
+    def busca(alvo):
+        enc = []
+        for x in range(10**lv):
+            if len(enc)+len(res) >= qtd: break
+            dl = str(x).zfill(lv); en = r1(sm+sum(int(d) for d in dl))
+            if en == alvo:
+                n = ss+dl
+                if n not in tent:
+                    if 0 &lt; x &lt; 10 and alvo != r1(sm): continue
+                    tent.add(n); st = sm+sum(int(d) for d in dl)
+                    enc.append({"numero": n, "energia": alvo, "ideal": alvo == 8, "sigla": ss, "digitos_livres": dl, "soma_sigla": sm, "soma_total": st, "nome_energia": ei.get(alvo, ""), "explicacao_calculo": f"Sigla {ss} ({ss[0]}+{ss[1]}={sm}) + digitos {dl} ({'+'.join(dl)}={st-sm}) = {st} -> {alvo}"})
+        return enc
+    res.extend(busca(8))
+    if len(res) &lt; qtd: res.extend(busca(3))
+    if len(res) &lt; qtd:
+        for e in [7, 1, 9, 5, 6, 4, 2]:
+            if len(res) >= qtd: break
+            res.extend(busca(e))
+    return res[:qtd]
+
+# Dados do livro Monique Cissay
+SIG = {
+    1: ("Individualidade", "Original, criativo, lider nato, independente. Energia do comeco, do impulso criador.", "Egoista, arrogante, dominador, impulsivo.", "Desenvolver humildade e saber trabalhar em equipe."),
+    2: ("Associacao", "Diplomatico, sensivel, cooperativo, pacificador.", "Indeciso, carente, submisso, hipersensivel.", "Desenvolver autoconfianca e independencia emocional."),
+    3: ("Criacao", "Criativo, comunicativo, otimista, carismatico.", "Superficial, disperso, exagerado, dramatico.", "Desenvolver foco e profundidade na expressao."),
+    4: ("Trabalho", "Pratico, disciplinado, confiavel, leal, persistente.", "Rigido, teimoso, lento para mudar.", "Desenvolver flexibilidade e leveza."),
+    5: ("Liberdade", "Livre, versatil, aventureiro, progressista.", "Impulsivo, irresponsavel, ansioso.", "Equilibrar liberdade com responsabilidade."),
+    6: ("Familia", "Responsavel, amoroso, protetor, justo.", "Superprotetor, intrometido.", "Amar sem controlar. Respeitar o espaco alheio."),
+    7: ("Sabedoria", "Sabio, analitico, espiritual, intuitivo.", "Frio, sarcastico, isolado, desconfiado.", "Equilibrar razao e emocao. Compartilhar conhecimento."),
+    8: ("Poder", "Poderoso, realizador, prospero, estrategista.", "Materialista, autoritario, workaholic.", "Usar o poder com integridade."),
+    9: ("Humanidade", "Humanitario, generoso, compassivo, sabio.", "Melancolico, disperso, vitimista.", "Perdoar e deixar ir."),
+    11: ("Mestre Inspirador", "Intuitivo, iluminado, inspirador, visionario.", "Ansioso, nervoso, distante.", "Equilibrar mundo espiritual com o material."),
+    22: ("Mestre Construtor", "Realizador, visionario pratico.", "Ambicioso excessivo, estressado.", "Construir sem escravizar-se ao trabalho.")
+}
+CAM = {
+    1: ("Realizacao", "Sua missao e abrir caminhos, liderar e inovar."),
+    2: ("Paz e Cooperacao", "Sua missao e cooperar, equilibrar e servir como ponte."),
+    3: ("Alegria e Criacao", "Sua missao e comunicar, criar e inspirar alegria."),
+    4: ("Acao e Estrutura", "Sua missao e construir, organizar e criar estrutura."),
+    5: ("Evolucao e Liberdade", "Sua missao e experimentar, mudar e evoluir."),
+    6: ("Conciliacao e Responsabilidade", "Sua missao e servir, cuidar e harmonizar."),
+    7: ("Sabedoria e Perfeicao", "Sua missao e buscar a verdade."),
+    8: ("Justica e Prosperidade", "Sua missao e manifestar abundancia com sabedoria."),
+    9: ("Sabedoria e Humanitarismo", "Sua missao e servir a humanidade."),
+    11: ("Inspiracao Divina", "Sua missao e iluminar e elevar a consciencia."),
+    22: ("Construcao em Grande Escala", "Sua missao e realizar grandes obras.")
+}
+DES = {0: "Equilibrio natural.", 1: "Superar o egoismo.", 2: "Vencer a timidez.", 3: "Evitar a dispersao.", 4: "Superar a rigidez.", 5: "Controlar os excessos.", 6: "Evitar a superprotecao.", 7: "Vencer o isolamento.", 8: "Equilibrar ambicao com etica.", 9: "Superar o desapego."}
+VIB = {1: "Nasceu sob vibracao 1. Lider nato.", 2: "Nasceu sob vibracao 2. Sensivel, diplomatico.", 3: "Nasceu sob vibracao 3. Comunicativo, criativo.", 4: "Nasceu sob vibracao 4. Trabalhador, disciplinado.", 5: "Nasceu sob vibracao 5. Livre, versatil.", 6: "Nasceu sob vibracao 6. Amoroso, responsavel.", 7: "Nasceu sob vibracao 7. Sabio, introspectivo.", 8: "Nasceu sob vibracao 8. Poderoso, realizador.", 9: "Nasceu sob vibracao 9. Humanitario, generoso."}
+
+def pdf8(data, nome, bd):
+    path = f"/tmp/p8_{uuid.uuid4().hex[:8]}.pdf"
+    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=45, rightMargin=45, topMargin=18, bottomMargin=15)
+    e = []; e.append(Spacer(1, 8))
+    e.append(Paragraph("MAPA NUMEROLOGICO EXPRESS", ParagraphStyle("T", fontName=FN, fontSize=15, textColor=GOLD, alignment=TA_CENTER, spaceAfter=3, leading=18)))
+    e.append(Paragraph(nome.upper(), ParagraphStyle("N", fontName=FN, fontSize=10, alignment=TA_CENTER, textColor=DARK, spaceAfter=1)))
+    e.append(Paragraph(bd, ParagraphStyle("D", fontName=FONTE, fontSize=8, alignment=TA_CENTER, textColor=GRAY, spaceAfter=5)))
+    td = [["Numero", "Valor"]] + [[l, str(data[k])] for k, l in [("life_path", "Caminho de Vida"), ("expression", "Expressao"), ("soul_urge", "Motiv.Alma"), ("personality", "Personalidade"), ("destiny", "Destino")]]
+    tbl = Table(td, colWidths=[170, 110])
+    tbl.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, 0), GOLD), ("TEXTCOLOR", (0, 0), (-1, 0), colors.white), ("FONTSIZE", (0, 0), (-1, -1), 8.5), ("FONTNAME", (0, 0), (-1, -1), FONTE), ("GRID", (0, 0), (-1, -1), 0.3, colors.grey), ("ALIGN", (1, 0), (1, -1), "CENTER"), ("BACKGROUND", (0, 1), (-1, -1), LGRAY), ("TEXTCOLOR", (0, 1), (-1, -1), DARK), ("TOPPADDING", (0, 0), (-1, -1), 2), ("BOTTOMPADDING", (0, 0), (-1, -1), 2)]))
+    e.append(tbl); e.append(Spacer(1, 3))
+    TXT = {1: "Lider nato, pioneiro.", 2: "Diplomata, sensivel.", 3: "Criativo, comunicador.", 4: "Pratico, disciplinado.", 5: "Livre, aventureiro.", 6: "Amoroso, responsavel.", 7: "Sabio, espiritual.", 8: "Poderoso, prospero.", 9: "Humanitario, generoso.", 11: "Mestre intuitivo.", 22: "Mestre construtor."}
+    for k, l in [("life_path", "Vida"), ("expression", "Expressao"), ("soul_urge", "Alma"), ("personality", "Personal."), ("destiny", "Destino")]:
+        v = data[k]; txt = TXT.get(v, "Unico.")
+        e.append(Paragraph(f"<b>{l} {v}:</b> {txt}", ParagraphStyle("X", fontName=FONTE, fontSize=8, leading=9.5, textColor=DARK, spaceAfter=1)))
+    e.append(Paragraph("(c) A1ELOS", ParagraphStyle("F", fontName=FONTE, fontSize=6.5, textColor=GRAY, alignment=TA_CENTER, spaceBefore=3)))
+    doc.build(e); return path
+
+def pdf17(data, nome, bd_str):
+    path = f"/tmp/p17_{uuid.uuid4().hex[:8]}.pdf"
+    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=40, rightMargin=40, topMargin=22, bottomMargin=18)
+    e = []
+    JU = ParagraphStyle("J", fontName=FONTE, fontSize=9.5, leading=12, textColor=DARK, spaceAfter=2.5)
+    SEC = ParagraphStyle("S", fontName=FN, fontSize=12, textColor=GOLD, alignment=0, spaceBefore=4, spaceAfter=2.5, leading=15)
+    lp = data["life_path"]; e.append(Spacer(1, 6))
+    e.append(Paragraph("M A P A   N U M E R O L O G I C O   C O M P L E T O", ParagraphStyle("T", fontName=FN, fontSize=14, textColor=GOLD, alignment=TA_CENTER, spaceAfter=2.5, leading=17)))
+    e.append(Paragraph(nome.upper(), ParagraphStyle("N", fontName=FN, fontSize=10, alignment=TA_CENTER, textColor=DARK, spaceAfter=1)))
+    e.append(Paragraph(bd_str, ParagraphStyle("D", fontName=FONTE, fontSize=8.5, alignment=TA_CENTER, textColor=GRAY, spaceAfter=4)))
+    e.append(Paragraph(f"Caminho de Vida {lp}. Expressao {data['expression']}. Motivacao {data['soul_urge']}. Personalidade {data['personality']}. Destino {data['destiny']}.", JU))
+    e.append(PageBreak())
+    e.append(Paragraph("Analise Detalhada", SEC))
+    TX = {1: "Lider nato", 2: "Diplomata", 3: "Criativo", 4: "Pratico", 5: "Livre", 6: "Amoroso", 7: "Sabio", 8: "Prospero", 9: "Humanitario", 11: "Mestre", 22: "Mestre"}
+    NG = {1: "Egoista", 2: "Indeciso", 3: "Disperso", 4: "Rigido", 5: "Impulsivo", 6: "Superprotetor", 7: "Frio", 8: "Materialista", 9: "Melancolico", 11: "Ansioso", 22: "Ambicioso"}
+    LC = {1: "Humildade", 2: "Autoconfianca", 3: "Foco", 4: "Flexibilidade", 5: "Responsabilidade", 6: "Confiar", 7: "Compartilhar", 8: "Integridade", 9: "Perdoar", 11: "Equilibrar", 22: "Equilibrar"}
+    for v in [lp, data["expression"], data["soul_urge"], data["personality"], data["destiny"]]:
+        e.append(Paragraph(f"<b>{TX.get(v, '')} ({v})</b> - {NG.get(v, '')}. Licao: {LC.get(v, '')}.", JU))
+    e.append(Paragraph("Ciclos da Vida", SEC))
+    bb = dp.parse(bd_str.split(" ")[0] if " " in bd_str else bd_str).date()
+    d, m, a = bb.day, bb.month, bb.year; fe = max(36-min(lp, 36), 25)
+    e.append(Paragraph(f"Formativo (0-{fe}a). Produtivo ({fe+1}-{fe+27}a). Colheita ({fe+28}+a).", JU))
+    e.append(Paragraph("Desafios", SEC))
+    d1 = r1(abs(d-m)); d2 = r1(abs(m-r1(a))); dp_ = r1(abs(d1-d2))
+    DESS = {0: "Equilibrio", 1: "Superar egoismo", 2: "Vencer timidez", 3: "Foco", 4: "Flexibilidade", 5: "Responsabilidade", 6: "Confiar", 7: "Fe", 8: "Etica", 9: "Desapegar"}
+    e.append(Paragraph(f"Menor 1 ({d1}): {DESS.get(d1, '')}. Menor 2 ({d2}): {DESS.get(d2, '')}. Principal ({dp_}): {DESS.get(dp_, '')}.", JU))
+    e.append(Paragraph("Realizacoes", SEC))
+    e.append(Paragraph(f"1({r1(d+m)}) 2({r1(d+a)}) 3({r1(r1(d+m)+r1(d+a))}) 4({r1(d+m+a)}).", JU))
+    e.append(Paragraph("Ano Pessoal", SEC))
+    ap = r1(d+m+datetime.utcnow().year)
+    APT = {1: "Novos comecos", 2: "Parcerias", 3: "Criatividade", 4: "Trabalho", 5: "Mudancas", 6: "Familia", 7: "Reflexao", 8: "Prosperidade", 9: "Conclusao"}
+    e.append(Paragraph(f"{datetime.utcnow().year}: Ano {ap} - {APT.get(ap, '')}.", JU))
+    e.append(Paragraph("Grade de Inclusao", SEC))
+    grid = calc_grid(nome)
+    pres = [str(n) for n in range(1, 10) if grid.get(n, 0) > 0]; aus = [str(n) for n in range(1, 10) if grid.get(n, 0) == 0]
+    e.append(Paragraph(f"Presentes: {', '.join(pres) or '-'}. Carencias: {', '.join(aus) or '-'}.", JU))
+    e.append(Paragraph("A numerologia ilumina caminhos. O livre arbitrio e seu maior poder.", JU))
+    e.append(Paragraph("(c) A1ELOS - Baseado em Monique Cissay", ParagraphStyle("F", fontName=FONTE, fontSize=6.5, textColor=GRAY, alignment=TA_CENTER, spaceBefore=3)))
+    doc.build(e); return path
+
+def pdf_urna(nc, cl, resultados, sugestoes):
+    path = f"/tmp/u_{uuid.uuid4().hex[:8]}.pdf"
+    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50, topMargin=45, bottomMargin=45)
+    e = []; TIT = ParagraphStyle("T", fontName=FN, fontSize=TAM_T, textColor=GOLD, alignment=TA_CENTER, spaceAfter=ET*0.5, leading=TAM_T*1.5)
+    e.append(Spacer(1, 25)); e.append(Paragraph("VALIDACAO DE NOME DE URNA", TIT))
+    e.append(Paragraph(nc.title(), ParagraphStyle("N", fontName=FN, fontSize=TAM_C+2, alignment=TA_CENTER, textColor=DARK, spaceAfter=4)))
+    e.append(Paragraph(f"Cargo: {cl}", ParagraphStyle("D", fontName=FONTE, fontSize=TAM_C-2, alignment=TA_CENTER, textColor=GRAY, spaceAfter=EL)))
+    for r in resultados:
+        ic = "S" if r["eh_ideal"] else "X"; co = "#4CAF50" if r["eh_ideal"] else "#e74c3c"
+        e.append(Paragraph(f"{ic} <b>{r['nome']}</b> - Energia <font color='{co}'><b>{r['energia']}</b></font>", ParagraphStyle("B", fontName=FN, fontSize=TAM_C-1, leading=EL*0.95, textColor=DARK, spaceAfter=EL*0.3)))
+        if r["letras"]:
+            ls = ", ".join([f'{l["letra"]}={l["valor"]}' for l in r["letras"]])
+            e.append(Paragraph(f"<i>{ls} -> {r['soma']} -> {r['energia']}</i>", ParagraphStyle("C", fontName=FONTE, fontSize=TAM_C-2, leading=EL*0.7, textColor=GRAY, spaceAfter=EL*0.2)))
+        e.append(Paragraph(r["explicacao"], ParagraphStyle("J", fontName=FONTE, fontSize=TAM_C-1, leading=EL*0.9, textColor=DARK, spaceAfter=EL*0.4)))
+    if sugestoes:
+        e.append(Paragraph("Sugestoes:", ParagraphStyle("S", fontName=FN, fontSize=18, textColor=GOLD, spaceBefore=EL, spaceAfter=ET, leading=27)))
+        for s in sugestoes[:3]: e.append(Paragraph(f'<b>{s["nome"]}</b> - Energia {s["energia"]}', ParagraphStyle("X", fontName=FONTE, fontSize=TAM_C, leading=EL, textColor=DARK, spaceAfter=EL*0.3)))
+    e.append(Paragraph("(c) A1ELOS", ParagraphStyle("F", fontName=FONTE, fontSize=8, textColor=GRAY, alignment=TA_CENTER)))
+    doc.build(e); return path
+
+def pdf_eleitoral(ss, cl, sugestoes, ne=None):
+    path = f"/tmp/e_{uuid.uuid4().hex[:8]}.pdf"
+    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50, topMargin=45, bottomMargin=45)
+    e = []; TIT = ParagraphStyle("T", fontName=FN, fontSize=TAM_T, textColor=GOLD, alignment=TA_CENTER, spaceAfter=ET*0.5, leading=TAM_T*1.5)
+    SEC = ParagraphStyle("S", fontName=FN, fontSize=18, textColor=GOLD, alignment=0, spaceBefore=EL, spaceAfter=ET, leading=27)
+    J = ParagraphStyle("J", fontName=FONTE, fontSize=TAM_C-1, leading=EL*0.9, textColor=DARK, spaceAfter=EL*0.4)
+    e.append(Spacer(1, 25)); e.append(Paragraph("NUMERO ELEITORAL - ANALISE COMPLETA", TIT))
+    e.append(Paragraph(f"Cargo: {cl} | Sigla: {ss}", ParagraphStyle("D", fontName=FONTE, fontSize=TAM_C-2, alignment=TA_CENTER, textColor=GRAY, spaceAfter=EL)))
+    e.append(Paragraph("<b>Como calculamos o numero eleitoral?</b>", SEC))
+    e.append(Paragraph("Na numerologia eleitoral, cada numero possui uma vibracao.", J))
+    e.append(Paragraph(f"Para {cl}, os dois primeiros digitos sao fixos (sigla {ss}, soma {int(ss[0])+int(ss[1])}).", J))
+    e.append(Paragraph("Sugestoes de Numeros", SEC))
+    ids = [s for s in sugestoes if s.get("ideal")]; fbs = [s for s in sugestoes if not s.get("ideal")]
+    if ids:
+        e.append(Paragraph("<b>Opcoes com Energia 8 - IDEAL:</b>", ParagraphStyle("B", fontName=FN, fontSize=TAM_C-1, leading=EL*0.95, textColor=DARK, spaceAfter=EL*0.3)))
+        for s in ids:
+            e.append(Paragraph(f"S {s['numero']} - Energia 8 - Poder e Prosperidade!", ParagraphStyle("X", fontName=FONTE, fontSize=TAM_C, leading=EL, textColor=colors.HexColor("#4CAF50"), spaceAfter=EL*0.2)))
+            if "explicacao_calculo" in s: e.append(Paragraph(f"<i>Calculo: {s['explicacao_calculo']}</i>", ParagraphStyle("C", fontName=FONTE, fontSize=TAM_C-2, leading=EL*0.7, textColor=GRAY, spaceAfter=EL*0.2)))
+    if fbs:
+        if ids: e.append(Spacer(1, EL*0.5))
+        e.append(Paragraph("<b>Opcoes Alternativas:</b>", ParagraphStyle("B", fontName=FN, fontSize=TAM_C-1, leading=EL*0.95, textColor=DARK, spaceAfter=EL*0.3)))
+        for s in fbs: e.append(Paragraph(f"{s['numero']} - Energia {s['energia']} - {s.get('nome_energia', '')}", ParagraphStyle("X2", fontName=FONTE, fontSize=TAM_C-1, leading=EL*0.9, textColor=DARK, spaceAfter=EL*0.2)))
+    e.append(Paragraph("Atencao: Verifique a disponibilidade do numero com seu partido.", ParagraphStyle("AV", fontName=FONTE, fontSize=TAM_C-2, leading=EL*0.7, textColor=GRAY, spaceAfter=EL)))
+    e.append(Paragraph("(c) A1ELOS", ParagraphStyle("F", fontName=FONTE, fontSize=8, textColor=GRAY, alignment=TA_CENTER)))
+    doc.build(e); return path
+
+def enviar_email(para, assunto, corpo, anexo=None):
+    if not SENDGRID_KEY: return False
+    try:
+        sg = SendGridAPIClient(SENDGRID_KEY)
+        mail = Mail(Email(FROM_EMAIL, FROM_NAME), para, assunto, Content("text/plain", corpo))
+        if anexo and os.path.exists(anexo):
+            with open(anexo, "rb") as f: enc = base64.b64encode(f.read()).decode()
+            mail.attachment = Attachment(FileContent(enc), FileName("Documento_A1ELOS.pdf"), FileType("application/pdf"), Disposition("attachment"))
+        sg.send(mail); logger.info(f"Email enviado p/ {para}"); return True
+    except Exception as e: logger.error(f"Falha email: {e}"); return False
+
+def pg_sucesso(pdf_path, nome, prod_nome):
+    pdf_b64 = ""
+    if pdf_path and os.path.exists(pdf_path):
+        with open(pdf_path, "rb") as f: pdf_b64 = base64.b64encode(f.read()).decode()
+    btn = f'<a href="data:application/pdf;base64,{pdf_b64}" download="Documento_A1ELOS.pdf" style="display:inline-block;padding:18px 50px;background:#C9A94E;color:#000;text-decoration:none;border-radius:50px;font-weight:700;font-size:1.2rem;margin:25px 0;transition:.3s">📥 BAIXAR PDF AGORA</a>' if pdf_b64 else '<p style="color:#e74c3c">Erro ao gerar PDF. Contate arvigne@gmail.com</p>'
+    return f"""<html><body style='background:#0a0a0a;color:#fff;font-family:sans-serif;margin:0;padding:20px;text-align:center;min-height:100vh;display:flex;align-items:center;justify-content:center'><div style='max-width:600px'><h1 style='color:#C9A94E;font-family:serif;font-size:2.5rem'>✅ Confirmado!</h1><p style='color:#888;font-size:1.1rem;margin:20px 0'>Ola <b style='color:#fff'>{nome}</b>, seu <b style='color:#C9A94E'>{prod_nome}</b> foi gerado.</p>{btn}<p style='color:#888;font-size:.85rem'>Clique acima para baixar e salvar o PDF onde quiser.<br>Link temporario — baixe agora.</p><a href='/' style='display:inline-block;padding:12px 30px;border:1px solid #C9A94E;color:#C9A94E;text-decoration:none;border-radius:50px;margin-top:10px'>← Voltar ao Inicio</a></div></body></html>"""
+
+@app.post("/calculate")
+def calculate(req: PayReq):
+    db = Session()
+    try:
+        if len(req.name.strip()) &lt; 2: raise HTTPException(400, "Nome curto")
+        if not req.birth_date: raise HTTPException(400, "Data obrigatoria")
+        res = calc(req.name, req.birth_date)
+        cid = uuid.uuid4().hex[:8]
+        db.add(Calc(id=cid, name=req.name, birth_date=req.birth_date, email=req.email, **res)); db.commit()
+        return {"id": cid, **res, "email_sent": False}
+    except HTTPException: raise
+    except Exception as e: logger.error(f"Calc: {e}"); raise HTTPException(500, "Erro")
+    finally: db.close()
+
+@app.post("/api/pay/stripe")
+def pay_stripe(req: PayReq):
+    if not STRIPE_KEY: raise HTTPException(503, "Stripe nao configurado")
+    if not req.price or req.price &lt;= 0: raise HTTPException(400, "Preco invalido")
+    amt = int(float(req.price)*100)
+    cs = stripe.checkout.Session.create(mode="payment", payment_method_types=["card"], line_items=[{"price_data": {"currency": "brl", "product_data": {"name": f"Mapa-{req.product}"}, "unit_amount": amt}, "quantity": 1}], customer_email=req.email, metadata={"product": req.product, "name": req.name, "birth_date": req.birth_date or "", "email": req.email}, success_url=f"{BASE_URL}/api/pay/success?session_id={{CHECKOUT_SESSION_ID}}", cancel_url=f"{BASE_URL}/api/pay/cancel", payment_method_options={"card": {"installments": {"enabled": True}}})
+    return {"payment_url": cs.url, "id": cs.id, "methods": ["card"]}
+
+@app.get("/api/pay/success")
+def pay_success(request: Request):
+    sid = request.query_params.get("session_id", "")
+    if not sid: return HTMLResponse(ERR.format(msg="Sessao invalida"))
+    try:
+        s = stripe.checkout.Session.retrieve(sid)
+        meta = getattr(s, "metadata", {}) or {}
+        if hasattr(meta, "to_dict"): meta = meta.to_dict()
+        name = meta.get("name", "Cliente"); email = meta.get("email", "") or getattr(s, "customer_email", "")
+        bd = meta.get("birth_date", ""); prod = meta.get("product", "pdf8")
+        total = int(getattr(s, "amount_total", 0) or getattr(s, "amount_subtotal", 0) or 0)
+        product = "pdf17" if (prod == "pdf17" or total >= 1200) else "pdf8"
+        if not bd: bd = "2000-01-01"
+        if not email: return HTMLResponse(ERR.format(msg="Email nao encontrado"))
+    except: return HTMLResponse(ERR.format(msg="Falha pagamento"))
+    try:
+        data = calc(name, bd)
+        if product == "pdf17": pf = pdf17(data, name, bd); pn = "Mapa Numerologico Completo"
+        else: pf = pdf8(data, name, bd); pn = "Mapa Numerologico Express"
+        if pf and email:
+            try: enviar_email(email, f"Seu {pn}!", f"Ola {name},\n\nPDF anexo.\n\nA1ELOS", pf)
+            except: pass
+        html = pg_sucesso(pf, name, pn)
+        if pf and os.path.exists(pf): os.remove(pf)
+        return HTMLResponse(html)
+    except: logger.error(traceback.format_exc()); return HTMLResponse(ERR.format(msg="Erro. Contate arvigne@gmail.com"))
+
+@app.post("/api/pay/urna-session")
+def pay_urna_session(req: UrnaPayReq):
+    if not STRIPE_KEY: raise HTTPException(503, "Stripe nao configurado")
+    if not req.email: raise HTTPException(400, "Email obrigatorio")
+    if len(req.nome_completo.strip()) &lt; 3: raise HTTPException(400, "Nome obrigatorio")
+    nomes = [n.strip() for n in [req.nome1, req.nome2, req.nome3, req.nome4, req.nome5] if n.strip()]
+    if not nomes: raise HTTPException(400, "Pelo menos 1 nome")
+    meta = {"product": "urna26", "nome_completo": req.nome_completo, "cargo": req.cargo, "email": req.email}
+    for i, n in enumerate(nomes, 1): meta[f"nome{i}"] = n
+    cs = stripe.checkout.Session.create(mode="payment", payment_method_types=["card"], line_items=[{"price_data": {"currency": "brl", "product_data": {"name": "Validacao Nome"}, "unit_amount": 2600}, "quantity": 1}], customer_email=req.email, metadata=meta, success_url=f"{BASE_URL}/api/pay/urna-success?session_id={{CHECKOUT_SESSION_ID}}", cancel_url=f"{BASE_URL}/api/pay/cancel")
+    return {"payment_url": cs.url, "id": cs.id}
+
+@app.get("/api/pay/urna-success")
+def pay_urna_success(request: Request):
+    sid = request.query_params.get("session_id", "")
+    if not sid: return HTMLResponse(ERR.format(msg="Sessao invalida"))
+    s = stripe.checkout.Session.retrieve(sid)
+    meta = getattr(s, "metadata", {}) or {}
+    if hasattr(meta, "to_dict"): meta = meta.to_dict()
+    nc = meta.get("nome_completo", ""); cr = meta.get("cargo", "vereador"); em = meta.get("email", "") or getattr(s, "customer_email", "")
+    nomes = [meta.get(f"nome{i}", "") for i in range(1, 6) if meta.get(f"nome{i}", "")]
+    if not nomes: return HTMLResponse(ERR.format(msg="Dados nao encontrados"))
+    try:
+        res, _, sugs = validar_nomes_urna(nomes, cr)
+        cl = CARGO_INFO.get(cr, {}).get("label", cr)
+        pf = pdf_urna(nc, cl, res, sugs)
+        if pf and em:
+            try: enviar_email(em, "Validacao Nome - A1ELOS", f"Ola {nc.split()[0] if nc else ''},\n\nPDF anexo.\n\nA1ELOS", pf)
+            except: pass
+        html = pg_sucesso(pf, nc, "Validacao de Nome de Urna")
+        if pf and os.path.exists(pf): os.remove(pf)
+        return HTMLResponse(html)
+    except: logger.error(traceback.format_exc()); return HTMLResponse(ERR.format(msg="Erro ao gerar. Contate arvigne@gmail.com"))
+
+@app.post("/api/pay/eleitoral-session")
+def pay_eleitoral_session(req: EleitoralPayReq):
+    if not STRIPE_KEY: raise HTTPException(503, "Stripe nao configurado")
+    if not req.email: raise HTTPException(400, "Email obrigatorio")
+    if req.sigla &lt; 10 or req.sigla > 99: raise HTTPException(400, "Sigla 2 digitos")
+    if req.cargo not in ["vereador", "dep_estadual", "dep_federal", "senador"]: raise HTTPException(400, "Cargo invalido")
+    meta = {"product": "eleitoral26", "sigla": str(req.sigla), "cargo": req.cargo, "email": req.email, "numero_existente": req.numero_existente or ""}
+    cs = stripe.checkout.Session.create(mode="payment", payment_method_types=["card"], line_items=[{"price_data": {"currency": "brl", "product_data": {"name": "Numero Eleitoral"}, "unit_amount": 2600}, "quantity": 1}], customer_email=req.email, metadata=meta, success_url=f"{BASE_URL}/api/pay/eleitoral-success?session_id={{CHECKOUT_SESSION_ID}}", cancel_url=f"{BASE_URL}/api/pay/cancel")
+    return {"payment_url": cs.url, "id": cs.id}
+
+@app.get("/api/pay/eleitoral-success")
+def pay_eleitoral_success(request: Request):
+    sid = request.query_params.get("session_id", "")
+    if not sid: return HTMLResponse(ERR.format(msg="Sessao invalida"))
+    s = stripe.checkout.Session.retrieve(sid)
+    meta = getattr(s, "metadata", {}) or {}
+    if hasattr(meta, "to_dict"): meta = meta.to_dict()
+    sg = int(meta.get("sigla", "0")); cr = meta.get("cargo", "vereador"); em = meta.get("email", "") or getattr(s, "customer_email", "")
+    if not em: return HTMLResponse(ERR.format(msg="Email nao encontrado"))
+    ne_str = meta.get("numero_existente", ""); ss = str(sg).zfill(2)
+    cl_map = {"vereador": "Vereador", "dep_estadual": "Dep. Estadual", "dep_federal": "Dep. Federal", "senador": "Senador"}
+    cl2 = cl_map.get(cr, cr); sugs = gerar_numeros(sg, cr)
+    ei = {8: "Poder e Prosperidade", 7: "Sabedoria", 3: "Criacao", 1: "Lideranca", 9: "Humanitarismo", 5: "Liberdade", 6: "Familia", 4: "Trabalho", 2: "Associacao"}
+    ni = None
+    if ne_str and len(ne_str) >= 3:
+        try: en = r1(sum(int(d) for d in ne_str)); ni = {"numero": ne_str, "energia": en, "interpretacao": ei.get(en, "")}
+        except: pass
+    try:
+        pf = pdf_eleitoral(ss, cl2, sugs, ni)
+        if pf and em:
+            try: enviar_email(em, "Numero Eleitoral - A1ELOS", f"Ola,\n\nPDF com sugestoes para {cl2} anexo.\n\nA1ELOS", pf)
+            except: pass
+        html = pg_sucesso(pf, f"Candidato {cl2}", f"Numero Eleitoral para {cl2}")
+        if pf and os.path.exists(pf): os.remove(pf)
+        return HTMLResponse(html)
+    except: logger.error(traceback.format_exc()); return HTMLResponse(ERR.format(msg="Erro ao gerar. Contate arvigne@gmail.com"))
+
+@app.get("/api/pay/cancel")
+def pay_cancel(): return HTMLResponse(CANCEL)
+
+@app.get("/")
+def root():
+    try: return HTMLResponse(open(os.path.join(os.path.dirname(__file__), "index.html"), "r", encoding="utf-8").read())
+    except: return HTMLResponse("<h1>API ativa</h1>")
+
+@app.get("/api/health")
+def health(): return {"status": "ok", "stripe": bool(STRIPE_KEY), "sendgrid": bool(SENDGRID_KEY)}
+
+OK = """<html><body style='background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh'><div style='text-align:center'><h1 style='color:#C9A94E'>✅ Confirmado!</h1><p>Documento enviado.</p><p>Verifique spam.</p><a href='/' style='display:inline-block;padding:12px 30px;background:#C9A94E;color:#000;text-decoration:none;border-radius:50px'>Voltar</a></div></body></html>"""
+ERR = """<html><body style='background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh'><div style='text-align:center'><h1 style='color:#e74c3c'>{msg}</h1><a href='/' style='display:inline-block;padding:12px 30px;background:#C9A94E;color:#000;text-decoration:none;border-radius:50px'>Voltar</a></div></body></html>"""
+CANCEL = """<html><body style='background:#0a0a0a;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh'><div style='text-align:center'><h1 style='color:#e67e22'>Cancelado</h1><a href='/' style='display:inline-block;padding:12px 30px;background:#C9A94E;color:#000;text-decoration:none;border-radius:50px'>Voltar</a></div></body></html>"""
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.getenv("PORT", "10000"))
+    uvicorn.run(app, host="0.0.0.0", port=port)
