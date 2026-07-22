@@ -202,7 +202,8 @@ def pdf17(data, nome, bd_str):
     e.append(Paragraph(f"{datetime.utcnow().year}: Ano {ap} - {APT.get(ap, '')}.", JU))
     e.append(Paragraph("Grade de Inclusao", SEC))
     grid = calc_grid(nome)
-    pres = [str(n) for n in range(1, 10) if grid.get(n, 0) > 0]; aus = [str(n) for n in range(1, 10) if grid.get(n, 0) == 0]
+    pres = [str(n) for n in range(1, 10) if grid.get(n, 0) > 0]
+    aus = [str(n) for n in range(1, 10) if grid.get(n, 0) == 0]
     e.append(Paragraph(f"Presentes: {', '.join(pres) or '-'}. Carencias: {', '.join(aus) or '-'}.", JU))
     e.append(Paragraph("A numerologia ilumina caminhos. O livre arbitrio e seu maior poder.", JU))
     e.append(Paragraph("(c) A1ELOS", ParagraphStyle("F", fontName=FONTE, fontSize=6.5, textColor=GRAY, alignment=TA_CENTER, spaceBefore=3)))
@@ -239,8 +240,6 @@ def pdf_eleitoral(ss, cl, sugestoes, ne=None):
     e.append(Paragraph("<b>Como calculamos o numero eleitoral?</b>", SEC))
     e.append(Paragraph("Na numerologia eleitoral, cada numero possui uma vibracao.", J))
     e.append(Paragraph(f"Para {cl}, os dois primeiros digitos sao fixos (sigla {ss}, soma {int(ss[0])+int(ss[1])}).", J))
-    e.append(Paragraph("<b>Por que a energia 8 e a ideal?</b>", SEC))
-    e.append(Paragraph("O numero 8 representa Poder, Prosperidade e Realizacao material.", J))
     e.append(Paragraph("Sugestoes de Numeros", SEC))
     ids = [s for s in sugestoes if s.get("ideal")]; fbs = [s for s in sugestoes if not s.get("ideal")]
     if ids:
