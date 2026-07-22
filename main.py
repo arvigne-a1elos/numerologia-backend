@@ -395,6 +395,38 @@ def pagina_sucesso(pdf_path, nome, prod_nome):
         f'</body></html>'
     )
 
+def pagina_sucesso(pdf_path, nome, prod_nome):
+    """Gera página HTML com PDF embutido para download direto"""
+    b64 = ""
+    if pdf_path and os.path.exists(pdf_path):
+        with open(pdf_path, "rb") as f:
+            b64 = base64.b64encode(f.read()).decode()
+    btn = ""
+    if b64:
+        btn = (
+            f'<a href="data:application/pdf;base64,{b64}" '
+            f'download="Documento.pdf" '
+            f'style="display:inline-block;padding:18px 50px;'
+            f'background:#C9A94E;color:#000;text-decoration:none;'
+            f'border-radius:50px;font-weight:700;font-size:1.2rem;'
+            f'margin:25px 0">📥 BAIXAR PDF AGORA</a>'
+        )
+    return (
+        f'<html><body style="background:#0a0a0a;color:#fff;'
+        f'text-align:center;padding:40px;font-family:sans-serif">'
+        f'<h1 style="color:#C9A94E;font-size:2.5rem">✅ Confirmado!</h1>'
+        f'<p style="font-size:1.1rem;margin:20px 0">'
+        f'Ola <b style="color:#fff">{nome}</b>, '
+        f'seu <b style="color:#C9A94E">{prod_nome}</b> foi gerado.</p>'
+        f'{btn}'
+        f'<p style="color:#888;font-size:.85rem">'
+        f'Clique acima para baixar e salvar o PDF.</p>'
+        f'<a href="/" style="display:inline-block;padding:12px 30px;'
+        f'border:1px solid #C9A94E;color:#C9A94E;text-decoration:none;'
+        f'border-radius:50px;margin-top:10px">← Voltar</a>'
+        f'</body></html>'
+    )
+
 @app.post("/calculate")
 def calculate(req: PayReq):
     db = Session()
