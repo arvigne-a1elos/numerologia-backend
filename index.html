@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Mapa Numerológico | A1ELOS</title>
+<title>Mapa Numerologico | A1ELOS</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -150,16 +150,16 @@ footer{padding:60px 20px;text-align:center;border-top:1px solid #222;color:#444;
 </section>
 <footer><p>© A1ELOS - <span data-i18n="footer_text">A ciencia dos numeros aplicada ao seu sucesso</span></p></footer>
 <script>
-// ══════ 12 IDIOMAS ══════
+// 12 IDIOMAS
 const LANGS=[
-{code:'pt',label:'PT',name:'Português'},{code:'en',label:'EN',name:'English'},
-{code:'es',label:'ES',name:'Español'},{code:'fr',label:'FR',name:'Français'},
+{code:'pt',label:'PT',name:'Portugues'},{code:'en',label:'EN',name:'English'},
+{code:'es',label:'ES',name:'Espanol'},{code:'fr',label:'FR',name:'Francais'},
 {code:'de',label:'DE',name:'Deutsch'},{code:'it',label:'IT',name:'Italiano'},
-{code:'ja',label:'JA',name:'日本語'},{code:'zh',label:'ZH',name:'中文'},
-{code:'ko',label:'KO',name:'한국어'},{code:'ru',label:'RU',name:'Русский'},
-{code:'ar',label:'AR',name:'العربية'},{code:'nl',label:'NL',name:'Nederlands'}
+{code:'ja',label:'JA',name:'Japanese'},{code:'zh',label:'ZH',name:'Chinese'},
+{code:'ko',label:'KO',name:'Korean'},{code:'ru',label:'RU',name:'Russian'},
+{code:'ar',label:'AR',name:'Arabic'},{code:'nl',label:'NL',name:'Dutch'}
 ];
-// ══════ PRODUTOS ══════
+// PRODUTOS
 const PRODUTOS=[
 {id:'express',nome:'Mapa Express (tela)',desc:'5 numeros na tela. Gratis.',preco:'Gratis',soma:0,link:'#calc',btn:'Calcular',status:'ativo'},
 {id:'express_pdf',nome:'Mapa Express PDF',desc:'5 numeros + frases. 1 pagina.',preco:'R$ 8',soma:'8',btn:'Adquirir R$ 8',status:'ativo'},
@@ -171,7 +171,7 @@ const PRODUTOS=[
 {id:'casal',nome:'Mapa Casal Completo',desc:'2 mapas + compatibilidade.',preco:'R$ 44',soma:'4+4=8',btn:'Em breve',status:'breve'},
 {id:'premium',nome:'Mapa Premium Familia',desc:'Ate 4 pessoas + PDF.',preco:'R$ 197',soma:'1+9+7=17->8',btn:'Em breve',status:'breve'}
 ];
-// ══════ TRADUCOES ══════
+// TRADUCOES
 const i18n={};const KEYS=['nav_home','nav_map','nav_prod','nav_urna','nav_elec','nav_energy','hero_title','hero_sub','hero_btn1','hero_btn2','hero_btn3','calc_title','label_name','label_date','label_email','btn_calc','btn_express','btn_completo','prod_title','prod_sub','th_prod','th_price','th_energy','th_action','urna_title','urna_desc','urna_name','urna_cargo','urna_email','urna_5names','elec_title','elec_desc','elec_mask','elec_sigla','elec_existente','elec_email','energy_title','energy_desc','footer_text'];
 const TRAD={};
 TRAD.pt='Inicio|Mapa|Produtos|Urna|Eleitoral|Energias|MAPA NUMEROLOGICO|A ciencia dos numeros aplicada ao seu destino e negocios|Gerar Mapa Gratis|Ver Produtos|Solucoes Eleitorais|Calcule seu Mapa|Nome Completo|Data de Nascimento|Email|Calcular Agora|Mapa Express PDF R$ 8|Mapa Completo PDF R$ 17|Todos os Produtos|Todos os precos somam 8|Produto|Preco|Soma 8|Acao|Validacao Nome de Urna|5 tentativas + calculo letra a letra + PDF - R$ 26|Nome Completo|Cargo|Email|Ate 5 opcoes:|Calculo N. Eleitoral|Sugestoes com energia 8 - R$ 26|Por lei eleitoral, numeros nao podem ser divulgados.|Sigla (2 digitos)|Numero existente (opcional)|Email|Significado das Energias|Cada numero carrega uma vibracao|A ciencia dos numeros aplicada ao seu sucesso';
@@ -180,12 +180,10 @@ TRAD.es='Inicio|Mapa|Productos|Urna|Electoral|Energias|MAPA NUMEROLOGICO|La cien
 TRAD.fr='Accueil|Carte|Produits|Urne|Electoral|Energies|CARTE NUMEROLOGIQUE|La science des nombres pour votre destin et affaires|Generer une Carte Gratuite|Voir Produits|Solutions Electorales|Calculez votre Carte|Nom Complet|Date de Naissance|Email|Calculer Maintenant|Carte Express PDF R$ 8|Carte Complete PDF R$ 17|Tous les Produits|Tous les prix totalisent 8|Produit|Prix|Somme 8|Action|Validation Nom d\'Urne|5 tentatives + calcul lettre a lettre + PDF - R$ 26|Nom Complet|Poste|Email|Jusqu\'a 5 options:|Calcul N. Electoral|Suggestions energie 8 - R$ 26|Par loi electorale, numeros confidentiels.|Numero du Parti (2 chiffres)|Numero existant (optionnel)|Email|Signification des Energies|Chaque nombre porte une vibration|La science des nombres pour votre succes';
 TRAD.de='Start|Karte|Produkte|Wahlname|Wahl-Nr|Energien|NUMEROLOGISCHE KARTE|Die Wissenschaft der Zahlen fur Ihr Schicksal und Geschaft|Kostenlose Karte erstellen|Produkte anzeigen|Wahllosungen|Berechnen Sie Ihre Karte|Vollstandiger Name|Geburtsdatum|E-Mail|Jetzt berechnen|Express Karte PDF R$ 8|Vollstandige Karte PDF R$ 17|Alle Produkte|Alle Preise ergeben 8|Produkt|Preis|Summe 8|Aktion|Wahlnamen-Prufung|5 Versuche + Buchstabenberechnung + PDF - R$ 26|Vollstandiger Name|Position|E-Mail|Bis zu 5 Optionen:|Wahlnummer|Energie 8 Vorschlage - R$ 26|Aus Wahlrecht Grunden vertraulich.|Parteinummer (2 Ziffern)|Bestehende Nummer (optional)|E-Mail|Bedeutung der Energien|Jede Zahl tragt eine spezifische Schwingung|Die Wissenschaft der Zahlen fur Ihren Erfolg';
 TRAD.it='Home|Mappa|Prodotti|Nome Elettorale|Elettorale|Energie|MAPPA NUMEROLOGICA|La scienza dei numeri per il tuo destino e affari|Genera Mappa Gratuita|Vedi Prodotti|Soluzioni Elettorali|Calcola la tua Mappa|Nome Completo|Data di Nascita|Email|Calcola Ora|Mappa Express PDF R$ 8|Mappa Completa PDF R$ 17|Tutti i Prodotti|Tutti i prezzi sommano a 8|Prodotto|Prezzo|Somma 8|Azione|Validazione Nome Elettorale|5 tentativi + calcolo lettera per lettera + PDF - R$ 26|Nome Completo|Carica|Email|Fino a 5 opzioni:|Calcolo N. Elettorale|Suggerimenti con energia 8 - R$ 26|Per legge elettorale, numeri riservati.|Numero del Partito (2 cifre)|Numero esistente (opzionale)|Email|Significato delle Energie|Ogni numero ha una vibrazione specifica|La scienza dei numeri per il tuo successo';
-TRAD.ja='Home|Map|Products|Ballot Name|Electoral|Energies|NUMEROLOGICAL MAP|The science of numbers for your destiny and business|Generate Free Map|View Products|Electoral Solutions|Calculate Your Map|Full Name|Birth Date|Email|Calculate Now|Express Map PDF R$ 8|Full Map PDF R$ 17|All Products|All prices sum to 8|Product|Price|Sum 8|Action|Ballot Name Validation|5 attempts + letter calculation + PDF - R$ 26|Full Name|Position|Email|Up to 5 options:|Electoral Number|Energy 8 suggestions - R$ 26|By electoral law, numbers cannot be publicly disclosed.|Party Number (2 digits)|Existing number (optional)|Email|Meaning of Energies|Each number carries a specific vibration|The science of numbers for your success';
-TRAD.zh='Home|Map|Products|Ballot Name|Electoral|Energies|NUMEROLOGICAL MAP|The science of numbers for your destiny and business|Generate Free Map|View Products|Electoral Solutions|Calculate Your Map|Full Name|Birth Date|Email|Calculate Now|Express Map PDF R$ 8|Full Map PDF R$ 17|All Products|All prices sum to 8|Product|Price|Sum 8|Action|Ballot Name Validation|5 attempts + letter calculation + PDF - R$ 26|Full Name|Position|Email|Up to 5 options:|Electoral Number|Energy 8 suggestions - R$ 26|By electoral law, numbers cannot be publicly disclosed.|Party Number (2 digits)|Existing number (optional)|Email|Meaning of Energies|Each number carries a specific vibration|The science of numbers for your success';
-TRAD.ko='Home|Map|Products|Ballot Name|Electoral|Energies|NUMEROLOGICAL MAP|The science of numbers for your destiny and business|Generate Free Map|View Products|Electoral Solutions|Calculate Your Map|Full Name|Birth Date|Email|Calculate Now|Express Map PDF R$ 8|Full Map PDF R$ 17|All Products|All prices sum to 8|Product|Price|Sum 8|Action|Ballot Name Validation|5 attempts + letter calculation + PDF - R$ 26|Full Name|Position|Email|Up to 5 options:|Electoral Number|Energy 8 suggestions - R$ 26|By electoral law, numbers cannot be publicly disclosed.|Party Number (2 digits)|Existing number (optional)|Email|Meaning of Energies|Each number carries a specific vibration|The science of numbers for your success';
-TRAD.ru='Home|Map|Products|Ballot Name|Electoral|Energies|NUMEROLOGICAL MAP|The science of numbers for your destiny and business|Generate Free Map|View Products|Electoral Solutions|Calculate Your Map|Full Name|Birth Date|Email|Calculate Now|Express Map PDF R$ 8|Full Map PDF R$ 17|All Products|All prices sum to 8|Product|Price|Sum 8|Action|Ballot Name Validation|5 attempts + letter calculation + PDF - R$ 26|Full Name|Position|Email|Up to 5 options:|Electoral Number|Energy 8 suggestions - R$ 26|By electoral law, numbers cannot be publicly disclosed.|Party Number (2 digits)|Existing number (optional)|Email|Meaning of Energies|Each number carries a specific vibration|The science of numbers for your success';
-TRAD.ar='Home|Map|Products|Ballot Name|Electoral|Energies|NUMEROLOGICAL MAP|The science of numbers for your destiny and business|Generate Free Map|View Products|Electoral Solutions|Calculate Your Map|Full Name|Birth Date|Email|Calculate Now|Express Map PDF R$ 8|Full Map PDF R$ 17|All Products|All prices sum to 8|Product|Price|Sum 8|Action|Ballot Name Validation|5 attempts + letter calculation + PDF - R$ 26|Full Name|Position|Email|Up to 5 options:|Electoral Number|Energy 8 suggestions - R$ 26|By electoral law, numbers cannot be publicly disclosed.|Party Number (2 digits)|Existing number (optional)|Email|Meaning of Energies|Each number carries a specific vibration|The science of numbers for your success';
 TRAD.nl='Home|Kaart|Producten|Stembusnaam|Verkiezing|Energieen|NUMEROLOGISCHE KAART|De wetenschap van getallen voor uw lot en zaken|Gratis kaart genereren|Producten bekijken|Verkiezingsoplossingen|Bereken uw Kaart|Volledige naam|Geboortedatum|E-mail|Nu berekenen|Express Kaart PDF R$ 8|Volledige Kaart PDF R$ 17|Alle Producten|Alle prijzen sommeren tot 8|Product|Prijs|Som 8|Actie|Stembusnaam Validatie|5 pogingen + letterberekening + PDF - R$ 26|Volledige naam|Functie|E-mail|Tot 5 opties:|Verkiezingsnummer|Energie 8 suggesties - R$ 26|Volgens kieswet vertrouwelijk.|Partijnummer (2 cijfers)|Bestaand nummer (optioneel)|E-mail|Betekenis van Energieen|Elk getal heeft een specifieke trilling|De wetenschap van getallen voor uw succes';
+// Idiomas com fallback ingles
+var fallback=['ja','zh','ko','ru','ar'];
+fallback.forEach(function(c){TRAD[c]=TRAD.en;});
 // Inicializar i18n
 for(var lang in TRAD){i18n[lang]={};var vals=TRAD[lang].split('|');for(var i=0;i<KEYS.length;i++){i18n[lang][KEYS[i]]=vals[i]||TRAD.pt.split('|')[i]||''}}
 function t(k){var l=localStorage.getItem('l')||'pt';return(i18n[l]||i18n.pt)[k]||i18n.pt[k]||k}
