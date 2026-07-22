@@ -1,370 +1,264 @@
-import os
-import smtplib
-import sqlite3
-import datetime as dt
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.mime.application import MIMEApplication
-from typing import List, Optional
-
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
-from fastapi.responses import JSONResponse
+import os, logging, uuid, stripe, base64, traceback
+from datetime import datetime
+from typing import Optional
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel
+from sqlalchemy import create_engine, Column, String, Integer, Float, DateTime
+from sqlalchemy.orm import sessionmaker, declarative_base
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail, Email, To, Content, Attachment, FileContent, FileName, FileType, Disposition
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.units import cm
-import uvicorn
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
+import dateutil.parser as dp
 
-# ---------------------------------------------------------------------------
-# Configurações via variáveis de ambiente
-# ---------------------------------------------------------------------------
-DB_PATH = os.getenv("NUMEROLOGY_DB", "numerology.db")
-SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USER = os.getenv("SMTP_USER", "")
-SMTP_PASS = os.getenv("SMTP_PASS", "")
-SMTP_FROM = os.getenv("SMTP_FROM", SMTP_USER)
-CHECKOUT_WEBHOOK_SECRET = os.getenv("CHECKOUT_SECRET", "dev-secret")
-PDF_DIR = os.getenv("PDF_DIR", "pdfs")
-os.makedirs(PDF_DIR, exist_ok=True)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Numerologia API", version="1.0.0")
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+STRIPE_KEY = os.getenv("STRIPE_SECRET_KEY", "")
+SENDGRID_KEY = os.getenv("SENDGRID_API_KEY", "")
+FROM_EMAIL = os.getenv("FROM_EMAIL", "arvigne@gmail.com")
+FROM_NAME = "Mapa Numerologico"
+BASE_URL = os.getenv("BASE_URL", "https://numerologia-api-wd2q.onrender.com")
+DB_URL = os.getenv("DATABASE_URL", "sqlite:///./numerologia.db")
 
-# ---------------------------------------------------------------------------
-# Banco de dados SQLite
-# ---------------------------------------------------------------------------
-def get_db():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    try:
-        yield conn
-    finally:
-        conn.close()
+logger.info(f"Stripe={bool(STRIPE_KEY)} SendGrid={bool(SENDGRID_KEY)}")
+if STRIPE_KEY:
+    stripe.api_key = STRIPE_KEY
 
+engine = create_engine(DB_URL, connect_args={"check_same_thread": False})
+Base = declarative_base()
+Session = sessionmaker(bind=engine)
 
-def init_db():
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.executescript("""
-        CREATE TABLE IF NOT EXISTS calculations (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            birth_date TEXT NOT NULL,
-            email TEXT,
-            life_path INTEGER,
-            expression INTEGER,
-            soul_urge INTEGER,
-            personality INTEGER,
-            destiny INTEGER,
-            created_at TEXT DEFAULT CURRENT_TIMESTAMP
-        );
-        CREATE TABLE IF NOT EXISTS orders (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            email TEXT NOT NULL,
-            product TEXT NOT NULL,
-            price REAL NOT NULL,
-            status TEXT DEFAULT 'pending',
-            calculation_id INTEGER,
-            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (calculation_id) REFERENCES calculations(id)
-        );
-        """)
+class Calc(Base):
+    __tablename__ = "calculations"
+    id = Column(String, primary_key=True)
+    name = Column(String)
+    birth_date = Column(String)
+    email = Column(String, nullable=True)
+    life_path = Column(Integer)
+    expression = Column(Integer)
+    soul_urge = Column(Integer)
+    personality = Column(Integer)
+    destiny = Column(Integer)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
+class Order(Base):
+    __tablename__ = "orders"
+    id = Column(String, primary_key=True)
+    email = Column(String)
+    product = Column(String)
+    price = Column(Float)
+    status = Column(String, default="pending")
+    payment_id = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
-@app.on_event("startup")
-def on_startup():
-    init_db()
+Base.metadata.create_all(bind=engine)
+app = FastAPI()
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True,
+                   allow_methods=["*"], allow_headers=["*"])
 
-
-# ---------------------------------------------------------------------------
-# Modelos Pydantic
-# ---------------------------------------------------------------------------
-class NumerologyRequest(BaseModel):
-    name: str = Field(..., min_length=2)
-    birth_date: dt.date
-    email: Optional[EmailStr] = None
-
-
-class NumerologyResult(BaseModel):
+class PayReq(BaseModel):
     name: str
-    birth_date: str
-    life_path: int
-    expression: int
-    soul_urge: int
-    personality: int
-    destiny: int
+    email: str
+    product: Optional[str] = "pdf8"
+    price: Optional[float] = 0
+    calculation_id: Optional[str] = None
+    birth_date: Optional[str] = None
 
+GOLD = colors.HexColor("#B8860B")
+LGRAY = colors.HexColor("#f0f0f0")
+DARK = colors.HexColor("#222")
+GRAY = colors.HexColor("#888")
+FONTE = "Helvetica"
+FN = "Helvetica-Bold"
 
-class CheckoutRequest(BaseModel):
-    email: EmailStr
-    product: str = "mapa_numerologico"
-    price: float = 49.90
-    calculation_id: Optional[int] = None
-
-
-class CheckoutWebhook(BaseModel):
-    order_id: int
-    status: str
-    secret: str
-
-
-# ---------------------------------------------------------------------------
-# Lógica de numerologia
-# ---------------------------------------------------------------------------
-PYTHAGOREAN = {
-    'a': 1, 'j': 1, 's': 1,
-    'b': 2, 'k': 2, 't': 2,
-    'c': 3, 'l': 3, 'u': 3,
-    'd': 4, 'm': 4, 'v': 4,
-    'e': 5, 'n': 5, 'w': 5,
-    'f': 6, 'o': 6, 'x': 6,
-    'g': 7, 'p': 7, 'y': 7,
-    'h': 8, 'q': 8, 'z': 8,
-    'i': 9, 'r': 9,
-}
-VOWELS = set("aeiou")
-
-
-def reduce_number(n: int, master: bool = True) -> int:
-    while n > 9:
-        if master and n in (11, 22, 33):
-            return n
+def r1(n):
+    while n > 9 and n not in (11, 22, 33):
         n = sum(int(d) for d in str(n))
     return n
 
-
-def calc_life_path(birth_date: dt.date) -> int:
-    total = sum(int(d) for d in birth_date.strftime("%Y%m%d"))
-    return reduce_number(total)
-
-
-def calc_name_numbers(name: str):
-    name = name.lower().replace(" ", "")
-    total = 0
-    vowels = 0
-    consonants = 0
-    for ch in name:
-        v = PYTHAGOREAN.get(ch, 0)
-        total += v
-        if ch in VOWELS:
-            vowels += v
+def calc(nome, data_str):
+    bd = dp.parse(data_str).date()
+    lp = r1(bd.day + bd.month + bd.year)
+    t = {c: (i % 9 or 9) for i, c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)}
+    nu = nome.upper().replace(" ", "")
+    te = 0
+    tv = 0
+    tp = 0
+    for ch in nu:
+        val = t.get(ch, 0)
+        te += val
+        if ch in "AEIOU":
+            tv += val
         else:
-            consonants += v
-    return {
-        "expression": reduce_number(total),
-        "soul_urge": reduce_number(vowels),
-        "personality": reduce_number(consonants),
-    }
+            tp += val
+    return {"life_path": lp, "expression": r1(te), "soul_urge": r1(tv),
+            "personality": r1(tp), "destiny": r1(r1(te) + lp)}
 
+def estilo(tam, negrito=False, cor=DARK, alinhamento=TA_LEFT, antes=0, depois=4):
+    return ParagraphStyle("S", fontName=FN if negrito else FONTE,
+                         fontSize=tam, textColor=cor,
+                         alignment=alinhamento, spaceBefore=antes,
+                         spaceAfter=depois)
 
-def calc_destiny(life_path: int, expression: int) -> int:
-    return reduce_number(life_path + expression)
+def pdf8(data, nome, bd):
+    path = f"/tmp/p8_{uuid.uuid4().hex[:8]}.pdf"
+    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50,
+                            topMargin=40, bottomMargin=30)
+    e = []
+    e.append(Spacer(1, 15))
+    e.append(Paragraph("MAPA EXPRESS", estilo(20, True, GOLD, TA_CENTER, 0, 6)))
+    e.append(Paragraph(nome.upper(), estilo(12, True, DARK, TA_CENTER, 0, 2)))
+    e.append(Paragraph(bd, estilo(9, False, GRAY, TA_CENTER, 0, 10)))
+    td = [["Numero", "Valor"]] + [[l, str(data[k])] for k, l in [
+        ("life_path", "Caminho de Vida"), ("expression", "Expressao"),
+        ("soul_urge", "Motivacao"), ("personality", "Personalidade"),
+        ("destiny", "Destino")]]
+    tbl = Table(td, colWidths=[200, 100])
+    tbl.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), GOLD),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTSIZE", (0, 0), (-1, -1), 9),
+        ("GRID", (0, 0), (-1, -1), 0.3, colors.grey),
+        ("BACKGROUND", (0, 1), (-1, -1), LGRAY),
+    ]))
+    e.append(tbl)
+    e.append(Spacer(1, 10))
+    e.append(Paragraph("(c) Monique Cissay", estilo(7, False, GRAY, TA_CENTER)))
+    doc.build(e)
+    return path
 
+def enviar_email(para, assunto, corpo, anexo=None):
+    if not SENDGRID_KEY:
+        return False
+    try:
+        sg = SendGridAPIClient(SENDGRID_KEY)
+        mail = Mail(Email(FROM_EMAIL, FROM_NAME), para, assunto, Content("text/plain", corpo))
+        if anexo and os.path.exists(anexo):
+            with open(anexo, "rb") as f:
+                enc = base64.b64encode(f.read()).decode()
+            mail.attachment = Attachment(FileContent(enc), FileName("Documento.pdf"),
+                                         FileType("application/pdf"), Disposition("attachment"))
+        sg.send(mail)
+        return True
+    except:
+        return False
 
-def compute_numerology(name: str, birth_date: dt.date) -> NumerologyResult:
-    life_path = calc_life_path(birth_date)
-    name_nums = calc_name_numbers(name)
-    destiny = calc_destiny(life_path, name_nums["expression"])
-    return NumerologyResult(
-        name=name,
-        birth_date=birth_date.isoformat(),
-        life_path=life_path,
-        expression=name_nums["expression"],
-        soul_urge=name_nums["soul_urge"],
-        personality=name_nums["personality"],
-        destiny=destiny,
-    )
+def pagina_sucesso(pdf_path, nome, prod_nome):
+    b64 = ""
+    if pdf_path and os.path.exists(pdf_path):
+        with open(pdf_path, "rb") as f:
+            b64 = base64.b64encode(f.read()).decode()
+    btn = ""
+    if b64:
+        btn = (f'<a href="data:application/pdf;base64,{b64}" download="Documento.pdf" '
+               f'style="display:inline-block;padding:18px 50px;background:#C9A94E;color:#000;'
+               f'text-decoration:none;border-radius:50px;font-weight:700;font-size:1.2rem;margin:25px 0">BAIXAR PDF</a>')
+    return (f'<html><body style="background:#0a0a0a;color:#fff;text-align:center;padding:40px;'
+            f'font-family:sans-serif"><h1 style="color:#C9A94E">Confirmado!</h1>'
+            f'<p>Ola <b>{nome}</b>, seu {prod_nome} foi gerado.</p>{btn}'
+            f'<a href="/" style="color:#C9A94E">Voltar</a></body></html>')
 
+@app.post("/calculate")
+def calculate(req: PayReq):
+    db = Session()
+    try:
+        if len(req.name.strip()) &lt; 2:
+            raise HTTPException(400, "Nome curto")
+        if not req.birth_date:
+            raise HTTPException(400, "Data obrigatoria")
+        res = calc(req.name, req.birth_date)
+        cid = uuid.uuid4().hex[:8]
+        db.add(Calc(id=cid, name=req.name, birth_date=req.birth_date, email=req.email, **res))
+        db.commit()
+        return {"id": cid, **res}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Calc: {e}")
+        raise HTTPException(500, "Erro")
+    finally:
+        db.close()
 
-# ---------------------------------------------------------------------------
-# Geração de PDF
-# ---------------------------------------------------------------------------
-def generate_pdf(result: NumerologyResult, path: str):
-    doc = SimpleDocTemplate(path, pagesize=A4, topMargin=2 * cm, bottomMargin=2 * cm)
-    styles = getSampleStyleSheet()
-    story = []
-    story.append(Paragraph("Mapa Numerológico", styles["Title"]))
-    story.append(Spacer(1, 0.5 * cm))
-    story.append(Paragraph(f"Nome: {result.name}", styles["Normal"]))
-    story.append(Paragraph(f"Data de Nascimento: {result.birth_date}", styles["Normal"]))
-    story.append(Spacer(1, 0.5 * cm))
-    story.append(Paragraph(f"Caminho de Vida: {result.life_path}", styles["Heading2"]))
-    story.append(Paragraph(f"Expressão: {result.expression}", styles["Heading2"]))
-    story.append(Paragraph(f"Motivação (Alma): {result.soul_urge}", styles["Heading2"]))
-    story.append(Paragraph(f"Personalidade: {result.personality}", styles["Heading2"]))
-    story.append(Paragraph(f"Destino: {result.destiny}", styles["Heading2"]))
-    story.append(Spacer(1, 1 * cm))
-    story.append(Paragraph("Obrigado por confiar na nossa numerologia!", styles["Normal"]))
-    doc.build(story)
+@app.post("/api/pay/stripe")
+def pay_stripe(req: PayReq):
+    if not STRIPE_KEY:
+        raise HTTPException(503, "Stripe nao configurado")
+    if not req.price or req.price &lt;= 0:
+        raise HTTPException(400, "Preco invalido")
+    amt = int(float(req.price) * 100)
+    cs = stripe.checkout.Session.create(
+        mode="payment", payment_method_types=["card"],
+        line_items=[{"price_data": {"currency": "brl", "product_data": {"name": f"Mapa-{req.product}"},
+                                    "unit_amount": amt}, "quantity": 1}],
+        customer_email=req.email,
+        metadata={"product": req.product, "name": req.name, "birth_date": req.birth_date or "", "email": req.email},
+        success_url=f"{BASE_URL}/api/pay/success?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url=f"{BASE_URL}/api/pay/cancel",
+        payment_method_options={"card": {"installments": {"enabled": True}}})
+    return {"payment_url": cs.url, "id": cs.id}
 
+@app.get("/api/pay/success")
+def pay_success(request: Request):
+    sid = request.query_params.get("session_id", "")
+    if not sid:
+        return HTMLResponse("ERRO")
+    try:
+        s = stripe.checkout.Session.retrieve(sid)
+        meta = getattr(s, "metadata", {}) or {}
+        if hasattr(meta, "to_dict"):
+            meta = meta.to_dict()
+        name = meta.get("name", "Cliente")
+        email = meta.get("email", "") or getattr(s, "customer_email", "")
+        bd = meta.get("birth_date", "")
+        prod = meta.get("product", "pdf8")
+        total = int(getattr(s, "amount_total", 0) or 0)
+        product = "pdf17" if (prod == "pdf17" or total >= 1200) else "pdf8"
+        if not bd:
+            bd = "2000-01-01"
+    except:
+        return HTMLResponse("ERRO")
+    try:
+        data = calc(name, bd)
+        if product == "pdf17":
+            pf = pdf8(data, name, bd)
+            pn = "Mapa Completo"
+        else:
+            pf = pdf8(data, name, bd)
+            pn = "Mapa Express"
+        if pf and email:
+            try:
+                enviar_email(email, f"Seu {pn}!", f"Ola {name},\n\nPDF anexo.", pf)
+            except:
+                pass
+        html = pagina_sucesso(pf, name, pn)
+        if pf and os.path.exists(pf):
+            os.remove(pf)
+        return HTMLResponse(html)
+    except:
+        return HTMLResponse("ERRO")
 
-# ---------------------------------------------------------------------------
-# E-mail
-# ---------------------------------------------------------------------------
-def send_email(to: str, subject: str, body: str, attachment_path: Optional[str] = None):
-    if not SMTP_USER or not SMTP_PASS:
-        print(f"[SMTP] Credenciais ausentes. E-mail para {to} não enviado.")
-        return
-    msg = MIMEMultipart()
-    msg["From"] = SMTP_FROM
-    msg["To"] = to
-    msg["Subject"] = subject
-    msg.attach(MIMEText(body, "plain", "utf-8"))
-    if attachment_path and os.path.exists(attachment_path):
-        with open(attachment_path, "rb") as f:
-            part = MIMEApplication(f.read(), Name=os.path.basename(attachment_path))
-        part["Content-Disposition"] = f'attachment; filename="{os.path.basename(attachment_path)}"'
-        msg.attach(part)
-    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-        server.starttls()
-        server.login(SMTP_USER, SMTP_PASS)
-        server.sendmail(SMTP_FROM, [to], msg.as_string())
+@app.get("/api/pay/cancel")
+def pay_cancel():
+    return HTMLResponse("<h1>Cancelado</h1><a href='/'>Voltar</a>")
 
-
-# ---------------------------------------------------------------------------
-# Endpoints
-# ---------------------------------------------------------------------------
 @app.get("/")
 def root():
-    return {"status": "ok", "service": "numerologia-api"}
+    try:
+        return HTMLResponse(open(os.path.join(os.path.dirname(__file__), "index.html"), "r", encoding="utf-8").read())
+    except:
+        return HTMLResponse("<h1>API ativa</h1>")
 
-
-@app.post("/calculate", response_model=NumerologyResult)
-def calculate(req: NumerologyRequest, db: sqlite3.Connection = Depends(get_db)):
-    result = compute_numerology(req.name, req.birth_date)
-    cur = db.execute(
-        """INSERT INTO calculations
-           (name, birth_date, email, life_path, expression, soul_urge, personality, destiny)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-        (result.name, result.birth_date, req.email, result.life_path,
-         result.expression, result.soul_urge, result.personality, result.destiny),
-    )
-    db.commit()
-    result_id = cur.lastrowid
-    return JSONResponse(status_code=200, content={**result.dict(), "id": result_id})
-
-
-@app.get("/calculations", response_model=List[NumerologyResult])
-def list_calculations(db: sqlite3.Connection = Depends(get_db)):
-    rows = db.execute("SELECT * FROM calculations ORDER BY id DESC").fetchall()
-    return [
-        NumerologyResult(
-            name=r["name"], birth_date=r["birth_date"],
-            life_path=r["life_path"], expression=r["expression"],
-            soul_urge=r["soul_urge"], personality=r["personality"],
-            destiny=r["destiny"],
-        ) for r in rows
-    ]
-
-
-@app.post("/checkout")
-def checkout(req: CheckoutRequest, db: sqlite3.Connection = Depends(get_db)):
-    cur = db.execute(
-        "INSERT INTO orders (email, product, price, calculation_id) VALUES (?, ?, ?, ?)",
-        (req.email, req.product, req.price, req.calculation_id),
-    )
-    db.commit()
-    order_id = cur.lastrowid
-    return {
-        "order_id": order_id,
-        "status": "pending",
-        "message": "Pagamento pendente. Use o webhook para confirmar.",
-        "checkout_url": f"https://exemplo.com/pay/{order_id}",
-    }
-
-
-@app.post("/checkout/webhook")
-def checkout_webhook(
-    payload: CheckoutWebhook,
-    background: BackgroundTasks,
-    db: sqlite3.Connection = Depends(get_db),
-):
-    if payload.secret != CHECKOUT_WEBHOOK_SECRET:
-        raise HTTPException(status_code=403, detail="Secret inválido")
-    order = db.execute("SELECT * FROM orders WHERE id = ?", (payload.order_id,)).fetchone()
-    if not order:
-        raise HTTPException(status_code=404, detail="Pedido não encontrado")
-    db.execute("UPDATE orders SET status = ? WHERE id = ?", (payload.status, payload.order_id))
-    db.commit()
-
-    if payload.status == "paid" and order["calculation_id"]:
-        calc = db.execute(
-            "SELECT * FROM calculations WHERE id = ?", (order["calculation_id"],)
-        ).fetchone()
-        if calc:
-            result = NumerologyResult(
-                name=calc["name"], birth_date=calc["birth_date"],
-                life_path=calc["life_path"], expression=calc["expression"],
-                soul_urge=calc["soul_urge"], personality=calc["personality"],
-                destiny=calc["destiny"],
-            )
-            pdf_path = os.path.join(PDF_DIR, f"mapa_{order['id']}.pdf")
-            generate_pdf(result, pdf_path)
-            background.add_task(
-                send_email,
-                to=order["email"],
-                subject="Seu Mapa Numerológico",
-                body=f"Olá {result.name},\n\nSegue em anexo o seu mapa numerológico.\n\nObrigado!",
-                attachment_path=pdf_path,
-            )
-    return {"order_id": payload.order_id, "status": payload.status}
-
-
-@app.post("/generate-pdf/{calculation_id}")
-def generate_pdf_endpoint(calculation_id: int, db: sqlite3.Connection = Depends(get_db)):
-    calc = db.execute(
-        "SELECT * FROM calculations WHERE id = ?", (calculation_id,)
-    ).fetchone()
-    if not calc:
-        raise HTTPException(status_code=404, detail="Cálculo não encontrado")
-    result = NumerologyResult(
-        name=calc["name"], birth_date=calc["birth_date"],
-        life_path=calc["life_path"], expression=calc["expression"],
-        soul_urge=calc["soul_urge"], personality=calc["personality"],
-        destiny=calc["destiny"],
-    )
-    pdf_path = os.path.join(PDF_DIR, f"mapa_{calculation_id}.pdf")
-    generate_pdf(result, pdf_path)
-    return {"pdf_path": pdf_path, "message": "PDF gerado com sucesso."}
-
-
-@app.post("/send-email")
-def send_email_endpoint(
-    email: EmailStr,
-    calculation_id: int,
-    background: BackgroundTasks,
-    db: sqlite3.Connection = Depends(get_db),
-):
-    calc = db.execute(
-        "SELECT * FROM calculations WHERE id = ?", (calculation_id,)
-    ).fetchone()
-    if not calc:
-        raise HTTPException(status_code=404, detail="Cálculo não encontrado")
-    result = NumerologyResult(
-        name=calc["name"], birth_date=calc["birth_date"],
-        life_path=calc["life_path"], expression=calc["expression"],
-        soul_urge=calc["soul_urge"], personality=calc["personality"],
-        destiny=calc["destiny"],
-    )
-    pdf_path = os.path.join(PDF_DIR, f"mapa_{calculation_id}.pdf")
-    if not os.path.exists(pdf_path):
-        generate_pdf(result, pdf_path)
-    background.add_task(
-        send_email,
-        to=email,
-        subject="Seu Mapa Numerológico",
-        body=f"Olá {result.name},\n\nSegue em anexo o seu mapa numerológico.\n\nObrigado!",
-        attachment_path=pdf_path,
-    )
-    return {"message": "E-mail agendado para envio.", "email": email}
-
+@app.get("/api/health")
+def health():
+    return {"status": "ok", "stripe": bool(STRIPE_KEY), "sendgrid": bool(SENDGRID_KEY)}
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    import uvicorn
+    port = int(os.getenv("PORT", "10000"))
+    uvicorn.run(app, host="0.0.0.0", port=port)
