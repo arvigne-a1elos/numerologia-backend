@@ -191,7 +191,13 @@ TRAD = {
 // Inicializar i18n
 for(var lang in TRAD){i18n[lang]={};var vals=TRAD[lang].split('|');for(var i=0;i<KEYS.length;i++){i18n[lang][KEYS[i]]=vals[i]||TRAD.pt.split('|')[i]||''}}
 function t(k){var l=localStorage.getItem('l')||'pt';return(i18n[l]||i18n.pt)[k]||i18n.pt[k]||k}
-function applyLang(){var l=localStorage.getItem('l')||'pt';document.querySelectorAll('[data-i18n]').forEach(function(el){el.textContent=t(el.dataset.i18n)});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===l)});document.documentElement.dir=(l==='ar')?'rtl':'ltr'}
+function applyLang(){var l=localStorage.getItem('l')||'pt';document.querySelectorAll('[data-i18n]').forEach(function(el){el.textContent=t(el.dataset.i18n)});document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.onclick = function() {
+        const code = this.dataset.lang;
+        localStorage.setItem('l', code);
+        applyLang(code);
+    }
+});.forEach(function(b){b.classList.toggle('active',b.dataset.lang===l)});document.documentElement.dir=(l==='ar')?'rtl':'ltr'}
 function setLang(c){localStorage.setItem('l',c);applyLang();renderProdTable();renderEnergyGrid()}
 (function(){var c=document.getElementById('langSelector');if(!c)return;LANGS.forEach(function(l){var b=document.createElement('button');b.className='lang-btn'+((localStorage.getItem('l')||'pt')===l.code?' active':'');b.dataset.lang=l.code;b.textContent=l.label;b.title=l.name;b.onclick=function(){setLang(l.code)};c.appendChild(b)})})();
 function renderProdTable(){var tb=document.getElementById('prodTableBody');if(!tb)return;tb.innerHTML='';PRODUTOS.forEach(function(p){var tr=document.createElement('tr');var sc=p.status==='ativo'?'tag-s8':'tag-breve';var sl=p.status==='ativo'?(p.soma?'Soma '+p.soma:''):'Em breve';var bh='';if(p.status==='ativo'){if(p.link){bh='<a href="'+p.link+'" class="btn btn-sm">'+p.btn+'</a>'}else if(p.id==='express_pdf'){bh='<button class="btn btn-sm" onclick="payExpress()">'+p.btn+'</button>'}else if(p.id==='completo'){bh='<button class="btn btn-sm" onclick="payCompleto()">'+p.btn+'</button>'}}tr.innerHTML='<td>'+p.nome+'<br><span style="font-size:.75rem;color:#888">'+p.desc+'</span></td><td style="font-weight:700;color:var(--gold)">'+p.preco+'</td><td><span class="'+sc+'">'+sl+'</span></td><td>'+bh+'</td>';tb.appendChild(tr)})}
