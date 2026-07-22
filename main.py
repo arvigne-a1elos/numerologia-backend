@@ -59,8 +59,13 @@ class Order(Base):
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True,
-                   allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class PayReq(BaseModel):
     name: str
@@ -93,13 +98,18 @@ GRAY = colors.HexColor("#888")
 FONTE = "Helvetica"
 FN = "Helvetica-Bold"
 
-CARGO_INFO = {"vereador": {"label": "Vereador"},
-              "dep_estadual": {"label": "Deputado Estadual"},
-              "dep_federal": {"label": "Deputado Federal"},
-              "senador": {"label": "Senador"}}
-ENERGIAS = {1: "Lideranca", 2: "Cooperacao", 3: "Criatividade",
-            4: "Trabalho", 5: "Liberdade", 6: "Familia",
-            7: "Sabedoria", 8: "Poder e Prosperidade (IDEAL)", 9: "Humanitarismo"}
+CARGO_INFO = {
+    "vereador": {"label": "Vereador"},
+    "dep_estadual": {"label": "Deputado Estadual"},
+    "dep_federal": {"label": "Deputado Federal"},
+    "senador": {"label": "Senador"},
+}
+
+ENERGIAS = {
+    1: "Lideranca", 2: "Cooperacao", 3: "Criatividade",
+    4: "Trabalho", 5: "Liberdade", 6: "Familia",
+    7: "Sabedoria", 8: "Poder e Prosperidade (IDEAL)", 9: "Humanitarismo",
+}
 
 def r1(n):
     while n > 9 and n not in (11, 22, 33):
@@ -127,8 +137,13 @@ def calc(nome, data_str):
             tv += val
         else:
             tp += val
-    return {"life_path": lp, "expression": r1(te), "soul_urge": r1(tv),
-            "personality": r1(tp), "destiny": r1(r1(te) + lp)}
+    return {
+        "life_path": lp,
+        "expression": r1(te),
+        "soul_urge": r1(tv),
+        "personality": r1(tp),
+        "destiny": r1(r1(te) + lp),
+    }
 
 def calc_grid(nome):
     t = {c: (i % 9 or 9) for i, c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)}
@@ -157,9 +172,14 @@ def validar_nomes_urna(nomes, cargo_key):
             expl = f"Nome {nome.strip().title()} tem ENERGIA 8! Ideal para candidatura."
         else:
             expl = f"Nome {nome.strip().title()} tem energia {en}. {ENERGIAS.get(en, '')}."
-        results.append({"nome": nome.strip().title(), "energia": en,
-                        "soma": st, "eh_ideal": en == 8,
-                        "explicacao": expl, "letras": letras})
+        results.append({
+            "nome": nome.strip().title(),
+            "energia": en,
+            "soma": st,
+            "eh_ideal": en == 8,
+            "explicacao": expl,
+            "letras": letras,
+        })
     ideal = any(r["eh_ideal"] for r in results)
     sugs = []
     if not ideal:
@@ -202,9 +222,13 @@ def gerar_numeros(sigla, cargo, qtd=5):
                     tent.add(n)
                     st = sm + sum(int(d) for d in dl)
                     enc.append({
-                        "numero": n, "energia": alvo, "ideal": alvo == 8,
-                        "sigla": ss, "digitos_livres": dl,
-                        "soma_sigla": sm, "soma_total": st,
+                        "numero": n,
+                        "energia": alvo,
+                        "ideal": alvo == 8,
+                        "sigla": ss,
+                        "digitos_livres": dl,
+                        "soma_sigla": sm,
+                        "soma_total": st,
                     })
         return enc
 
@@ -219,24 +243,37 @@ def gerar_numeros(sigla, cargo, qtd=5):
     return res[:qtd]
 
 def estilo(tam, negrito=False, cor=DARK, alinhamento=TA_LEFT, antes=0, depois=4):
-    return ParagraphStyle("S", fontName=FN if negrito else FONTE,
-                         fontSize=tam, textColor=cor,
-                         alignment=alinhamento, spaceBefore=antes,
-                         spaceAfter=depois)
+    return ParagraphStyle(
+        "S",
+        fontName=FN if negrito else FONTE,
+        fontSize=tam,
+        textColor=cor,
+        alignment=alinhamento,
+        spaceBefore=antes,
+        spaceAfter=depois,
+    )
 
 def pdf8(data, nome, bd):
     path = f"/tmp/p8_{uuid.uuid4().hex[:8]}.pdf"
-    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50,
-                            topMargin=40, bottomMargin=30)
+    doc = SimpleDocTemplate(
+        path, pagesize=A4, leftMargin=50, rightMargin=50,
+        topMargin=40, bottomMargin=30
+    )
     e = []
     e.append(Spacer(1, 15))
     e.append(Paragraph("MAPA EXPRESS", estilo(20, True, GOLD, TA_CENTER, 0, 6)))
     e.append(Paragraph(nome.upper(), estilo(12, True, DARK, TA_CENTER, 0, 2)))
     e.append(Paragraph(bd, estilo(9, False, GRAY, TA_CENTER, 0, 10)))
-    td = [["Numero", "Valor"]] + [[l, str(data[k])] for k, l in [
-        ("life_path", "Caminho de Vida"), ("expression", "Expressao"),
-        ("soul_urge", "Motivacao"), ("personality", "Personalidade"),
-        ("destiny", "Destino")]]
+
+    td = [["Numero", "Valor"]] + [
+        [l, str(data[k])] for k, l in [
+            ("life_path", "Caminho de Vida"),
+            ("expression", "Expressao"),
+            ("soul_urge", "Motivacao"),
+            ("personality", "Personalidade"),
+            ("destiny", "Destino"),
+        ]
+    ]
     tbl = Table(td, colWidths=[200, 100])
     tbl.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), GOLD),
@@ -247,14 +284,16 @@ def pdf8(data, nome, bd):
     ]))
     e.append(tbl)
     e.append(Spacer(1, 10))
-    e.append(Paragraph("(c) Monique Cissay", estilo(7, False, GRAY, TA_CENTER)))
+    e.append(Paragraph("(c) Monique Cissay — Numerologia", estilo(7, False, GRAY, TA_CENTER)))
     doc.build(e)
     return path
 
 def pdf17(data, nome, bd_str):
     path = f"/tmp/p17_{uuid.uuid4().hex[:8]}.pdf"
-    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50,
-                            topMargin=35, bottomMargin=25)
+    doc = SimpleDocTemplate(
+        path, pagesize=A4, leftMargin=50, rightMargin=50,
+        topMargin=35, bottomMargin=25
+    )
     e = []
     lp = data["life_path"]
     e.append(Spacer(1, 15))
@@ -263,10 +302,16 @@ def pdf17(data, nome, bd_str):
     e.append(Paragraph(bd_str, estilo(9, False, GRAY, TA_CENTER, 0, 10)))
     e.append(Paragraph(f"Caminho de Vida {lp}", estilo(11, False, DARK, TA_CENTER)))
     e.append(Spacer(1, 8))
-    td = [["Numero", "Valor"]] + [[l, str(data[k])] for k, l in [
-        ("life_path", "Caminho de Vida"), ("expression", "Expressao"),
-        ("soul_urge", "Motivacao"), ("personality", "Personalidade"),
-        ("destiny", "Destino")]]
+
+    td = [["Numero", "Valor"]] + [
+        [l, str(data[k])] for k, l in [
+            ("life_path", "Caminho de Vida"),
+            ("expression", "Expressao"),
+            ("soul_urge", "Motivacao"),
+            ("personality", "Personalidade"),
+            ("destiny", "Destino"),
+        ]
+    ]
     tbl = Table(td, colWidths=[200, 100])
     tbl.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), GOLD),
@@ -277,10 +322,14 @@ def pdf17(data, nome, bd_str):
     ]))
     e.append(tbl)
     e.append(Spacer(1, 10))
+
     bb = dp.parse(bd_str.split(" ")[0] if " " in bd_str else bd_str).date()
     d, m, a = bb.day, bb.month, bb.year
     fe = max(36 - min(lp, 36), 25)
-    e.append(Paragraph(f"Ciclo 1 (0-{fe}a) | Ciclo 2 ({fe+1}-{fe+27}a) | Ciclo 3 ({fe+28}+a)", estilo(10, False, DARK)))
+    e.append(Paragraph(
+        f"Ciclo 1 (0-{fe}a) | Ciclo 2 ({fe+1}-{fe+27}a) | Ciclo 3 ({fe+28}+a)",
+        estilo(10, False, DARK),
+    ))
     d1 = r1(abs(d - m))
     d2 = r1(abs(m - r1(a)))
     dp_ = r1(abs(d1 - d2))
@@ -290,62 +339,12 @@ def pdf17(data, nome, bd_str):
     grid = calc_grid(nome)
     pres = [str(n) for n in range(1, 10) if grid.get(n, 0) > 0]
     aus = [str(n) for n in range(1, 10) if grid.get(n, 0) == 0]
-    e.append(Paragraph(f"Grade: Presentes {', '.join(pres) or '-'} | Carencias {', '.join(aus) or '-'}", estilo(10, False, DARK)))
+    e.append(Paragraph(
+        f"Grade: Presentes {', '.join(pres) or '-'} | Carencias {', '.join(aus) or '-'}",
+        estilo(10, False, DARK),
+    ))
     e.append(Spacer(1, 15))
-    e.append(Paragraph("(c) Monique Cissay", estilo(7, False, GRAY, TA_CENTER)))
-    doc.build(e)
-    return path
-
-def pdf_urna(nc, cl, resultados, sugestoes):
-    path = f"/tmp/u_{uuid.uuid4().hex[:8]}.pdf"
-    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50,
-                            topMargin=40, bottomMargin=35)
-    e = []
-    e.append(Spacer(1, 20))
-    e.append(Paragraph("VALIDACAO DE NOME DE URNA", estilo(20, True, GOLD, TA_CENTER)))
-    e.append(Paragraph(nc.title(), estilo(12, True, DARK, TA_CENTER)))
-    e.append(Paragraph(f"Cargo: {cl}", estilo(9, False, GRAY, TA_CENTER)))
-    for r in resultados:
-        ic = "S" if r["eh_ideal"] else "X"
-        co = "#4CAF50" if r["eh_ideal"] else "#e74c3c"
-        e.append(Paragraph(f'{ic} {r["nome"]} - Energia {r["energia"]}', estilo(11, True, DARK)))
-        if r["letras"]:
-            ls = ", ".join([f'{l["letra"]}={l["valor"]}' for l in r["letras"]])
-            e.append(Paragraph(f"{ls} -> {r['soma']} -> {r['energia']}", estilo(9, False, GRAY)))
-        e.append(Paragraph(r["explicacao"], estilo(10, False, DARK)))
-    if sugestoes:
-        e.append(Spacer(1, 10))
-        e.append(Paragraph("Sugestoes:", estilo(16, True, GOLD)))
-        for s in sugestoes[:3]:
-            e.append(Paragraph(f'{s["nome"]} - Energia {s["energia"]}', estilo(11, False, DARK)))
-    e.append(Paragraph("(c) A1ELOS", estilo(7, False, GRAY, TA_CENTER)))
-    doc.build(e)
-    return path
-
-def pdf_eleitoral(ss, cl, sugestoes, ne=None):
-    path = f"/tmp/e_{uuid.uuid4().hex[:8]}.pdf"
-    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50,
-                            topMargin=40, bottomMargin=35)
-    e = []
-    e.append(Spacer(1, 20))
-    e.append(Paragraph("NUMERO ELEITORAL", estilo(20, True, GOLD, TA_CENTER)))
-    e.append(Paragraph(f"Cargo: {cl} | Sigla: {ss}", estilo(9, False, GRAY, TA_CENTER)))
-    e.append(Spacer(1, 10))
-    ids = [s for s in sugestoes if s.get("ideal")]
-    fbs = [s for s in sugestoes if not s.get("ideal")]
-    if ids:
-        e.append(Paragraph("Opcoes com Energia 8 - IDEAL:", estilo(11, True, DARK)))
-        for s in ids:
-            e.append(Paragraph(f'{s["numero"]} - Energia 8!', estilo(11, False, colors.HexColor("#4CAF50"))))
-    if fbs:
-        if ids:
-            e.append(Spacer(1, 8))
-        e.append(Paragraph("Opcoes Alternativas:", estilo(11, True, DARK)))
-        for s in fbs:
-            e.append(Paragraph(f'{s["numero"]} - Energia {s["energia"]}', estilo(11, False, DARK)))
-    if ne:
-        e.append(Paragraph(f'Numero: {ne["numero"]} - Energia: {ne["energia"]}', estilo(11, False, DARK)))
-    e.append(Paragraph("(c) A1ELOS", estilo(7, False, GRAY, TA_CENTER)))
+    e.append(Paragraph("(c) Monique Cissay — Numerologia", estilo(7, False, GRAY, TA_CENTER)))
     doc.build(e)
     return path
 
@@ -354,18 +353,20 @@ def enviar_email(para, assunto, corpo, anexo=None):
         return False
     try:
         sg = SendGridAPIClient(SENDGRID_KEY)
-        mail = Mail(Email(FROM_EMAIL, FROM_NAME), para, assunto,
-                    Content("text/plain", corpo))
+        mail = Mail(Email(FROM_EMAIL, FROM_NAME), para, assunto, Content("text/plain", corpo))
         if anexo and os.path.exists(anexo):
             with open(anexo, "rb") as f:
                 enc = base64.b64encode(f.read()).decode()
-            mail.attachment = Attachment(FileContent(enc),
-                                         FileName("Documento.pdf"),
-                                         FileType("application/pdf"),
-                                         Disposition("attachment"))
+            mail.attachment = Attachment(
+                FileContent(enc),
+                FileName("Documento.pdf"),
+                FileType("application/pdf"),
+                Disposition("attachment"),
+            )
         sg.send(mail)
         return True
-    except:
+    except Exception as e:
+        logger.error(f"Email: {e}")
         return False
 
 def pagina_sucesso(pdf_path, nome, prod_nome):
@@ -375,17 +376,24 @@ def pagina_sucesso(pdf_path, nome, prod_nome):
             b64 = base64.b64encode(f.read()).decode()
     btn = ""
     if b64:
-        btn = (f'<a href="data:application/pdf;base64,{b64}" '
-               f'download="Documento.pdf" '
-               f'style="display:inline-block;padding:18px 50px;'
-               f'background:#C9A94E;color:#000;text-decoration:none;'
-               f'border-radius:50px;font-weight:700;font-size:1.2rem;'
-               f'margin:25px 0">BAIXAR PDF</a>')
-    return (f'<html><body style="background:#0a0a0a;color:#fff;'
-            f'text-align:center;padding:40px;font-family:sans-serif">'
-            f'<h1 style="color:#C9A94E">Confirmado!</h1>'
-            f'<p>Ola <b>{nome}</b>, seu {prod_nome} foi gerado.</p>{btn}'
-            f'<a href="/" style="color:#C9A94E">Voltar</a></body></html>')
+        btn = (
+            f'<a href="data:application/pdf;base64,{b64}" '
+            f'download="Documento.pdf" '
+            f'style="display:inline-block;padding:18px 50px;'
+            f'background:#C9A94E;color:#000;text-decoration:none;'
+            f'border-radius:50px;font-weight:700;font-size:1.2rem;'
+            f'margin:25px 0">BAIXAR PDF</a>'
+        )
+    return (
+        f'<html><body style="background:#0a0a0a;color:#fff;'
+        f'text-align:center;padding:40px;font-family:sans-serif">'
+        f'<h1 style="color:#C9A94E">Confirmado!</h1>'
+        f'<p>Ola <b>{nome}</b>, seu {prod_nome} foi gerado.</p>'
+        f'{btn}'
+        f'<p>Clique para salvar o PDF.</p>'
+        f'<a href="/" style="color:#C9A94E">Voltar</a>'
+        f'</body></html>'
+    )
 
 @app.post("/calculate")
 def calculate(req: PayReq):
@@ -397,8 +405,10 @@ def calculate(req: PayReq):
             raise HTTPException(400, "Data obrigatoria")
         res = calc(req.name, req.birth_date)
         cid = uuid.uuid4().hex[:8]
-        db.add(Calc(id=cid, name=req.name, birth_date=req.birth_date,
-                    email=req.email, **res))
+        db.add(Calc(
+            id=cid, name=req.name, birth_date=req.birth_date,
+            email=req.email, **res
+        ))
         db.commit()
         return {"id": cid, **res}
     except HTTPException:
@@ -417,16 +427,27 @@ def pay_stripe(req: PayReq):
         raise HTTPException(400, "Preco invalido")
     amt = int(float(req.price) * 100)
     cs = stripe.checkout.Session.create(
-        mode="payment", payment_method_types=["card"],
-        line_items=[{"price_data": {"currency": "brl",
-                                    "product_data": {"name": f"Mapa-{req.product}"},
-                                    "unit_amount": amt}, "quantity": 1}],
+        mode="payment",
+        payment_method_types=["card"],
+        line_items=[{
+            "price_data": {
+                "currency": "brl",
+                "product_data": {"name": f"Mapa-{req.product}"},
+                "unit_amount": amt,
+            },
+            "quantity": 1,
+        }],
         customer_email=req.email,
-        metadata={"product": req.product, "name": req.name,
-                  "birth_date": req.birth_date or "", "email": req.email},
+        metadata={
+            "product": req.product,
+            "name": req.name,
+            "birth_date": req.birth_date or "",
+            "email": req.email,
+        },
         success_url=f"{BASE_URL}/api/pay/success?session_id={CHECKOUT_SESSION_ID}",
         cancel_url=f"{BASE_URL}/api/pay/cancel",
-        payment_method_options={"card": {"installments": {"enabled": True}}})
+        payment_method_options={"card": {"installments": {"enabled": True}}},
+    )
     return {"payment_url": cs.url, "id": cs.id}
 
 @app.get("/api/pay/success")
@@ -447,7 +468,7 @@ def pay_success(request: Request):
         product = "pdf17" if (prod == "pdf17" or total >= 1200) else "pdf8"
         if not bd:
             bd = "2000-01-01"
-    except:
+    except Exception:
         return HTMLResponse("ERRO")
     try:
         data = calc(name, bd)
@@ -460,135 +481,13 @@ def pay_success(request: Request):
         if pf and email:
             try:
                 enviar_email(email, f"Seu {pn}!", f"Ola {name},\n\nPDF anexo.", pf)
-            except:
+            except Exception:
                 pass
         html = pagina_sucesso(pf, name, pn)
         if pf and os.path.exists(pf):
             os.remove(pf)
         return HTMLResponse(html)
-    except:
-        return HTMLResponse("ERRO")
-
-@app.post("/api/pay/urna-session")
-def pay_urna_session(req: UrnaPayReq):
-    if not STRIPE_KEY:
-        raise HTTPException(503, "Stripe nao configurado")
-    if not req.email:
-        raise HTTPException(400, "Email obrigatorio")
-    if len(req.nome_completo.strip()) < 3:
-        raise HTTPException(400, "Nome obrigatorio")
-    nomes = [n.strip() for n in [req.nome1, req.nome2, req.nome3,
-                                  req.nome4, req.nome5] if n.strip()]
-    if not nomes:
-        raise HTTPException(400, "Pelo menos 1 nome")
-    meta = {"product": "urna26", "nome_completo": req.nome_completo,
-            "cargo": req.cargo, "email": req.email}
-    for i, n in enumerate(nomes, 1):
-        meta[f"nome{i}"] = n
-    cs = stripe.checkout.Session.create(
-        mode="payment", payment_method_types=["card"],
-        line_items=[{"price_data": {"currency": "brl",
-                                    "product_data": {"name": "Validacao Nome"},
-                                    "unit_amount": 2600}, "quantity": 1}],
-        customer_email=req.email, metadata=meta,
-        success_url=f"{BASE_URL}/api/pay/urna-success?session_id={CHECKOUT_SESSION_ID}",
-        cancel_url=f"{BASE_URL}/api/pay/cancel")
-    return {"payment_url": cs.url, "id": cs.id}
-
-@app.get("/api/pay/urna-success")
-def pay_urna_success(request: Request):
-    sid = request.query_params.get("session_id", "")
-    if not sid:
-        return HTMLResponse("ERRO")
-    try:
-        s = stripe.checkout.Session.retrieve(sid)
-        meta = getattr(s, "metadata", {}) or {}
-        if hasattr(meta, "to_dict"):
-            meta = meta.to_dict()
-        nc = meta.get("nome_completo", "")
-        cr = meta.get("cargo", "vereador")
-        em = meta.get("email", "") or getattr(s, "customer_email", "")
-        nomes = [meta.get(f"nome{i}", "") for i in range(1, 6)
-                 if meta.get(f"nome{i}", "")]
-        if not nomes:
-            return HTMLResponse("ERRO")
-        res, _, sugs = validar_nomes_urna(nomes, cr)
-        cl = CARGO_INFO.get(cr, {}).get("label", cr)
-        pf = pdf_urna(nc, cl, res, sugs)
-        if pf and em:
-            try:
-                enviar_email(em, "Validacao Nome", f"PDF anexo.", pf)
-            except:
-                pass
-        html = pagina_sucesso(pf, nc, "Validacao Urna")
-        if pf and os.path.exists(pf):
-            os.remove(pf)
-        return HTMLResponse(html)
-    except:
-        return HTMLResponse("ERRO")
-
-@app.post("/api/pay/eleitoral-session")
-def pay_eleitoral_session(req: EleitoralPayReq):
-    if not STRIPE_KEY:
-        raise HTTPException(503, "Stripe nao configurado")
-    if not req.email:
-        raise HTTPException(400, "Email obrigatorio")
-    if req.sigla < 10 or req.sigla > 99:
-        raise HTTPException(400, "Sigla 2 digitos")
-    if req.cargo not in ["vereador", "dep_estadual", "dep_federal", "senador"]:
-        raise HTTPException(400, "Cargo invalido")
-    meta = {"product": "eleitoral26", "sigla": str(req.sigla),
-            "cargo": req.cargo, "email": req.email,
-            "numero_existente": req.numero_existente or ""}
-    cs = stripe.checkout.Session.create(
-        mode="payment", payment_method_types=["card"],
-        line_items=[{"price_data": {"currency": "brl",
-                                    "product_data": {"name": "Numero Eleitoral"},
-                                    "unit_amount": 2600}, "quantity": 1}],
-        customer_email=req.email, metadata=meta,
-        success_url=f"{BASE_URL}/api/pay/eleitoral-success?session_id={CHECKOUT_SESSION_ID}",
-        cancel_url=f"{BASE_URL}/api/pay/cancel")
-    return {"payment_url": cs.url, "id": cs.id}
-
-@app.get("/api/pay/eleitoral-success")
-def pay_eleitoral_success(request: Request):
-    sid = request.query_params.get("session_id", "")
-    if not sid:
-        return HTMLResponse("ERRO")
-    try:
-        s = stripe.checkout.Session.retrieve(sid)
-        meta = getattr(s, "metadata", {}) or {}
-        if hasattr(meta, "to_dict"):
-            meta = meta.to_dict()
-        sg = int(meta.get("sigla", "0"))
-        cr = meta.get("cargo", "vereador")
-        em = meta.get("email", "") or getattr(s, "customer_email", "")
-        if not em:
-            return HTMLResponse("ERRO")
-        ne_str = meta.get("numero_existente", "")
-        ss = str(sg).zfill(2)
-        cl_map = {"vereador": "Vereador", "dep_estadual": "Dep. Estadual",
-                  "dep_federal": "Dep. Federal", "senador": "Senador"}
-        cl2 = cl_map.get(cr, cr)
-        sugs = gerar_numeros(sg, cr)
-        ni = None
-        if ne_str and len(ne_str) >= 3:
-            try:
-                en = r1(sum(int(d) for d in ne_str))
-                ni = {"numero": ne_str, "energia": en}
-            except:
-                pass
-        pf = pdf_eleitoral(ss, cl2, sugs, ni)
-        if pf and em:
-            try:
-                enviar_email(em, "Numero Eleitoral", f"PDF para {cl2}.", pf)
-            except:
-                pass
-        html = pagina_sucesso(pf, f"Candidato {cl2}", f"Numero Eleitoral")
-        if pf and os.path.exists(pf):
-            os.remove(pf)
-        return HTMLResponse(html)
-    except:
+    except Exception:
         return HTMLResponse("ERRO")
 
 @app.get("/api/pay/cancel")
@@ -598,16 +497,23 @@ def pay_cancel():
 @app.get("/")
 def root():
     try:
-        return HTMLResponse(open(os.path.join(os.path.dirname(__file__),
-                                              "index.html"), "r",
-                                encoding="utf-8").read())
-    except:
+        return HTMLResponse(
+            open(
+                os.path.join(os.path.dirname(__file__), "index.html"),
+                "r",
+                encoding="utf-8",
+            ).read()
+        )
+    except Exception:
         return HTMLResponse("<h1>API ativa</h1>")
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "stripe": bool(STRIPE_KEY),
-            "sendgrid": bool(SENDGRID_KEY)}
+    return {
+        "status": "ok",
+        "stripe": bool(STRIPE_KEY),
+        "sendgrid": bool(SENDGRID_KEY),
+    }
 
 if __name__ == "__main__":
     import uvicorn
