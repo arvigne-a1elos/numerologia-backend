@@ -414,7 +414,7 @@ def pay_stripe(req: PayReq):
                                     "unit_amount": amt}, "quantity": 1}],
         customer_email=req.email,
         metadata={"product": req.product, "name": req.name, "birth_date": req.birth_date or "", "email": req.email},
-        success_url=f"{BASE_URL}/api/pay/success?session_id={CHECKOUT_SESSION_ID}",
+        success_url=f"{BASE_URL}/api/pay/success?session_id={{CHECKOUT_SESSION_ID}}",
         cancel_url=f"{BASE_URL}/api/pay/cancel",
         payment_method_options={"card": {"installments": {"enabled": True}}})
     return {"payment_url": cs.url, "id": cs.id}
@@ -477,7 +477,7 @@ def pay_urna_session(req: UrnaPayReq):
         mode="payment", payment_method_types=["card"],
         line_items=[{"price_data": {"currency": "brl", "product_data": {"name": "Validacao Nome"}, "unit_amount": 2600}, "quantity": 1}],
         customer_email=req.email, metadata=meta,
-        success_url=f"{BASE_URL}/api/pay/urna-success?session_id={CHECKOUT_SESSION_ID}",
+        success_url=f"{BASE_URL}/api/pay/urna-success?session_id={{CHECKOUT_SESSION_ID}}",
         cancel_url=f"{BASE_URL}/api/pay/cancel")
     return {"payment_url": cs.url, "id": cs.id}
 
@@ -527,7 +527,7 @@ def pay_eleitoral_session(req: EleitoralPayReq):
         mode="payment", payment_method_types=["card"],
         line_items=[{"price_data": {"currency": "brl", "product_data": {"name": "Numero Eleitoral"}, "unit_amount": 2600}, "quantity": 1}],
         customer_email=req.email, metadata=meta,
-        success_url=f"{BASE_URL}/api/pay/eleitoral-success?session_id={CHECKOUT_SESSION_ID}",
+        success_url=f"{BASE_URL}/api/pay/eleitoral-success?session_id={{CHECKOUT_SESSION_ID}}",
         cancel_url=f"{BASE_URL}/api/pay/cancel")
     return {"payment_url": cs.url, "id": cs.id}
 
