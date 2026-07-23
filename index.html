@@ -208,6 +208,7 @@ function showSection(id){var el=document.getElementById(id);if(!el)return;el.cla
 async function calculate(){var n=document.getElementById('mainName').value.trim();var d=document.getElementById('mainDate').value;var e=document.getElementById('mainEmail').value.trim();var btn=document.getElementById('calcBtn');var rd=document.getElementById('calcResult');var rg=document.getElementById('calcResultGrid');if(!n||!d||!e){alert('Preencha todos os campos');return}btn.textContent='Calculando...';btn.disabled=true;if(rd)rd.style.display='none';try{var r=await fetch('/calculate',{method:'POST',headers:{'Content-Type':'application/json'},body: JSON.stringify({
 name: n,
 birth_date: d,
+    lang: Optional[str] = "pt"
 email: e,
 product: 'pdf8',  // ou 'pdf17'
 price: 8,          // ou 17
