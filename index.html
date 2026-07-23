@@ -226,18 +226,13 @@ async function payExpress(){
 }
 
 async function payCompleto(){
- var n=document.getElementById('mainName').value.trim();
- var d=document.getElementById('mainDate').value;
- if(!n||!d){alert('Preencha nome e data primeiro');return}
- try{
-  var r=await fetch('/api/pay/stripe',{
-   method:'POST',headers:{'Content-Type':'application/json'},
-   body:JSON.stringify({name:n,birth_date:d,email:e,product:'pdf8',lang:localStorage.getItem('l')||'pt'}) 
- if(data.payment_url)window.location.href=data.payment_url;
-  else alert('Erro ao criar pagamento');
- }catch(ex){alert('Erro de conex\u00e3o')}
-}
-
+var n=document.getElementById('mainName').value.trim();
+var d=document.getElementById('mainDate').value;
+if(!n||!d){alert('Preencha nome e data primeiro');return}
+try{
+var r=await fetch('/api/pay/stripe',{
+method:'POST',headers:{'Content-Type':'application/json'},
+body:JSON.stringify({name:n,birth_date:d,email:e,product:'pdf8',lang:localStorage.getItem('l')||'pt'})
 document.addEventListener('DOMContentLoaded',function(){applyLang();renderEnergyGrid()});
 </script>
 </body>
