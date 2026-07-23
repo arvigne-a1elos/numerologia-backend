@@ -1,239 +1,224 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapa Numerol\u00f3gico | A1ELOS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        :root { --gold: #C9A94E; --dark: #0a0a0a; --card-bg: #111; --text-gray: #a0a0a0; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: var(--dark); color: #fff; overflow-x: hidden; line-height: 1.6; }
-        [dir="rtl"] { direction: rtl; text-align: right; }
-        .lang-wrapper { position: fixed; top: 0; width: 100%; z-index: 1100; background: rgba(10,10,10,0.9); backdrop-filter: blur(12px); border-bottom: 1px solid #222; padding: 8px 0; }
-        .lang-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
-        .lang-btn { background: transparent; border: 1px solid #333; color: #aaa; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 11px; transition: 0.3s; display: flex; align-items: center; gap: 4px; }
-        .lang-btn:hover, .lang-btn.active { border-color: var(--gold); color: var(--gold); }
-        nav.sections { position: fixed; top: 45px; width: 100%; z-index: 1000; background: rgba(10,10,10,0.8); border-bottom: 1px solid #222; padding: 10px 0; display: flex; justify-content: center; gap: 20px; }
-        nav.sections a { color: #888; text-decoration: none; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
-        nav.sections a:hover { color: var(--gold); }
-        .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 120px 20px 60px; background: radial-gradient(circle at center, #1a1a1a 0%, #0a0a0a 100%); }
-        .logo-img { width: 140px; height: 140px; margin-bottom: 25px; border-radius: 50%; border: 2px solid var(--gold); }
-        h1 { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 6vw, 4rem); color: var(--gold); margin-bottom: 10px; }
-        .subtitle { font-size: 1.2rem; color: var(--text-gray); margin-bottom: 30px; }
-        .btn { display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, var(--gold), #b8942e); color: #0a0a0a; text-decoration: none; font-weight: 700; border-radius: 50px; cursor: pointer; border: none; text-transform: uppercase; font-size: 0.8rem; transition: 0.3s; }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(201,169,78,0.4); }
-        .btn-outline { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
-        section { padding: 80px 20px; max-width: 1100px; margin: 0 auto; }
-        .form-container { background: #111; padding: 40px; border-radius: 20px; border: 1px solid #222; max-width: 600px; margin: 0 auto; }
-        .form-group { margin-bottom: 20px; text-align: left; }
-        .form-group label { display: block; font-size: 0.8rem; color: #888; margin-bottom: 8px; }
-        .form-group input { width: 100%; padding: 12px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; color: #fff; outline: none; }
-        .form-group input:focus { border-color: var(--gold); }
-        .result-card { display: none; margin-top: 40px; animation: fadeIn 0.8s ease; }
-        .result-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
-        .num-box { background: #1a1a1a; padding: 20px; border-radius: 15px; border: 1px solid #222; text-align: center; }
-        .num-box .val { font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--gold); }
-        .num-box .label { font-size: 0.7rem; text-transform: uppercase; color: #777; margin-top: 5px; }
-        .pricing-table { width: 100%; border-collapse: collapse; margin-top: 40px; font-size: 0.85rem; }
-        .pricing-table th { text-align: left; padding: 15px; border-bottom: 2px solid var(--gold); color: var(--gold); }
-        .pricing-table td { padding: 15px; border-bottom: 1px solid #222; }
-        .pricing-table tr:hover { background: rgba(255,255,255,0.02); }
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
-        .panel { background: #111; width: 90%; max-width: 500px; padding: 40px; border-radius: 20px; border: 1px solid var(--gold); position: relative; max-height: 90vh; overflow-y: auto; }
-        .panel h3 { font-family: 'Playfair Display', serif; color: var(--gold); margin-bottom: 20px; font-size: 1.5rem; }
-        .panel-close { position: absolute; top: 20px; right: 20px; cursor: pointer; color: #555; font-size: 1.5rem; }
-        .energy-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 40px; }
-        .energy-card { background: #111; border: 1px solid #222; padding: 25px; border-radius: 15px; text-align: center; }
-        .energy-card h4 { color: var(--gold); font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 10px; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        footer { padding: 60px 20px; text-align: center; border-top: 1px solid #222; color: #444; font-size: 0.8rem; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Mapa Numerologico | A1ELOS</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--gold:#C9A94E;--gold2:#b8942e;--dark:#0a0a0a;--card:#111;--gray:#a0a0a0;--red:#e74c3c;--green:#4CAF50}
+body{font-family:'Inter',sans-serif;background:var(--dark);color:#fff;line-height:1.6}
+.lang-wrapper{position:fixed;top:0;width:100%;z-index:1100;background:rgba(10,10,10,0.95);border-bottom:1px solid #222;padding:8px 0}
+.lang-container{max-width:1200px;margin:0 auto;display:flex;justify-content:center;gap:4px;flex-wrap:wrap}
+.lang-btn{background:transparent;border:1px solid #333;color:#aaa;padding:4px 7px;border-radius:6px;cursor:pointer;font-size:10px;transition:.3s}
+.lang-btn:hover,.lang-btn.active{border-color:var(--gold);color:var(--gold)}
+nav.sections{position:fixed;top:43px;width:100%;z-index:1000;background:rgba(10,10,10,0.85);border-bottom:1px solid #222;padding:10px 0;display:flex;justify-content:center;gap:20px;flex-wrap:wrap}
+nav.sections a{color:#888;text-decoration:none;font-size:.75rem;text-transform:uppercase;letter-spacing:1px;transition:.3s}
+nav.sections a:hover{color:var(--gold)}
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:130px 20px 60px;background:radial-gradient(circle at center,#1a1a1a 0%,#0a0a0a 100%)}
+.hero-logo{width:140px;height:140px;margin-bottom:25px;border-radius:50%;border:2px solid var(--gold)}
+h1{font-family:'Playfair Display',serif;font-size:clamp(2rem,6vw,4rem);color:var(--gold);margin-bottom:10px}
+.hero-sub{font-size:1.2rem;color:var(--gray);margin-bottom:30px;max-width:700px}
+.hero-btns{display:flex;gap:15px;flex-wrap:wrap;justify-content:center}
+.btn{display:inline-block;padding:14px 32px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0a0a;font-weight:700;border-radius:50px;cursor:pointer;border:none;text-transform:uppercase;font-size:.8rem;transition:.3s;font-family:'Inter',sans-serif}
+.btn:hover{transform:translateY(-2px);box-shadow:0 5px 20px rgba(201,169,78,0.35)}
+.btn-sm{padding:10px 20px;font-size:.7rem}
+.btn-outline{background:transparent;color:var(--gold);border:1px solid var(--gold)}
+.btn-block{width:100%}
+section{padding:80px 20px;max-width:1100px;margin:0 auto}
+.section-hidden{display:none}
+.form-box{background:var(--card);padding:40px;border-radius:20px;border:1px solid #222;max-width:600px;margin:0 auto}
+.form-group{margin-bottom:20px;text-align:left}
+.form-group label{display:block;font-size:.8rem;color:#888;margin-bottom:8px}
+.form-group input,.form-group select{width:100%;padding:12px;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;outline:none;font-size:1rem;font-family:'Inter',sans-serif}
+.form-group input:focus,.form-group select:focus{border-color:var(--gold)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.result-card{display:none;margin-top:40px;animation:fadeIn .8s ease}
+.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px}
+.num-box{background:#1a1a1a;padding:20px;border-radius:15px;border:1px solid #222;text-align:center}
+.num-box .val{font-family:'Playfair Display',serif;font-size:2.5rem;color:var(--gold)}
+.num-box .label{font-size:.7rem;text-transform:uppercase;color:#777;margin-top:5px}
+.prod-table{width:100%;border-collapse:collapse;margin-top:40px;font-size:.85rem}
+.prod-table th{text-align:left;padding:15px;border-bottom:2px solid var(--gold);color:var(--gold)}
+.prod-table td{padding:15px;border-bottom:1px solid #222;vertical-align:middle}
+.prod-table tr:hover{background:rgba(255,255,255,0.02)}
+.tag-s8{display:inline-block;background:#1a3a1a;color:var(--green);padding:2px 8px;border-radius:12px;font-size:.65rem;border:1px solid var(--green)}
+.tag-breve{display:inline-block;background:#1a1a1a;color:#888;padding:2px 8px;border-radius:12px;font-size:.65rem;border:1px solid #333}
+.tab-bar{display:flex;gap:4px;margin-bottom:25px;background:#1a1a1a;border-radius:12px;padding:4px;flex-wrap:wrap}
+.tab-btn{flex:1;min-width:80px;padding:10px;text-align:center;border-radius:10px;background:transparent;color:#888;cursor:pointer;border:none;font-size:.75rem;font-weight:500;transition:.3s;font-family:'Inter',sans-serif}
+.tab-btn.active{background:var(--gold);color:#0a0a0a}
+.energy-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;margin-top:40px}
+.energy-card{background:var(--card);border:1px solid #222;padding:25px;border-radius:15px;text-align:center}
+.energy-card h4{color:var(--gold);font-family:'Playfair Display',serif;font-size:2rem;margin-bottom:10px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+footer{padding:60px 20px;text-align:center;border-top:1px solid #222;color:#444;font-size:.8rem}
+.gold-bar{width:60px;height:3px;background:var(--gold);margin:0 auto 30px;border-radius:3px}
+@media(max-width:768px){.form-grid{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
-
-<div class="lang-wrapper">
-    <div class="lang-container" id="langSelector"></div>
-</div>
-
+<div class="lang-wrapper"><div class="lang-container" id="langSelector"></div></div>
 <nav class="sections">
-    <a href="#inicio" data-i18n="nav_home">In\u00edcio</a>
-    <a href="#calc" data-i18n="nav_map">Mapa</a>
-    <a href="#eleitoral" data-i18n="nav_elec">Eleitoral</a>
-    <a href="#energias" data-i18n="nav_energy">Energias</a>
-    <a href="#precos" data-i18n="nav_products">Pre\u00e7os</a>
+<a href="#inicio" data-i18n="nav_home">Inicio</a>
+<a href="#calc" data-i18n="nav_map">Mapa</a>
+<a href="#produtos" data-i18n="nav_prod">Produtos</a>
+<a href="#urna" data-i18n="nav_urna">Urna</a>
+<a href="#eleitoral" data-i18n="nav_elec">Eleitoral</a>
+<a href="#energias" data-i18n="nav_energy">Energias</a>
 </nav>
-
 <section id="inicio" class="hero">
-    <img src="https://generated-images.adapta.one/arvigne%40gmail.com/019f56cb-b9e4-7644-9dd8-5d14c5261d46/2026-07-14T13-27-24-531Z_Original_user_intent_A_premium_minimalist_logo_s.png" class="logo-img" alt="A1ELOS">
-    <h1 data-i18n="hero_title">MAPA NUMEROL\u00d3GICO</h1>
-    <p class="subtitle" data-i18n="hero_sub">A ci\u00eancia dos n\u00fameros aplicada ao seu destino e neg\u00f3cios</p>
-    <div style="display:flex; gap:15px; flex-wrap:wrap; justify-content:center;">
-        <button class="btn" onclick="document.getElementById('calc').scrollIntoView({behavior:'smooth'})" data-i18n="hero_btn_main">Gerar Mapa Gr\u00e1tis</button>
-        <a href="#precos" class="btn btn-outline" data-i18n="hero_btn_prod">Ver Produtos</a>
-    </div>
+<img src="https://generated-images.adapta.one/arvigne%40gmail.com/019f56cb-b9e4-7644-9dd8-5d14c5261d46/2026-07-14T13-27-24-531Z_Original_user_intent_A_premium_minimalist_logo_s.png" class="hero-logo" alt="A1ELOS">
+<h1 data-i18n="hero_title">MAPA NUMEROLOGICO</h1>
+<p class="hero-sub" data-i18n="hero_sub">A ciencia dos numeros aplicada ao seu destino e negocios</p>
+<div class="hero-btns">
+<button class="btn" onclick="document.getElementById('calc').scrollIntoView({behavior:'smooth'})" data-i18n="hero_btn1">Gerar Mapa Gratis</button>
+<a href="#produtos" class="btn btn-outline" data-i18n="hero_btn2">Ver Produtos</a>
+<a href="#eleitoral" class="btn btn-outline" data-i18n="hero_btn3">Solucoes Eleitorais</a>
+</div>
 </section>
-
 <section id="calc">
-    <div class="form-container">
-        <h2 style="text-align:center; margin-bottom:30px; font-family:'Playfair Display';" data-i18n="calc_title">Calcule seu Mapa</h2>
-        <form id="mainForm" onsubmit="event.preventDefault(); calculate();">
-            <div class="form-group">
-                <label data-i18n="label_name">Nome Completo</label>
-                <input type="text" id="mainName" required>
-            </div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-                <div class="form-group">
-                    <label data-i18n="label_date">Data de Nascimento</label>
-                    <input type="date" id="mainDate" required>
-                </div>
-                <div class="form-group">
-                    <label data-i18n="label_email">Email <span style="color:#666;font-size:0.7rem;">(opcional)</span></label>
-                    <input type="email" id="mainEmail">
-                </div>
-            </div>
-            <button type="submit" class="btn" style="width:100%;" id="calcBtn" data-i18n="btn_calc">Calcular Agora</button>
-        </form>
-
-        <div id="results" class="result-card">
-            <div class="result-grid" id="resultGrid"></div>
-
-            <h3 id="precos" style="margin-top:50px; color:var(--gold); font-family:'Playfair Display';" data-i18n="prod_title">Produtos e Servi\u00e7os</h3>
-            <table class="pricing-table">
-                <thead>
-                    <tr>
-                        <th data-i18n="th_prod">Produto</th>
-                        <th data-i18n="th_price">Pre\u00e7o</th>
-                        <th data-i18n="th_desc">Descri\u00e7\u00e3o</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody id="productTableBody">
-                    <tr><td>\ud83d\udd2e Mapa Express (tela)</td><td>Gr\u00e1tis</td><td>5 n\u00fameros principais. Resultado na tela.</td><td><a href="#calc" class="btn btn-sm">Calcular</a></td></tr>
-                    <tr><td>\ud83d\udcc4 Mapa Express PDF</td><td><b style="color:var(--gold)">R$ 8</b></td><td>1 p\u00e1gina com os 5 n\u00fameros + an\u00e1lise.</td><td><button class="btn btn-sm" onclick="payExpress()">Adquirir</button></td></tr>
-                    <tr><td>\ud83d\udcda Mapa Completo PDF</td><td><b style="color:var(--gold)">R$ 17</b></td><td>At\u00e9 5 p\u00e1ginas: an\u00e1lise completa.</td><td><button class="btn btn-sm" onclick="payCompleto()">Adquirir</button></td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+<div class="form-box">
+<h2 style="text-align:center;margin-bottom:30px;font-family:'Playfair Display';color:var(--gold)" data-i18n="calc_title">Calcule seu Mapa</h2>
+<form id="mainForm" onsubmit="event.preventDefault(); calculate()">
+<div class="form-group"><label data-i18n="label_name">Nome Completo</label><input type="text" id="mainName" required></div>
+<div class="form-grid">
+<div class="form-group"><label data-i18n="label_date">Data de Nascimento</label><input type="date" id="mainDate" required></div>
+<div class="form-group"><label data-i18n="label_email">Email</label><input type="email" id="mainEmail" required></div>
+</div>
+<button type="submit" class="btn btn-block" id="calcBtn" data-i18n="btn_calc">Calcular Agora</button>
+</form>
+<div id="calcResult" class="result-card">
+<div id="calcResultGrid" class="result-grid"></div>
+<div class="gold-bar" style="margin-top:40px"></div>
+<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+<button class="btn btn-sm" onclick="payExpress()" data-i18n="btn_express">Mapa Express PDF R$ 8</button>
+<button class="btn btn-sm" onclick="payCompleto()" data-i18n="btn_completo">Mapa Completo PDF R$ 17</button>
+</div>
+</div>
+</div>
 </section>
-
-<section id="eleitoral">
-    <h2 style="text-align:center; color:var(--gold); font-family:'Playfair Display'; margin-bottom:20px;">\ud83d\uddf3\ufe0f Solu\u00e7\u00f5es Eleitorais</h2>
-    <p style="text-align:center; color:#888; max-width:700px; margin: 0 auto 40px;" data-i18n="elec_desc">Valida\u00e7\u00e3o de nome de urna e n\u00famero eleitoral. Consultoria especializada para candidatos que buscam a vibra\u00e7\u00e3o do sucesso.</p>
+<section id="produtos">
+<h2 style="text-align:center;color:var(--gold);font-family:'Playfair Display';margin-bottom:10px" data-i18n="prod_title">Todos os Produtos</h2>
+<div class="gold-bar"></div>
+<p style="text-align:center;color:#888;max-width:700px;margin:0 auto 30px" data-i18n="prod_sub">Todos os precos somam 8</p>
+<table class="prod-table"><thead><tr><th data-i18n="th_prod">Produto</th><th data-i18n="th_price">Preco</th><th data-i18n="th_energy">Soma 8</th><th data-i18n="th_action">Acao</th></tr></thead><tbody id="prodTableBody"></tbody></table>
 </section>
-
+<section id="urna" class="section-hidden">
+<div class="form-box">
+<h2 style="text-align:center;margin-bottom:10px;font-family:'Playfair Display';color:var(--gold)" data-i18n="urna_title">Validacao Nome de Urna</h2>
+<p style="text-align:center;color:#888;margin-bottom:30px;font-size:.9rem" data-i18n="urna_desc">5 tentativas + calculo letra a letra + PDF sigiloso - R$ 26</p>
+<form id="urnaForm" onsubmit="event.preventDefault(); payUrna()">
+<div class="form-group"><label data-i18n="urna_name">Nome Completo</label><input type="text" id="urnaFullName" required></div>
+<div class="form-group"><label data-i18n="urna_cargo">Cargo</label><select id="urnaCargo" required><option value="vereador">Vereador</option><option value="dep_estadual">Dep. Estadual</option><option value="dep_federal">Dep. Federal</option><option value="senador">Senador</option></select></div>
+<div class="form-group"><label data-i18n="urna_email">Email</label><input type="email" id="urnaEmail" required></div>
+<p style="color:#888;font-size:.8rem;margin-bottom:15px" data-i18n="urna_5names">Ate 5 opcoes:</p>
+<div class="form-group"><label>Nome 1</label><input type="text" id="urnaNome1" required></div>
+<div class="form-group"><label>Nome 2</label><input type="text" id="urnaNome2"></div>
+<div class="form-group"><label>Nome 3</label><input type="text" id="urnaNome3"></div>
+<div class="form-group"><label>Nome 4</label><input type="text" id="urnaNome4"></div>
+<div class="form-group"><label>Nome 5</label><input type="text" id="urnaNome5"></div>
+<button type="submit" class="btn btn-block" id="urnaBtn">Pagar R$ 26</button>
+</form>
+</div>
+</section>
+<section id="eleitoral" class="section-hidden">
+<div class="form-box">
+<h2 style="text-align:center;margin-bottom:10px;font-family:'Playfair Display';color:var(--gold)" data-i18n="elec_title">Calculo N. Eleitoral</h2>
+<p style="text-align:center;color:#888;margin-bottom:10px;font-size:.9rem" data-i18n="elec_desc">Sugestoes com energia 8 - R$ 26</p>
+<p style="text-align:center;color:#555;margin-bottom:20px;font-size:.8rem;font-style:italic" data-i18n="elec_mask">Por lei eleitoral, numeros nao podem ser divulgados publicamente.</p>
+<div class="tab-bar">
+<button class="tab-btn active" onclick="setCargo('vereador',this)">Vereador (5)</button>
+<button class="tab-btn" onclick="setCargo('dep_estadual',this)">Dep. Estadual (5)</button>
+<button class="tab-btn" onclick="setCargo('dep_federal',this)">Dep. Federal (4)</button>
+<button class="tab-btn" onclick="setCargo('senador',this)">Senador (3)</button>
+</div>
+<form id="eleitoralForm" onsubmit="event.preventDefault(); payEleitoral()">
+<div class="form-group"><label data-i18n="elec_sigla">Sigla (2 digitos)</label><input type="number" id="eleitoralSigla" min="10" max="99" placeholder="XX" required></div>
+<div class="form-group"><label data-i18n="elec_existente">Numero existente (opcional)</label><input type="text" id="eleitoralNumero" placeholder="XXXXX"></div>
+<div class="form-group"><label data-i18n="elec_email">Email</label><input type="email" id="eleitoralEmail" required></div>
+<input type="hidden" id="eleitoralCargo" value="vereador">
+<button type="submit" class="btn btn-block" id="eleitoralBtn">Pagar R$ 26</button>
+</form>
+</div>
+</section>
 <section id="energias">
-    <h2 style="text-align:center; color:var(--gold); font-family:'Playfair Display'; margin-bottom:40px;" data-i18n="energy_title">Significado das Energias</h2>
-    <div class="energy-grid" id="energyGrid"></div>
+<h2 style="text-align:center;color:var(--gold);font-family:'Playfair Display';margin-bottom:10px" data-i18n="energy_title">Significado das Energias</h2>
+<div class="gold-bar"></div>
+<p style="text-align:center;color:#888;max-width:700px;margin:0 auto 20px" data-i18n="energy_desc">Cada numero carrega uma vibracao especifica.</p>
+<div class="energy-grid" id="energyGrid"></div>
 </section>
-
-<footer>
-    <p data-i18n="footer_text">&copy; A1ELOS Assessoria e Consultoria</p>
-</footer>
-
+<footer><p>© A1ELOS - <span data-i18n="footer_text">A ciencia dos numeros aplicada ao seu sucesso</span></p></footer>
 <script>
-const LANGUAGES=[
-{code:'pt',label:'\ud83c\udde7\ud83c\uddf7 PT'},{code:'en',label:'\ud83c\uddfa\ud83c\uddf8 EN'},{code:'es',label:'\ud83c\uddea\ud83c\uddf8 ES'},
-{code:'fr',label:'\ud83c\uddeb\ud83c\uddf7 FR'},{code:'de',label:'\ud83c\udde9\ud83c\uddea DE'},{code:'it',label:'\ud83c\uddee\ud83c\uddf9 IT'},
-{code:'ja',label:'\ud83c\uddef\ud83c\uddf5 JP'},{code:'zh',label:'\ud83c\udde8\ud83c\uddf3 ZH'},{code:'ko',label:'\ud83c\uddf0\ud83c\uddf7 KO'},
-{code:'ru',label:'\ud83c\uddf7\ud83c\uddfa RU'},{code:'ar',label:'\ud83c\uddf8\ud83c\udde6 AR'},{code:'nl',label:'\ud83c\uddf3\ud83c\uddf1 NL'}
+// 12 IDIOMAS
+const LANGS=[
+{code:'pt',label:'PT',name:'Portugues'},{code:'en',label:'EN',name:'English'},
+{code:'es',label:'ES',name:'Espanol'},{code:'fr',label:'FR',name:'Francais'},
+{code:'de',label:'DE',name:'Deutsch'},{code:'it',label:'IT',name:'Italiano'},
+{code:'ja',label:'JA',name:'Japanese'},{code:'zh',label:'ZH',name:'Chinese'},
+{code:'ko',label:'KO',name:'Korean'},{code:'ru',label:'RU',name:'Russian'},
+{code:'ar',label:'AR',name:'Arabic'},{code:'nl',label:'NL',name:'Dutch'}
 ];
-const i18n={},LK=['pt','en','es','fr','de','it','ja','zh','ko','ru','ar','nl'];
-const DEF={
-pt:'In\u00edcio|Mapa|Nome de Urna|N\u00ba Eleitoral|Energias|Pre\u00e7os|MAPA NUMEROL\u00d3GICO|A ci\u00eancia dos n\u00fameros aplicada ao seu destino e carreira pol\u00edtica|Gerar Mapa Gr\u00e1tis|Ver Produtos|Calcule seu Mapa|Nome Completo|Data de Nascimento|Email|Calcular Agora|Produto|Pre\u00e7o|Descri\u00e7\u00e3o|Uma p\u00e1gina com os 5 n\u00fameros e an\u00e1lise|At\u00e9 5 p\u00e1ginas com an\u00e1lise completa do perfil|A ci\u00eancia dos n\u00fameros aplicada ao seu sucesso',
-en:'Home|Map|Ballot Name|Electoral N\u00b0|Energies|Prices|NUMEROLOGICAL MAP|The science of numbers applied to your destiny and political career|Generate Free Map|View Products|Calculate Your Map|Full Name|Birth Date|Email|Calculate Now|Product|Price|Description|One page with 5 numbers and analysis|Up to 5 pages with complete profile analysis|The science of numbers applied to your success',
-es:'Inicio|Mapa|Nombre de Urna|N\u00ba Electoral|Energ\u00edas|Precios|MAPA NUMEROL\u00d3GICO|La ciencia de los n\u00fameros aplicada a su destino y carrera pol\u00edtica|Generar Mapa Gratis|Ver Productos|Calcule su Mapa|Nombre Completo|Fecha de Nacimiento|Email|Calcular Ahora|Producto|Precio|Descripci\u00f3n|Una p\u00e1gina con 5 n\u00fameros y an\u00e1lisis|Hasta 5 p\u00e1ginas con an\u00e1lisis completo de perfil|La ciencia de los n\u00fameros aplicada a su \u00e9xito',
-fr:'Accueil|Carte|Nom d\'Urne|N\u00b0 \u00c9lectoral|\u00c9nergies|Prix|CARTE NUM\u00c9ROLOGIQUE|La science des nombres appliqu\u00e9e \u00e0 votre destin et carri\u00e8re politique|G\u00e9n\u00e9rer une Carte Gratuite|Voir Produits|Calculez Votre Carte|Nom Complet|Date de Naissance|Email|Calculer Maintenant|Produit|Prix|Description|Une page avec 5 nombres et analyse|Jusqu\u2019\u00e0 5 pages avec analyse compl\u00e8te|La science des nombres appliqu\u00e9e \u00e0 votre succ\u00e8s',
-de:'Start|Karte|Urnenname|Wahl-N\u00b0|Energien|Preise|NUMEROLOGISCHE KARTE|Die Wissenschaft der Zahlen f\u00fcr Ihr Schicksal und Ihre politische Karriere|Kostenlose Karte Erstellen|Produkte Ansehen|Berechnen Sie Ihre Karte|Vollst\u00e4ndiger Name|Geburtsdatum|Email|Jetzt Berechnen|Produkt|Preis|Beschreibung|Eine Seite mit 5 Zahlen und Analyse|Bis zu 5 Seiten mit kompletter Profilanalyse|Die Wissenschaft der Zahlen f\u00fcr Ihren Erfolg',
-it:'Home|Mappa|Nome d\'Urna|N\u00b0 Elettorale|Energie|Prezzi|MAPPA NUMEROLOGICA|La scienza dei numeri applicata al tuo destino e carriera politica|Genera Mappa Gratuita|Vedi Prodotti|Calcola La Tua Mappa|Nome Completo|Data di Nascita|Email|Calcola Ora|Prodotto|Prezzo|Descrizione|Una pagina con 5 numeri e analisi|Fino a 5 pagine con analisi completa del profilo|La scienza dei numeri applicata al tuo successo',
-ja:'\u30db\u30fc\u30e0|\u30de\u30c3\u30d7|\u7f50\u540d\u524d|\u9078\u6319\u756a\u53f7|\u30a8\u30cd\u30eb\u30ae\u30fc|\u4fa1\u683c|\u6570\u79d8\u8853\u30de\u30c3\u30d7|\u3042\u306a\u305f\u306e\u904b\u547d\u3068\u653f\u6cbb\u30ad\u30e3\u30ea\u30a2\u306b\u5fdc\u7528\u3055\u308c\u308b\u6570\u306e\u79d1\u5b66|\u30de\u30c3\u30d7\u3092\u7121\u6599\u3067\u751f\u6210|\u88fd\u54c1\u3092\u898b\u308b|\u30de\u30c3\u30d7\u3092\u8a08\u7b97|\u6c0f\u540d|\u751f\u5e74\u6708\u65e5|\u30e1\u30fc\u30eb|\u8a08\u7b97\u3059\u308b|\u88fd\u54c1|\u4fa1\u683c|\u8aac\u660e|5\u3064\u306e\u6570\u5b57\u3068\u5206\u6790\u3092\u542b\u3080\uff11\u30da\u30fc\u30b8|\u5b8c\u5168\u306a\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u5206\u6790\u3092\u542b\u3080\u6700\u59275\u30da\u30fc\u30b8|\u3042\u306a\u305f\u306e\u6210\u529f\u306b\u5fdc\u7528\u3055\u308c\u308b\u6570\u306e\u79d1\u5b66',
-zh:'\u9996\u9875|\u56fe\u8868|\u74f6\u540d\u5b57|\u9009\u4e3e\u53f7\u7801|\u80fd\u91cf|\u4ef7\u683c|\u547d\u7406\u56fe|\u6570\u5b57\u79d1\u5b66\u5e94\u7528\u4e8e\u60a8\u7684\u547d\u8fd0\u548c\u653f\u6cbb\u751f\u6daf|\u514d\u8d39\u751f\u6210\u547d\u7406\u56fe|\u67e5\u770b\u4ea7\u54c1|\u8ba1\u7b97\u60a8\u7684\u547d\u7406\u56fe|\u5b8c\u6574\u59d3\u540d|\u51fa\u751f\u65e5\u671f|\u7535\u5b50\u90ae\u4ef6|\u7acb\u5373\u8ba1\u7b97|\u4ea7\u54c1|\u4ef7\u683c|\u63cf\u8ff0|\u5305\u542b5\u4e2a\u6570\u5b57\u548c\u5206\u6790\u76841\u9875|\u5305\u542b\u5b8c\u6574\u4e2a\u4eba\u6863\u6848\u5206\u6790\u7684\u6700\u591a5\u9875|\u6570\u5b57\u79d1\u5b66\u5e94\u7528\u4e8e\u60a8\u7684\u6210\u529f',
-ko:'\ud648|\ub9f5|\ubcd1 \uc774\ub984|\uc120\uac70\ubc88\ud638|\uc5d0\ub108\uc9c0|\uac00\uaca9|\uc218\ube44\ud559 \ub9f5|\uc8fc\uc1a1\uacfc \uc815\uce58 \uacbd\ub825\uc5d0 \uc801\uc6a9\ub41c \uc22b\uc790\uc758 \uacfc\ud559|\ubb34\ub8cc \ub9f5 \uc0dd\uc131|\uc81c\ud488 \ubcf4\uae30|\ub9f5 \uacc4\uc0b0|\uc804\ucca9|\uc0dd\ub144\uc6d4\uc77c|\uc774\uba54\uc77c|\uc9c0\uae08 \uacc4\uc0b0|\uc81c\ud488|\uac00\uaca9|\uc124\uba85|5\uac1c\uc758 \uc22b\uc790\uc640 \ubd84\uc11d\uc774 \ud3ec\ud568\ub41c 1\ud398\uc774\uc9c0|\uc644\uc804\ud55c \ud504\ub85c\ud544 \ubd84\uc11d\uc774 \ud3ec\ud568\ub41c \ucd5c\ub300 5\ud398\uc774\uc9c0|\uc218\ube44\ud559\uc774 \uc801\uc6a9\ub41c \uc131\uacf5',
-ru:'\u0413\u043b\u0430\u0432\u043d\u0430\u044f|\u041a\u0430\u0440\u0442\u0430|\u0418\u043c\u044f \u043d\u0430 \u0443\u0440\u043d\u0435|\u0412\u044b\u0431\u043e\u0440\u043d\u044b\u0439 \u2116|\u042d\u043d\u0435\u0440\u0433\u0438\u0438|\u0426\u0435\u043d\u044b|\u041d\u0423\u041c\u0415\u0420\u041e\u041b\u041e\u0413\u0418\u0427\u0415\u0421\u041a\u0410\u042f \u041a\u0410\u0420\u0422\u0410|\u041d\u0430\u0443\u043a\u0430 \u0447\u0438\u0441\u0435\u043b, \u043f\u0440\u0438\u043c\u0435\u043d\u0451\u043d\u043d\u0430\u044f \u043a \u0432\u0430\u0448\u0435\u0439 \u0441\u0443\u0434\u044c\u0431\u0435 \u0438 \u043f\u043e\u043b\u0438\u0442\u0438\u0447\u0435\u0441\u043a\u043e\u0439 \u043a\u0430\u0440\u044c\u0435\u0440\u0435|\u0421\u043e\u0437\u0434\u0430\u0442\u044c \u041a\u0430\u0440\u0442\u0443 \u0411\u0435\u0441\u043f\u043b\u0430\u0442\u043d\u043e|\u041f\u043e\u0441\u043c\u043e\u0442\u0440\u0435\u0442\u044c \u0422\u043e\u0432\u0430\u0440\u044b|\u0420\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u0442\u044c \u041a\u0430\u0440\u0442\u0443|\u041f\u043e\u043b\u043d\u043e\u0435 \u0418\u043c\u044f|\u0414\u0430\u0442\u0430 \u0420\u043e\u0436\u0434\u0435\u043d\u0438\u044f|\u042d\u043b. \u043f\u043e\u0447\u0442\u0430|\u0420\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u0442\u044c|\u0422\u043e\u0432\u0430\u0440|\u0426\u0435\u043d\u0430|\u041e\u043f\u0438\u0441\u0430\u043d\u0438\u0435|1 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0430 \u0441 5 \u0447\u0438\u0441\u043b\u0430\u043c\u0438 \u0438 \u0430\u043d\u0430\u043b\u0438\u0437\u043e\u043c|\u0414\u043e 5 \u0441\u0442\u0440\u0430\u043d\u0438\u0446 \u0441 \u043f\u043e\u043b\u043d\u044b\u043c \u0430\u043d\u0430\u043b\u0438\u0437\u043e\u043c \u043f\u0440\u043e\u0444\u0438\u043b\u044f|\u041d\u0430\u0443\u043a\u0430 \u0447\u0438\u0441\u0435\u043b \u0434\u043b\u044f \u0432\u0430\u0448\u0435\u0433\u043e \u0443\u0441\u043f\u0435\u0445\u0430',
-ar:'\u0627\u0644\u0631\u0626\u064a\u0633\u064a\u0629|\u0627\u0644\u062e\u0631\u064a\u0637\u0629|\u0627\u0633\u0645 \u0627\u0644\u0635\u0646\u062f\u0648\u0642|\u0627\u0644\u0631\u0642\u0645 \u0627\u0644\u0627\u0646\u062a\u062e\u0627\u0628\u064a|\u0627\u0644\u0637\u0627\u0642\u0627\u062a|\u0627\u0644\u0623\u0633\u0639\u0627\u0631|\u0627\u0644\u062e\u0631\u064a\u0637\u0629 \u0627\u0644\u0639\u062f\u062f\u064a\u0629|\u0639\u0644\u0645 \u0627\u0644\u0623\u0631\u0642\u0627\u0645 \u0627\u0644\u0645\u0637\u0628\u0642 \u0639\u0644\u0649 \u0645\u0635\u064a\u0631\u0643 \u0648\u0645\u0633\u064a\u0631\u062a\u0643 \u0627\u0644\u0633\u064a\u0627\u0633\u064a\u0629|\u062a\u0648\u0644\u064a\u062f \u062e\u0631\u064a\u0637\u0629 \u0645\u062c\u0627\u0646\u064b\u0627|\u0639\u0631\u0636 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a|\u0627\u062d\u0633\u0628 \u062e\u0631\u064a\u0637\u062a\u0643|\u0627\u0644\u0627\u0633\u0645 \u0627\u0644\u0643\u0627\u0645\u0644|\u062a\u0627\u0631\u064a\u062e \u0627\u0644\u0645\u064a\u0644\u0627\u062f|\u0627\u0644\u0628\u0631\u064a\u062f \u0627\u0644\u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a|\u0627\u062d\u0633\u0628 \u0627\u0644\u0622\u0646|\u0627\u0644\u0645\u0646\u062a\u062c|\u0627\u0644\u0633\u0639\u0631|\u0627\u0644\u0648\u0635\u0641|\u0635\u0641\u062d\u0629 \u0648\u0627\u062d\u062f\u0629 \u0628\u06405 \u0623\u0631\u0642\u0627\u0645 \u0648\u062a\u062d\u0644\u064a\u0644|\u062a\u062d\u0644\u064a\u0644 \u0643\u0627\u0645\u0644 \u0644\u0644\u0645\u0644\u0641 \u0627\u0644\u0634\u062e\u0635\u064a \u064a\u0635\u0644 \u0625\u0644\u0649 5 \u0635\u0641\u062d\u0627\u062a|\u0639\u0644\u0645 \u0627\u0644\u0623\u0631\u0642\u0627\u0645 \u0644\u0646\u062c\u0627\u062d\u0643',
-nl:'Home|Kaart|Stembus Naam|Kiesnummer|Energie\u00ebn|Prijzen|NUMEROLOGISCHE KAART|De wetenschap van getallen toegepast op uw lot en politieke carri\u00e8re|Genereer Gratis Kaart|Bekijk Producten|Bereken Uw Kaart|Volledige Naam|Geboortedatum|Email|Nu Berekenen|Product|Prijs|Beschrijving|1 pagina met 5 getallen en analyse|Tot 5 pagina's met volledige profielanalyse|De wetenschap van getallen voor uw succes'
-};
-var KS=['nav_home','nav_map','nav_urna','nav_elec','nav_energy','nav_products','hero_title','hero_sub','hero_btn_main','hero_btn_prod','calc_title','label_name','label_date','label_email','btn_calc','th_prod','th_price','th_desc','prod_desc1','prod_desc2','footer_text'];
-LK.forEach(function(l){i18n[l]={};var v=DEF[l].split('|');for(var i=0;i<KS.length;i++){i18n[l][KS[i]]=v[i]||''}});
-function t(k){return(i18n[localStorage.getItem('l')||'pt']||i18n.pt)[k]||i18n.pt[k]||k}
-function applyLang(){var l=localStorage.getItem('l')||'pt';document.querySelectorAll('[data-i18n]').forEach(function(e){e.textContent=t(e.dataset.i18n)});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===l)});document.documentElement.dir=(l==='ar')?'rtl':'ltr'}
-function setLang(c){localStorage.setItem('l',c);applyLang();renderEnergyGrid()}
-(function(){var c=document.getElementById('langSelector');LANGUAGES.forEach(function(l){var b=document.createElement('button');b.className='lang-btn'+((localStorage.getItem('l')||'pt')===l.code?' active':'');b.dataset.lang=l.code;b.innerHTML=l.label;b.onclick=function(){setLang(l.code)};c.appendChild(b)})})();
-
-var E=[
-{n:1,s:'\u2606',t:'Individualidade'},{n:2,s:'\u263d',t:'Coopera\u00e7\u00e3o'},{n:3,s:'\u25b3',t:'Cria\u00e7\u00e3o'},
-{n:4,s:'\u25a0',t:'Trabalho'},{n:5,s:'\u2605',t:'Liberdade'},{n:6,s:'\u2b21',t:'Fam\u00edlia'},
-{n:7,s:'\u2b22',t:'Sabedoria'},{n:8,s:'\u2b23',t:'Poder'},{n:9,s:'\u2b24',t:'Humanidade'}
+// PRODUTOS
+const PRODUTOS=[
+{id:'express',nome:'Mapa Express (tela)',desc:'5 numeros na tela. Gratis.',preco:'Gratis',soma:0,link:'#calc',btn:'Calcular',status:'ativo'},
+{id:'express_pdf',nome:'Mapa Express PDF',desc:'5 numeros + frases. 1 pagina.',preco:'R$ 8',soma:'8',btn:'Adquirir R$ 8',status:'ativo'},
+{id:'completo',nome:'Mapa Completo PDF',desc:'Grade, Ciclos, Desafios, Ano Pessoal.',preco:'R$ 17',soma:'1+7=8',btn:'Adquirir R$ 17',status:'ativo'},
+{id:'urna',nome:'Validacao Nome de Urna',desc:'5 nomes + calculo letra a letra + PDF.',preco:'R$ 26',soma:'3+5=8',link:'#urna',btn:'Acessar',status:'ativo'},
+{id:'eleitoral',nome:'Calculo N. Eleitoral',desc:'5 numeros energia 8 + explicacao.',preco:'R$ 26',soma:'2+6=8',link:'#eleitoral',btn:'Acessar',status:'ativo'},
+{id:'empresarial',nome:'Validacao Empresarial',desc:'Analise empresarial + PDF.',preco:'R$ 26',soma:'2+6=8',btn:'Em breve',status:'breve'},
+{id:'artistico',nome:'Validacao Nome Artistico',desc:'Analise artistica + PDF.',preco:'R$ 26',soma:'2+6=8',btn:'Em breve',status:'breve'},
+{id:'casal',nome:'Mapa Casal Completo',desc:'2 mapas + compatibilidade.',preco:'R$ 44',soma:'4+4=8',btn:'Em breve',status:'breve'},
+{id:'premium',nome:'Mapa Premium Familia',desc:'Ate 4 pessoas + PDF.',preco:'R$ 197',soma:'1+9+7=17->8',btn:'Em breve',status:'breve'}
 ];
-var energyTexts={pt:['Lideran\u00e7a, criatividade, in\u00edcio','Parceria, sensibilidade, intui\u00e7\u00e3o','Comunica\u00e7\u00e3o, arte, otimismo','Disciplina, organiza\u00e7\u00e3o, seguran\u00e7a','Liberdade, aventura, transforma\u00e7\u00e3o','Amor, fam\u00edlia, responsabilidade','Sabedoria, an\u00e1lise, espiritualidade','Poder, prosperidade, realiza\u00e7\u00e3o','Humanitarismo, compaix\u00e3o, conclus\u00e3o'],
-en:['Leadership, creativity, beginning','Partnership, sensitivity, intuition','Communication, art, optimism','Discipline, organization, security','Freedom, adventure, transformation','Love, family, responsibility','Wisdom, analysis, spirituality','Power, prosperity, achievement','Humanitarianism, compassion, conclusion'],
-es:['Liderazgo, creatividad, inicio','Asociaci\u00f3n, sensibilidad, intuici\u00f3n','Comunicaci\u00f3n, arte, optimismo','Disciplina, organizaci\u00f3n, seguridad','Libertad, aventura, transformaci\u00f3n','Amor, familia, responsabilidad','Sabidur\u00eda, an\u00e1lisis, espiritualidad','Poder, prosperidad, realizaci\u00f3n','Humanitarismo, compasi\u00f3n, conclusi\u00f3n']
-};
-['fr','de','it','ja','zh','ko','ru','ar','nl'].forEach(function(l){energyTexts[l]=energyTexts.pt});
-
-function renderEnergyGrid(){
- var g=document.getElementById('energyGrid');if(!g)return;
- var l=localStorage.getItem('l')||'pt';
- var et=energyTexts[l]||energyTexts.pt;
- g.innerHTML='';
- for(var i=0;i<E.length;i++){
-  var c=document.createElement('div');
-  c.className='energy-card';
-  c.innerHTML='<h4>'+E[i].n+'</h4><p>'+et[i]+'</p>';
-  g.appendChild(c);
- }
+// TRADUCOES
+const i18n={};const KEYS=['nav_home','nav_map','nav_prod','nav_urna','nav_elec','nav_energy','hero_title','hero_sub','hero_btn1','hero_btn2','hero_btn3','calc_title','label_name','label_date','label_email','btn_calc','btn_express','btn_completo','prod_title','prod_sub','th_prod','th_price','th_energy','th_action','urna_title','urna_desc','urna_name','urna_cargo','urna_email','urna_5names','elec_title','elec_desc','elec_mask','elec_sigla','elec_existente','elec_email','energy_title','energy_desc','footer_text'];
+const TRAD={};
+TRAD = {
+"pt": {"express": "MAPA EXPRESS", "completo": "MAPA COMPLETO", "numero": "Número", "valor": "Valor", "significado": "Significado", "caminho_vida": "Caminho de Vida", "expressao": "Expressão", "motivacao": "Motivação da Alma", "personalidade": "Personalidade", "destino": "Destino", "seus_numeros": "Seus Números", "perfil": "Seu Perfil Numerológico", "analise": "Análise Detalhada dos Números", "positivo": "Positivo", "negativo": "Negativo", "licao": "Lição", "ciclos": "Ciclos da Vida", "formativo": "Formativo", "produtivo": "Produtivo", "colheita": "Colheita", "desafios": "Desafios da Vida", "menor1": "Menor 1 (Dia x Mês)", "menor2": "Menor 2 (Mês x Ano)", "principal": "Principal", "realizacoes": "Realizações da Vida", "juventude": "Juventude", "vida_adulta": "Vida Adulta", "maturidade": "Maturidade", "legado": "Legado", "vibracao": "Vibração do Dia de Nascimento", "grade": "Grade de Inclusão", "presentes": "Presentes", "carencias": "Carências", "nota_final": "Nota Final", "regente": "Regente"},
+"en": {"express": "NUMEROLOGICAL MAP", "completo": "COMPLETE MAP", "numero": "Number", "valor": "Value", "significado": "Meaning", "caminho_vida": "Life Path", "expressao": "Expression", "motivacao": "Soul Urge", "personalidade": "Personality", "destino": "Destiny", "seus_numeros": "Your Numbers", "perfil": "Your Numerological Profile", "analise": "Detailed Number Analysis", "positivo": "Positive", "negativo": "Negative", "licao": "Lesson", "ciclos": "Life Cycles", "formativo": "Formative", "produtivo": "Productive", "colheita": "Harvest", "desafios": "Life Challenges", "menor1": "Minor 1 (Day x Month)", "menor2": "Minor 2 (Month x Year)", "principal": "Major", "realizacoes": "Life Achievements", "juventude": "Youth", "vida_adulta": "Adult Life", "maturidade": "Maturity", "legado": "Legacy", "vibracao": "Birth Day Vibration", "grade": "Inclusion Grid", "presentes": "Present", "carencias": "Missing", "nota_final": "Final Note", "regente": "Ruler"},
+"es": {"express": "MAPA EXPRÉS", "completo": "MAPA COMPLETO", "numero": "Número", "valor": "Valor", "significado": "Significado", "caminho_vida": "Camino de Vida", "expressao": "Expresión", "motivacao": "Motivación del Alma", "personalidade": "Personalidad", "destino": "Destino", "seus_numeros": "Sus Números", "perfil": "Su Perfil Numerológico", "analise": "Análisis Detallado", "positivo": "Positivo", "negativo": "Negativo", "licao": "Lección", "ciclos": "Ciclos de Vida", "formativo": "Formativo", "produtivo": "Productivo", "colheita": "Cosecha", "desafios": "Desafíos de la Vida", "menor1": "Menor 1 (Día x Mes)", "menor2": "Menor 2 (Mes x Año)", "principal": "Principal", "realizacoes": "Realizaciones de la Vida", "juventude": "Juventud", "vida_adulta": "Vida Adulta", "maturidade": "Madurez", "legado": "Legado", "vibracao": "Vibración del Día de Nacimiento", "grade": "Cuadrícula de Inclusión", "presentes": "Presentes", "carencias": "Ausencias", "nota_final": "Nota Final", "regente": "Regente"},
+"fr": {"express": "CARTE EXPRESS", "completo": "CARTE COMPLÈTE", "numero": "Nombre", "valor": "Valeur", "significado": "Signification", "caminho_vida": "Chemin de Vie", "expressao": "Expression", "motivacao": "Motivation de l'Âme", "personalidade": "Personnalité", "destino": "Destin", "seus_numeros": "Vos Nombres", "perfil": "Votre Profil Numérologique", "analise": "Analyse Détaillée", "positivo": "Positif", "negativo": "Négatif", "licao": "Leçon", "ciclos": "Cycles de Vie", "formativo": "Formatif", "produtivo": "Productif", "colheita": "Récolte", "desafios": "Défis de la Vie", "menor1": "Mineur 1 (Jour x Mois)", "menor2": "Mineur 2 (Mois x Année)", "principal": "Principal", "realizacoes": "Réalisations de la Vie", "juventude": "Jeunesse", "vida_adulta": "Vie Adulte", "maturidade": "Maturité", "legado": "Héritage", "vibracao": "Vibration du Jour de Naissance", "grade": "Grille d'Inclusion", "presentes": "Présents", "carencias": "Absents", "nota_final": "Note Finale", "regente": "Régent"},
+"de": {"express": "EXPRESS-KARTE", "completo": "KOMPLETTE KARTE", "numero": "Zahl", "valor": "Wert", "significado": "Bedeutung", "caminho_vida": "Lebensweg", "expressao": "Ausdruck", "motivacao": "Seelenmotivation", "personalidade": "Persönlichkeit", "destino": "Schicksal", "seus_numeros": "Ihre Zahlen", "perfil": "Ihr Numerologie-Profil", "analise": "Detaillierte Analyse", "positivo": "Positiv", "negativo": "Negativ", "licao": "Lektion", "ciclos": "Lebenszyklen", "formativo": "Formativ", "produtivo": "Produktiv", "colheita": "Ernte", "desafios": "Lebensherausforderungen", "menor1": "Neben 1 (Tag x Monat)", "menor2": "Neben 2 (Monat x Jahr)", "principal": "Haupt", "realizacoes": "Lebensleistungen", "juventude": "Jugend", "vida_adulta": "Erwachsenenleben", "maturidade": "Reife", "legado": "Vermächtnis", "vibracao": "Geburtstagsvibration", "grade": "Inklusionsraster", "presentes": "Vorhanden", "carencias": "Fehlend", "nota_final": "Schlussbemerkung", "regente": "Herrscher"},
+"it": {"express": "MAPPA EXPRESS", "completo": "MAPPA COMPLETA", "numero": "Numero", "valor": "Valore", "significado": "Significato", "caminho_vida": "Cammino di Vita", "expressao": "Espressione", "motivacao": "Motivazione dell'Anima", "personalidade": "Personalità", "destino": "Destino", "seus_numeros": "I Tuoi Numeri", "perfil": "Il Tuo Profilo Numerologico", "analise": "Analisi Dettagliata", "positivo": "Positivo", "negativo": "Negativo", "licao": "Lezione", "ciclos": "Cicli di Vita", "formativo": "Formativo", "produtivo": "Produttivo", "colheita": "Raccolto", "desafios": "Sfide della Vita", "menor1": "Minore 1 (Giorno x Mese)", "menor2": "Minore 2 (Mese x Anno)", "principal": "Principale", "realizacoes": "Realizzazioni della Vita", "juventude": "Gioventù", "vida_adulta": "Vita Adulta", "maturidade": "Maturità", "legado": "Eredità", "vibracao": "Vibrazione del Giorno di Nascita", "grade": "Griglia di Inclusione", "presentes": "Presenti", "carencias": "Mancanti", "nota_final": "Nota Finale", "regente": "Reggente"},
+"ja": {"express": "エクスプレスマップ", "completo": "コンプリートマップ", "numero": "数字", "valor": "値", "significado": "意味", "caminho_vida": "ライフパス", "expressao": "表現", "motivacao": "魂の動機", "personalidade": "性格", "destino": "運命", "seus_numeros": "あなたの数字", "perfil": "数秘術プロフィール", "analise": "詳細分析", "positivo": "ポジティブ", "negativo": "ネガティブ", "licao": "教訓", "ciclos": "人生のサイクル", "formativo": "形成期", "produtivo": "生産期", "colheita": "収穫期", "desafios": "人生の課題", "menor1": "小1 (日×月)", "menor2": "小2 (月×年)", "principal": "主要", "realizacoes": "人生の達成", "juventude": "青年期", "vida_adulta": "成人期", "maturidade": "成熟期", "legado": "遺産", "vibracao": "誕生日の波動", "grade": "包含グリッド", "presentes": "存在", "carencias": "欠如", "nota_final": "最終ノート", "regente": "支配数"},
+"zh": {"express": "快速命理图", "completo": "完整命理图", "numero": "数字", "valor": "数值", "significado": "含义", "caminho_vida": "生命道路", "expressao": "表现", "motivacao": "灵魂动机", "personalidade": "个性", "destino": "命运", "seus_numeros": "您的数字", "perfil": "您的命理档案", "analise": "详细分析", "positivo": "积极", "negativo": "消极", "licao": "教训", "ciclos": "生命周期", "formativo": "形成期", "produtivo": "生产期", "colheita": "收获期", "desafios": "人生挑战", "menor1": "次要1 (日×月)", "menor2": "次要2 (月×年)", "principal": "主要", "realizacoes": "人生成就", "juventude": "青年", "vida_adulta": "成年", "maturidade": "成熟", "legado": "遗产", "vibracao": "生日振动", "grade": "包含网格", "presentes": "存在", "carencias": "缺失", "nota_final": "最终说明", "regente": "主宰数"},
+"ko": {"express": "익스프레스 맵", "completo": "컴플리트 맵", "numero": "숫자", "valor": "값", "significado": "의미", "caminho_vida": "인생의 길", "expressao": "표현", "motivacao": "영혼의 동기", "personalidade": "성격", "destino": "운명", "seus_numeros": "당신의 숫자", "perfil": "수비학 프로필", "analise": "상세 분석", "positivo": "긍정적", "negativo": "부정적", "licao": "교훈", "ciclos": "인생 주기", "formativo": "형성기", "produtivo": "생산기", "colheita": "수확기", "desafios": "인생의 도전", "menor1": "소1 (일×월)", "menor2": "소2 (월×년)", "principal": "주요", "realizacoes": "인생의 성취", "juventude": "청년기", "vida_adulta": "성인기", "maturidade": "성숙기", "legado": "유산", "vibracao": "생일의 진동", "grade": "포함 그리드", "presentes": "존재", "carencias": "부재", "nota_final": "최종 노트", "regente": "지배수"},
+"ru": {"express": "ЭКСПРЕСС-КАРТА", "completo": "ПОЛНАЯ КАРТА", "numero": "Число", "valor": "Значение", "significado": "Смысл", "caminho_vida": "Жизненный Путь", "expressao": "Выражение", "motivacao": "Мотивация Души", "personalidade": "Личность", "destino": "Судьба", "seus_numeros": "Ваши Числа", "perfil": "Ваш Нумерологический Профиль", "analise": "Детальный Анализ", "positivo": "Позитивное", "negativo": "Негативное", "licao": "Урок", "ciclos": "Жизненные Циклы", "formativo": "Формирующий", "produtivo": "Продуктивный", "colheita": "Урожай", "desafios": "Жизненные Вызовы", "menor1": "Малый 1 (День х Месяц)", "menor2": "Малый 2 (Месяц х Год)", "principal": "Главный", "realizacoes": "Жизненные Достижения", "juventude": "Юность", "vida_adulta": "Взрослая Жизнь", "maturidade": "Зрелость", "legado": "Наследие", "vibracao": "Вибрация Дня Рождения", "grade": "Сетка Включения", "presentes": "Присутствуют", "carencias": "Отсутствуют", "nota_final": "Заключение", "regente": "Правитель"},
+"ar": {"express": "خريطة سريعة", "completo": "خريطة كاملة", "numero": "رقم", "valor": "قيمة", "significado": "معنى", "caminho_vida": "مسار الحياة", "expressao": "تعبير", "motivacao": "دافع الروح", "personalidade": "شخصية", "destino": "قدر", "seus_numeros": "أرقامك", "perfil": "ملفك العددي", "analise": "تحليل مفصل", "positivo": "إيجابي", "negativo": "سلبي", "licao": "درس", "ciclos": "دورات الحياة", "formativo": "تكويني", "produtivo": "إنتاجي", "colheita": "حصاد", "desafios": "تحديات الحياة", "menor1": "صغير 1 (يوم × شهر)", "menor2": "صغير 2 (شهر × سنة)", "principal": "رئيسي", "realizacoes": "إنجازات الحياة", "juventude": "شباب", "vida_adulta": "حياة البالغين", "maturidade": "نضج", "legado": "إرث", "vibracao": "اهتزاز يوم الميلاد", "grade": "شبكة التضمين", "presentes": "موجود", "carencias": "مفقود", "nota_final": "ملاحظة ختامية", "regente": "حاكم"},
+"nl": {"express": "EXPRESS KAART", "completo": "VOLLEDIGE KAART", "numero": "Getal", "valor": "Waarde", "significado": "Betekenis", "caminho_vida": "Levenspad", "expressao": "Expressie", "motivacao": "Zielsverlangen", "personalidade": "Persoonlijkheid", "destino": "Bestemming", "seus_numeros": "Uw Getallen", "perfil": "Uw Numerologie Profiel", "analise": "Gedetailleerde Analyse", "positivo": "Positief", "negativo": "Negatief", "licao": "Les", "ciclos": "Levenscycli", "formativo": "Vormend", "produtivo": "Productief", "colheita": "Oogst", "desafios": "Levensuitdagingen", "menor1": "Klein 1 (Dag x Maand)", "menor2": "Klein 2 (Maand x Jaar)", "principal": "Hoofd", "realizacoes": "Levensprestaties", "juventude": "Jeugd", "vida_adulta": "Volwassenheid", "maturidade": "Rijpheid", "legado": "Nalatenschap", "vibracao": "Geboortedagtrilling", "grade": "Inclusierooster", "presentes": "Aanwezig", "carencias": "Ontbrekend", "nota_final": "Eindnota", "regente": "Heerser"},
 }
-
-async function calculate(){
- var n=document.getElementById('mainName').value.trim();
- var d=document.getElementById('mainDate').value;
- var e=document.getElementById('mainEmail').value.trim();
- var btn=document.getElementById('calcBtn');
- var rd=document.getElementById('results');
- var rg=document.getElementById('resultGrid');
- if(!n||!d){alert(t('label_name')+', '+t('label_date'));return}
- btn.textContent='...';btn.disabled=true;rd.style.display='none';
- try{
-  var r=await fetch('/calculate',{
-   method:'POST',headers:{'Content-Type':'application/json'},
-   body:JSON.stringify({name:n,birth_date:d,email:e,product:'pdf8',product:'pdf8',lang:localStorage.getItem('l')||'pt'})
-  var data=await r.json();
-  var it=[{key:'life_path',label:'Vida'},{key:'expression',label:'Express\u00e3o'},{key:'soul_urge',label:'Motiva\u00e7\u00e3o'},{key:'personality',label:'Personalidade'},{key:'destiny',label:'Destino'}];
-  rg.innerHTML='';
-  it.forEach(function(i){
-   var b=document.createElement('div');b.className='num-box';
-   b.innerHTML='<div class="val">'+data[i.key]+'</div><div class="label">'+i.label+'</div>';
-   rg.appendChild(b);
-  });
-  rd.style.display='block';rd.scrollIntoView({behavior:'smooth'});
- }catch(ex){rg.innerHTML='<p style="color:#e74c3c">Erro</p>';rd.style.display='block'}
- btn.textContent=t('btn_calc');btn.disabled=false;
-}
-
-async function payExpress(){
- var n=document.getElementById('mainName').value.trim();
- var d=document.getElementById('mainDate').value;
- if(!n||!d){alert('Preencha nome e data primeiro');return}
- try{
-  var r=await fetch('/api/pay/stripe',{
-   method:'POST',headers:{'Content-Type':'application/json'},
-   body:JSON.stringify({name:n,birth_date:d,email:e,product:'pdf8',price:8,lang:localStorage.getItem('l')||'pt'})
-  var data=await r.json();
-  if(data.payment_url)window.location.href=data.payment_url;
-  else alert('Erro ao criar pagamento');
- }catch(ex){alert('Erro de conex\u00e3o')}
-}
-
-async function payCompleto(){
-var n=document.getElementById('mainName').value.trim();
-var d=document.getElementById('mainDate').value;
-if(!n||!d){alert('Preencha nome e data primeiro');return}
-try{
-var r=await fetch('/api/pay/stripe',{
-method:'POST',headers:{'Content-Type':'application/json'},
-body:JSON.stringify({name:n,birth_date:d,email:'',product:'pdf17',price:17,lang:localStorage.getItem('l')||'pt'})
-    document.addEventListener('DOMContentLoaded',function(){applyLang();renderEnergyGrid()});
+// Inicializar i18n
+for(var lang in TRAD){i18n[lang]={};var vals=TRAD[lang].split('|');for(var i=0;i<KEYS.length;i++){i18n[lang][KEYS[i]]=vals[i]||TRAD.pt.split('|')[i]||''}}
+function t(k){var l=localStorage.getItem('l')||'pt';return(i18n[l]||i18n.pt)[k]||i18n.pt[k]||k}
+function applyLang(){var l=localStorage.getItem('l')||'pt';document.querySelectorAll('[data-i18n]').forEach(function(el){el.textContent=t(el.dataset.i18n)});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===l)});document.documentElement.dir=(l==='ar')?'rtl':'ltr'}
+function applyLang(){var l=localStorage.getItem('l')||'pt';document.querySelectorAll('[data-i18n]').forEach(function(el){el.textContent=t(el.dataset.i18n)});document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.onclick = function() {
+        const code = this.dataset.lang;
+        localStorage.setItem('l', code);
+        applyLang(code);
+    }
+});.forEach(function(b){b.classList.toggle('active',b.dataset.lang===l)});document.documentElement.dir=(l==='ar')?'rtl':'ltr'}
+function setLang(c){localStorage.setItem('l',c);applyLang();renderProdTable();renderEnergyGrid()}
+(function(){var c=document.getElementById('langSelector');if(!c)return;LANGS.forEach(function(l){var b=document.createElement('button');b.className='lang-btn'+((localStorage.getItem('l')||'pt')===l.code?' active':'');b.dataset.lang=l.code;b.textContent=l.label;b.title=l.name;b.onclick=function(){setLang(l.code)};c.appendChild(b)})})();
+function renderProdTable(){var tb=document.getElementById('prodTableBody');if(!tb)return;tb.innerHTML='';PRODUTOS.forEach(function(p){var tr=document.createElement('tr');var sc=p.status==='ativo'?'tag-s8':'tag-breve';var sl=p.status==='ativo'?(p.soma?'Soma '+p.soma:''):'Em breve';var bh='';if(p.status==='ativo'){if(p.link){bh='<a href="'+p.link+'" class="btn btn-sm">'+p.btn+'</a>'}else if(p.id==='express_pdf'){bh='<button class="btn btn-sm" onclick="payExpress()">'+p.btn+'</button>'}else if(p.id==='completo'){bh='<button class="btn btn-sm" onclick="payCompleto()">'+p.btn+'</button>'}}tr.innerHTML='<td>'+p.nome+'<br><span style="font-size:.75rem;color:#888">'+p.desc+'</span></td><td style="font-weight:700;color:var(--gold)">'+p.preco+'</td><td><span class="'+sc+'">'+sl+'</span></td><td>'+bh+'</td>';tb.appendChild(tr)})}
+var ED=[{n:1,pt:'Lideranca, independencia, originalidade',en:'Leadership, independence, originality',es:'Liderazgo, independencia, originalidad',fr:'Leadership, independance, originalite',de:'Fuhrung, Selbstandigkeit, Originalitat',it:'Leadership, indipendenza, originalita',nl:'Leiderschap, onafhankelijkheid, originaliteit'},{n:2,pt:'Cooperacao, diplomacia, sensibilidade',en:'Cooperation, diplomacy, sensitivity',es:'Cooperacion, diplomacia, sensibilidad',fr:'Cooperation, diplomatie, sensibilite',de:'Kooperation, Diplomatie, Sensibilitat',it:'Cooperazione, diplomazia, sensibilita',nl:'Samenwerking, diplomatie, gevoeligheid'},{n:3,pt:'Criatividade, comunicacao, alegria',en:'Creativity, communication, joy',es:'Creatividad, comunicacion, alegria',fr:'Creativite, communication, joie',de:'Kreativitat, Kommunikation, Freude',it:'Creativita, comunicazione, gioia',nl:'Creativiteit, communicatie, vreugde'},{n:4,pt:'Trabalho, disciplina, estabilidade',en:'Work, discipline, stability',es:'Trabajo, disciplina, estabilidad',fr:'Travail, discipline, stabilite',de:'Arbeit, Disziplin, Stabilitat',it:'Lavoro, disciplina, stabilita',nl:'Werk, discipline, stabiliteit'},{n:5,pt:'Liberdade, aventura, versatilidade',en:'Freedom, adventure, versatility',es:'Libertad, aventura, versatilidad',fr:'Liberte, aventure, versatilite',de:'Freiheit, Abenteuer, Vielseitigkeit',it:'Liberta, avventura, versatilita',nl:'Vrijheid, avontuur, veelzijdigheid'},{n:6,pt:'Familia, amor, responsabilidade',en:'Family, love, responsibility',es:'Familia, amor, responsabilidad',fr:'Famille, amour, responsabilite',de:'Familie, Liebe, Verantwortung',it:'Famiglia, amore, responsabilita',nl:'Familie, liefde, verantwoordelijkheid'},{n:7,pt:'Sabedoria, espiritualidade, analise',en:'Wisdom, spirituality, analysis',es:'Sabiduria, espiritualidad, analisis',fr:'Sagesse, spiritualite, analyse',de:'Weisheit, Spiritualitat, Analyse',it:'Saggezza, spiritualita, analisi',nl:'Wijsheid, spiritualiteit, analyse'},{n:8,pt:'Poder, prosperidade, realizacao (IDEAL)',en:'Power, prosperity, achievement (IDEAL)',es:'Poder, prosperidad, realizacion (IDEAL)',fr:'Pouvoir, prosperite, accomplissement (IDEAL)',de:'Macht, Wohlstand, Erfolg (IDEAL)',it:'Potere, prosperita, realizzazione (IDEALE)',nl:'Macht, welvaart, prestatie (IDEAAL)'},{n:9,pt:'Humanitarismo, generosidade',en:'Humanitarianism, generosity',es:'Humanitarismo, generosidad',fr:'Humanitarisme, generosite',de:'Humanitarismus, Grosszugigkeit',it:'Umanitarismo, generosita',nl:'Humanitarisme, vrijgevigheid'}];
+function renderEnergyGrid(){var g=document.getElementById('energyGrid');if(!g)return;var l=localStorage.getItem('l')||'pt';g.innerHTML='';ED.forEach(function(e){var txt=e[l]||e.pt;var c=document.createElement('div');c.className='energy-card';c.innerHTML='<h4>'+e.n+'</h4><p style="color:var(--gray);font-size:.9rem">'+txt+'</p>';g.appendChild(c)})}
+function showSection(id){var el=document.getElementById(id);if(!el)return;el.classList.remove('section-hidden');el.scrollIntoView({behavior:'smooth',block:'start'})}
+async function calculate(){var n=document.getElementById('mainName').value.trim();var d=document.getElementById('mainDate').value;var e=document.getElementById('mainEmail').value.trim();var btn=document.getElementById('calcBtn');var rd=document.getElementById('calcResult');var rg=document.getElementById('calcResultGrid');if(!n||!d||!e){alert('Preencha todos os campos');return}btn.textContent='Calculando...';btn.disabled=true;if(rd)rd.style.display='none';try{var r=await fetch('/calculate',{method:'POST',headers:{'Content-Type':'application/json'},body: JSON.stringify({
+name: n,
+birth_date: d,
+email: e,
+product: 'pdf8',  // ou 'pdf17'
+price: 8,          // ou 17
+lang: localStorage.getItem('l') || 'pt'
+})});var data=await r.json();var items=[{key:'life_path',label:'Vida'},{key:'expression',label:'Expressao'},{key:'soul_urge',label:'Motivacao'},{key:'personality',label:'Personalidade'},{key:'destiny',label:'Destino'}];rg.innerHTML='';items.forEach(function(i){var b=document.createElement('div');b.className='num-box';b.innerHTML='<div class="val">'+data[i.key]+'</div><div class="label">'+i.label+'</div>';rg.appendChild(b)});if(rd){rd.style.display='block';rd.scrollIntoView({behavior:'smooth'})}}catch(ex){rg.innerHTML='<p style="color:var(--red)">Erro ao calcular.</p>';if(rd)rd.style.display='block'}btn.textContent=t('btn_calc');btn.disabled=false}
+async function payExpress(){var n=document.getElementById('mainName').value.trim();var d=document.getElementById('mainDate').value;var e=document.getElementById('mainEmail').value.trim();if(!n||!d||!e){alert('Preencha nome, data e email primeiro');return}try{var r=await fetch('/api/pay/stripe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,birth_date:d,email:e,product:'pdf8',price:8})});var data=await r.json();if(data.payment_url)window.location.href=data.payment_url;else alert('Erro ao criar pagamento')}catch(ex){alert('Erro de conexao')}}
+async function payCompleto(){var n=document.getElementById('mainName').value.trim();var d=document.getElementById('mainDate').value;var e=document.getElementById('mainEmail').value.trim();if(!n||!d||!e){alert('Preencha nome, data e email primeiro');return}try{var r=await fetch('/api/pay/stripe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,birth_date:d,email:e,product:'pdf17',price:17})});var data=await r.json();if(data.payment_url)window.location.href=data.payment_url;else alert('Erro ao criar pagamento')}catch(ex){alert('Erro de conexao')}}
+async function payUrna(){var fn=document.getElementById('urnaFullName').value.trim();var cr=document.getElementById('urnaCargo').value;var em=document.getElementById('urnaEmail').value.trim();var n1=document.getElementById('urnaNome1').value.trim();var n2=document.getElementById('urnaNome2').value.trim();var n3=document.getElementById('urnaNome3').value.trim();var n4=document.getElementById('urnaNome4').value.trim();var n5=document.getElementById('urnaNome5').value.trim();if(!fn||fn.length<3){alert('Nome obrigatorio');return}if(!em){alert('Email obrigatorio');return}if(!n1){alert('Pelo menos Nome 1');return}var btn=document.getElementById('urnaBtn');btn.textContent='Redirecionando...';btn.disabled=true;try{var r=await fetch('/api/pay/urna-session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome_completo:fn,cargo:cr,email:em,nome1:n1,nome2:n2,nome3:n3,nome4:n4,nome5:n5})});var data=await r.json();if(data.payment_url)window.location.href=data.payment_url;else{alert('Erro');btn.textContent='Pagar R$ 26';btn.disabled=false}}catch(ex){alert('Erro de conexao');btn.textContent='Pagar R$ 26';btn.disabled=false}}
+var selCargo='vereador';function setCargo(c,b){selCargo=c;document.getElementById('eleitoralCargo').value=c;document.querySelectorAll('.tab-btn').forEach(function(x){x.classList.remove('active')});if(b)b.classList.add('active')}
+async function payEleitoral(){var s=parseInt(document.getElementById('eleitoralSigla').value);var ne=document.getElementById('eleitoralNumero').value.trim();var em=document.getElementById('eleitoralEmail').value.trim();if(!s||s<10||s>99){alert('Sigla: 2 digitos (10-99)');return}if(!em){alert('Email obrigatorio');return}var btn=document.getElementById('eleitoralBtn');btn.textContent='Redirecionando...';btn.disabled=true;try{var r=await fetch('/api/pay/eleitoral-session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sigla:s,cargo:selCargo,numero_existente:ne||'',email:em})});var data=await r.json();if(data.payment_url)window.location.href=data.payment_url;else{alert('Erro');btn.textContent='Pagar R$ 26';btn.disabled=false}}catch(ex){alert('Erro de conexao');btn.textContent='Pagar R$ 26';btn.disabled=false}}
+document.addEventListener('DOMContentLoaded',function(){applyLang();renderProdTable();renderEnergyGrid();if(window.location.hash==='#urna'||window.location.hash==='#eleitoral'){showSection(window.location.hash.replace('#',''))}});
 </script>
 </body>
 </html>
