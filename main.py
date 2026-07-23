@@ -343,7 +343,7 @@ def pdf17(data, name, bd_str, lang="pt"):
 def calculate(req: PayReq):
     db = Session()
     try:
-        if len(req.name.strip()) &lt; 2: raise HTTPException(400, "Nome curto")
+        if len(req.name.strip()) < 2: raise HTTPException(400, "Nome curto")
         if not req.birth_date: raise HTTPException(400, "Data obrigat\u00f3ria")
         res = calc(req.name, req.birth_date)
         cid = uuid.uuid4().hex[:8]
@@ -357,7 +357,7 @@ def calculate(req: PayReq):
 @app.post("/api/pay/stripe")
 def pay_stripe(req: PayReq):
     if not STRIPE_KEY: raise HTTPException(503, "Stripe n\u00e3o configurado")
-    if not req.price or req.price &lt;= 0: raise HTTPException(400, "Pre\u00e7o inv\u00e1lido")
+    if not req.price or req.price <= 0: raise HTTPException(400, "Pre\u00e7o inv\u00e1lido")
     amt = int(float(req.price) * 100)
     try:
         cs = stripe.checkout.Session.create(
