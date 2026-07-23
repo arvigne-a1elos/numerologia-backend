@@ -837,7 +837,7 @@ def pay_success(request: Request):
             pn = t("completo", lang)
         else:
             pf = pdf8(data, name, bd)
-            pn = "Mapa Express"
+            pn = t("express", lang)
         if pf and email:
             try:
                 enviar_email(email, f"Seu {pn}!", f"Ola {name},\n\nPDF anexo.", pf)
