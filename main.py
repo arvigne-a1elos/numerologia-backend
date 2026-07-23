@@ -324,7 +324,7 @@ def pdf17(data, name, bd_str, lang="pt"):
     grid = calc_grid(name)
     presentes = [str(n) for n in range(1, 10) if grid.get(n, 0) > 0]
     ausentes = [str(n) for n in range(1, 10) if grid.get(n, 0) == 0]
-    e.append(Paragraph(f"<b>{t('presentes', lang)}:</b> {', '.join(presentes) if presentes else '-'}. <b>{t('carencias', lang)}:</b> {', '.join(ausentes) if ausentes else '-'}.", JUST))
+    e.append(Paragraph(f"<b>{t('presentes', lang)}:</b> {', '.join(presentes) if ausentes else '-'}. <b>{t('carencias', lang)}:</b> {', '.join(ausentes) if ausentes else '-'}.", JUST))
     if ausentes:
         nomes_aus = []
         for n in ausentes:
