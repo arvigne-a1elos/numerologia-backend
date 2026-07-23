@@ -232,8 +232,8 @@ if(!n||!d){alert('Preencha nome e data primeiro');return}
 try{
 var r=await fetch('/api/pay/stripe',{
 method:'POST',headers:{'Content-Type':'application/json'},
-body:JSON.stringify({name:n,birth_date:d,email:e,product:'pdf8',lang:localStorage.getItem('l')||'pt'})
-document.addEventListener('DOMContentLoaded',function(){applyLang();renderEnergyGrid()});
+body:JSON.stringify({name:n,birth_date:d,email:'',product:'pdf17',price:17,lang:localStorage.getItem('l')||'pt'})
+    document.addEventListener('DOMContentLoaded',function(){applyLang();renderEnergyGrid()});
 </script>
 </body>
 </html>
