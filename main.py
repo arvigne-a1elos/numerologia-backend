@@ -153,6 +153,249 @@ TRAD = {
         "confirmado": "✅ ¡Confirmado!", "gerado": "fue generado con éxito.",
     },
 }
+SIG_en = {
+    1: (
+        "Individuality",
+        "Symbol: Circle. Day: Sunday. Planet: Sun. Element: Fire. Color: Yellow. Organs: Heart. Original, creative, born leader, independent, strong, determined, pioneer. Energy of beginnings, of the creative impulse. People with this number are visionaries who are not afraid to forge new paths. They take initiative and do not depend on others to act. When channeled positively, this energy builds empires and revolutionizes paradigms. Their presence is striking and their determination unshakable.",
+        "Selfish, arrogant, domineering, impulsive, stubborn, impatient. Tends to centralize decisions and not delegate. Can become authoritarian and inflexible, pushing away those who could collaborate with their projects. Excessive individuality can isolate them.",
+        "Develop humility and learn to work in teams. Remember that no one achieves great feats alone. True leadership inspires, not imposes. Sharing protagonism amplifies your power of accomplishment.",
+    ),
+    2: (
+        "Association",
+        "Symbol: Semicircle. Day: Monday. Planet: Moon. Element: Water. Color: Green. Diplomatic, sensitive, cooperative, peacemaker, intuitive, detail-oriented, good listener. Your presence calms and harmonizes environments. You have the gift of uniting people and finding solutions that please everyone. Your intuition is refined.",
+        "Indecisive, needy, submissive, hypersensitive, dependent on others' opinions, shy. Avoids conflict at all costs, even when taking a stand is necessary. Can annul themselves in relationships to maintain apparent peace.",
+        "Develop self-confidence and emotional independence. Say no when necessary. Your sensitivity is a gift, not a weakness. True peace comes from internal balance.",
+    ),
+    3: (
+        "Creation",
+        "Symbol: Triangle. Day: Tuesday. Planet: Jupiter. Element: Air. Color: Violet. Creative, communicative, optimistic, charismatic, artistically talented. You light up any environment with your presence. You have the gift of words and artistic expression. Your energy is contagious and naturally attracts people.",
+        "Superficial, scattered, exaggerated, dramatic. Tends to spread energy in many directions without completing projects. Can use dramatic talent to manipulate situations and people.",
+        "Develop focus and depth in your expression. Channel so much talent into a specific direction. Quality over quantity.",
+    ),
+    4: (
+        "Work",
+        "Symbol: Square. Day: Wednesday. Planet: Uranus. Element: Earth. Color: Blue. Practical, disciplined, reliable, loyal, persistent, organized, efficient, dedicated, honest. You are the foundation of any project or team. You don't give up until the job is well done. You value stability and security above all.",
+        "Rigid, stubborn, slow to change, excessively materialistic, resistant to innovation. Can cling to unnecessary routines and miss opportunities due to fear of the new.",
+        "Develop flexibility and lightness. Not everything needs to be so serious. Life also asks for spontaneity. Trust the flow of life more.",
+    ),
+    5: (
+        "Freedom",
+        "Symbol: Star. Day: Thursday. Planet: Mercury. Element: Air. Color: Orange. Free, versatile, adventurous, progressive, intelligent, curious, adaptable, magnetic. Your energy is contagious and easily attracts new people and situations. You thirst for life and experiences.",
+        "Impulsive, irresponsible, anxious, reckless, excessive in pleasures. Can hurt those you love with your unpredictability. Excessive freedom can become libertinage.",
+        "Balance freedom with responsibility. True freedom includes respect for others. Seek consistency without losing your essence.",
+    ),
+    6: (
+        "Family",
+        "Symbol: Hexagon. Day: Friday. Planet: Venus. Element: Earth. Color: Pink. Responsible, loving, protective, fair, compassionate, artistic, natural counselor. You are the emotional pillar of your loved ones. You have a sharp sense of justice and spare no effort to protect those you love.",
+        "Overprotective, meddlesome, anxious about others. Tends to want to control out of love. Can feel responsible for problems that aren't theirs.",
+        "Love without controlling. Respect others' space. Taking care of yourself is also taking care of others. True love is freedom.",
+    ),
+    7: (
+        "Wisdom",
+        "Symbol: Heptagon. Day: Saturday. Planet: Neptune. Element: Water. Color: Indigo. Wise, analytical, spiritual, intuitive, perfectionist, reserved, philosopher, brilliant mind. You seek truth where no one else looks. You have a deep connection with the invisible.",
+        "Cold, sarcastic, isolated, distrustful. Can feel intellectually superior. Solitude can turn into bitterness.",
+        "Balance reason and emotion. Share knowledge. Wisdom only has value when shared.",
+    ),
+    8: (
+        "Power",
+        "Symbol: Octagon. Day: Sunday (2). Planet: Saturn. Element: Earth. Color: Red. Powerful, accomplished, prosperous, strategist, ambitious, visionary. Born to lead and build wealth. Transforms vision into reality with efficiency. Naturally attracts success.",
+        "Materialistic, authoritarian, workaholic, impatient. Can sacrifice people in the name of success. Power without ethics corrupts.",
+        "Use power with integrity. True success is measured by the good you do. Money is a means, not an end.",
+    ),
+    9: (
+        "Humanity",
+        "Symbol: Nonagon. Day: Tuesday (2). Planet: Mars. Element: Fire. Color: Crimson. Humanitarian, generous, compassionate, wise, tolerant, inspiring, altruistic. You see the bigger picture of existence. Your soul is old and carries wisdom from many lives.",
+        "Melancholic, scattered, victim mentality. Tends to flee from concrete reality. Takes refuge in unattainable ideals.",
+        "Forgive and let go. Trust the flow of life. Detachment is liberating. Take care of yourself to take care of the world.",
+    ),
+    11: (
+        "Inspiring Master",
+        "Intuitive, enlightened, inspiring, visionary. Channels higher energies. Access to knowledge beyond the rational. Magnetic and inspiring presence. Elevates everyone around with inner light.",
+        "Anxious, nervous, distant, fanatical. The pressure of high vibration is difficult to bear. Can feel misunderstood and displaced.",
+        "Balance the spiritual world with the material. Ground your insights. Take care of the body as much as the spirit.",
+    ),
+    22: (
+        "Master Builder",
+        "Accomplisher, practical visionary. Capable of turning dreams into reality on a large scale. Combines spiritual vision with concrete action. Unlimited potential. Architect of the future, building works that benefit humanity.",
+        "Excessively ambitious, stressed, arrogant. The weight of great potential can crush and lead to burnout.",
+        "Build without enslaving yourself to work. The balance between doing and being. Great works need a master at peace.",
+    ),
+}
+
+SIG_es = {
+    1: (
+        "Individualidad",
+        "Símbolo: Círculo. Día: Domingo. Planeta: Sol. Elemento: Fuego. Color: Amarillo. Órganos: Corazón. Original, creativo, líder nato, independiente, fuerte, determinado, pionero. Energía del comienzo, del impulso creador. Personas con este número son visionarias que no temen abrir nuevos caminos. Toman iniciativa propia y no dependen de otros para actuar.",
+        "Egoísta, arrogante, dominante, impulsivo, terco, impaciente. Tiende a centralizar decisiones y no delegar. Puede volverse autoritario e inflexible, alejando a quienes podrían colaborar.",
+        "Desarrollar humildad y saber trabajar en equipo. Recordar que nadie logra grandes hazañas solo. El liderazgo verdadero inspira, no impone.",
+    ),
+    2: (
+        "Asociación",
+        "Símbolo: Semicírculo. Día: Lunes. Planeta: Luna. Elemento: Agua. Color: Verde. Diplomático, sensible, cooperativo, pacificador, intuitivo, detallista, buen oyente. Su presencia calma y armoniza ambientes. Tiene el don de unir personas y encontrar soluciones que agradan a todos.",
+        "Indeciso, carente, sumiso, hipersensible, dependiente de la opinión ajena, tímido. Evita conflictos a toda costa. Puede anularse en relaciones para mantener la paz aparente.",
+        "Desarrollar autoconfianza e independencia emocional. Decir no cuando sea necesario. Su sensibilidad es un don, no una debilidad.",
+    ),
+    3: (
+        "Creación",
+        "Símbolo: Triángulo. Día: Martes. Planeta: Júpiter. Elemento: Aire. Color: Violeta. Creativo, comunicativo, optimista, carismático, talentoso para las artes. Ilumina cualquier ambiente con su presencia. Tiene el don de la palabra y la expresión artística. Su energía es contagiosa.",
+        "Superficial, disperso, exagerado, dramático. Tiende a esparcir energía en muchas direcciones sin concluir proyectos. Puede manipular situaciones.",
+        "Desarrollar enfoque y profundidad en la expresión. Calidad sobre cantidad.",
+    ),
+    4: (
+        "Trabajo",
+        "Símbolo: Cuadrado. Día: Miércoles. Planeta: Urano. Elemento: Tierra. Color: Azul. Práctico, disciplinado, confiable, leal, persistente, organizado, eficiente, dedicado, honesto. Es el cimiento de cualquier proyecto o equipo. No se rinde hasta ver el trabajo bien hecho.",
+        "Rígido, terco, lento para cambiar, materialista en exceso, resistente a innovaciones. Puede aferrarse a rutinas innecesarias.",
+        "Desarrollar flexibilidad y ligereza. No todo necesita ser tan serio. Confiar más en el flujo de la vida.",
+    ),
+    5: (
+        "Libertad",
+        "Símbolo: Estrella. Día: Jueves. Planeta: Mercurio. Elemento: Aire. Color: Naranja. Libre, versátil, aventurero, progresista, inteligente, curioso, adaptable, magnético. Su energía atrae personas y situaciones nuevas con facilidad. Tiene sed de vida y experiencias.",
+        "Impulsivo, irresponsable, ansioso, inconsecuente, excesivo en placeres. Puede herir a quienes ama con su imprevisibilidad.",
+        "Equilibrar libertad con responsabilidad. La verdadera libertad incluye respeto por el otro.",
+    ),
+    6: (
+        "Familia",
+        "Símbolo: Hexágono. Día: Viernes. Planeta: Venus. Elemento: Tierra. Color: Rosa. Responsable, amoroso, protector, justo, compasivo, artístico, consejero nato. Es el pilar emocional de los suyos. Tiene un sentido de justicia agudo.",
+        "Sobreprotector, entrometido, ansioso por los demás. Tiende a querer controlar por amor. Puede sentirse responsable por problemas ajenos.",
+        "Amar sin controlar. Respetar el espacio ajeno. Cuidar de sí también es cuidar de los demás.",
+    ),
+    7: (
+        "Sabiduría",
+        "Símbolo: Heptágono. Día: Sábado. Planeta: Neptuno. Elemento: Agua. Color: Índigo. Sabio, analítico, espiritual, intuitivo, perfeccionista, reservado, filósofo, mente brillante. Busca la verdad donde nadie más mira.",
+        "Frío, sarcástico, aislado, desconfiado. Puede sentirse superior intelectualmente. La soledad puede volverse amargura.",
+        "Equilibrar razón y emoción. Compartir conocimiento. La sabiduría solo tiene valor cuando se comparte.",
+    ),
+    8: (
+        "Poder",
+        "Símbolo: Octógono. Día: Domingo (2). Planeta: Saturno. Elemento: Tierra. Color: Rojo. Poderoso, realizador, próspero, estratega, ambicioso, visionario. Nació para liderar y construir riqueza. Transforma visión en realidad con eficiencia.",
+        "Materialista, autoritario, workaholic, impaciente. Puede sacrificar personas en nombre del éxito. El poder sin ética corrompe.",
+        "Usar el poder con integridad. El verdadero éxito se mide por el bien que se hace. El dinero es medio, no fin.",
+    ),
+    9: (
+        "Humanidad",
+        "Símbolo: Nonágono. Día: Martes (2). Planeta: Marte. Elemento: Fuego. Color: Carmín. Humanitario, generoso, compasivo, sabio, tolerante, inspirador, altruista. Ve el cuadro mayor de la existencia. Su alma es vieja y carga sabiduría de muchas vidas.",
+        "Melancólico, disperso, victimista. Tiende a huir de la realidad concreta. Se refugia en ideales inalcanzables.",
+        "Perdonar y dejar ir. Confiar en el flujo de la vida. El desapego es liberador. Cuidar de sí para cuidar del mundo.",
+    ),
+    11: (
+        "Maestro Inspirador",
+        "Intuitivo, iluminado, inspirador, visionario. Canaliza energías superiores. Acceso al conocimiento más allá de lo racional. Presencia magnética e inspiradora. Eleva a todos con su luz interior.",
+        "Ansioso, nervioso, distante, fanático. La presión de la alta vibración es difícil de soportar.",
+        "Equilibrar el mundo espiritual con el material. Aterrizar los conocimientos. Cuidar el cuerpo tanto como el espíritu.",
+    ),
+    22: (
+        "Maestro Constructor",
+        "Realizador, visionario práctico. Capaz de transformar sueños en realidad a gran escala. Combina visión espiritual con acción concreta. Potencial ilimitado. Arquitecto del futuro.",
+        "Excesivamente ambicioso, estresado, prepotente. El peso del gran potencial puede aplastar.",
+        "Construir sin esclavizarse al trabajo. El equilibrio entre hacer y ser.",
+    ),
+}
+
+CAM_en = {
+    1: ("Realization", "Your mission is to open paths, lead, and innovate. You came to be a pioneer, to create opportunities where none existed. You have courage, willpower, and determination to achieve great feats. Your greatest challenge is learning that leading also means serving and inspiring others to shine."),
+    2: ("Peace and Cooperation", "Your mission is to cooperate, balance, and serve as a bridge between people. You came to bring harmony and diplomacy. Your sensitivity is your greatest tool. The world needs your ability to unite opposites and create consensus."),
+    3: ("Joy and Creation", "Your mission is to communicate, create, and inspire joy. You came to express life's beauty through art and words. Your charisma illuminates everyone around you."),
+    4: ("Action and Structure", "Your mission is to build, organize, and create structure. You came to establish solid foundations with discipline and transform chaos into order. Your reliability is your greatest asset."),
+    5: ("Evolution and Freedom", "Your mission is to experience, change, and evolve. You came to break paradigms and inspire liberation. Your versatility is your driving force."),
+    6: ("Conciliation and Responsibility", "Your mission is to serve, care, and harmonize. You came to create beauty and love in the world. Your generous heart guides your steps."),
+    7: ("Wisdom and Perfection", "Your mission is to seek truth and evolve spiritually. You came to understand the mysteries of existence and transmit wisdom."),
+    8: ("Justice and Prosperity", "Your mission is to manifest abundance with wisdom. You came to accomplish great works and show that prosperity and ethics go hand in hand."),
+    9: ("Wisdom and Humanitarianism", "Your mission is to serve humanity with compassion. You came to close cycles and inspire. Your soul carries wisdom from many lives."),
+    11: ("Divine Inspiration", "Your mission is to illuminate and elevate collective consciousness. You are a channel of higher intuition."),
+    22: ("Large Scale Construction", "Your mission is to accomplish great works that benefit humanity. You are the architect of the future."),
+}
+
+CAM_es = {
+    1: ("Realización", "Tu misión es abrir caminos, liderar e innovar. Viniste a ser pionero, a crear oportunidades donde no existían. Tienes coraje, fuerza de voluntad y determinación para lograr grandes hazañas."),
+    2: ("Paz y Cooperación", "Tu misión es cooperar, equilibrar y servir de puente entre las personas. Viniste a traer armonía y diplomacia. Tu sensibilidad es tu mayor herramienta."),
+    3: ("Alegría y Creación", "Tu misión es comunicar, crear e inspirar alegría. Viniste a expresar la belleza de la vida a través del arte y la palabra. Tu carisma ilumina a todos."),
+    4: ("Acción y Estructura", "Tu misión es construir, organizar y crear estructura. Viniste a establecer bases sólidas con disciplina y transformar el caos en orden."),
+    5: ("Evolución y Libertad", "Tu misión es experimentar, cambiar y evolucionar. Viniste a romper paradigmas e inspirar liberación. Tu versatilidad es tu fuerza motriz."),
+    6: ("Conciliación y Responsabilidad", "Tu misión es servir, cuidar y armonizar. Viniste a crear belleza y amor en el mundo. Tu corazón generoso guía tus pasos."),
+    7: ("Sabiduría y Perfección", "Tu misión es buscar la verdad y evolucionar espiritualmente. Viniste a comprender los misterios de la existencia y transmitir sabiduría."),
+    8: ("Justicia y Prosperidad", "Tu misión es manifestar abundancia con sabiduría. Viniste a realizar grandes obras y mostrar que prosperidad y ética van juntas."),
+    9: ("Sabiduría y Humanitarismo", "Tu misión es servir a la humanidad con compasión. Viniste a cerrar ciclos e inspirar. Tu alma carga sabiduría de muchas vidas."),
+    11: ("Inspiración Divina", "Tu misión es iluminar y elevar la conciencia colectiva. Eres un canal de intuición superior."),
+    22: ("Construcción a Gran Escala", "Tu misión es realizar grandes obras que benefician a la humanidad. Eres el arquitecto del futuro."),
+}
+
+DES_en = {
+    0: "Natural balance. You have balance in this area, just flow with life.",
+    1: "Overcome selfishness and develop servant leadership. True power lies in empowering others.",
+    2: "Overcome shyness and emotional dependence. Develop self-confidence to express your needs.",
+    3: "Avoid dispersion and cultivate focus. Concentrate creative energy on concrete projects.",
+    4: "Overcome rigidity and embrace change. Flexibility and adaptation are keys to growth.",
+    5: "Control excesses and cultivate discipline. Freedom with responsibility leads to maturity.",
+    6: "Avoid overprotectiveness. Trust that your loved ones can make their own choices.",
+    7: "Overcome isolation and share your knowledge with the world. Wisdom only exists when shared.",
+    8: "Balance ambition with ethics and generosity. Material success that benefits others is true success.",
+    9: "Overcome excessive detachment. Learn to close cycles without guilt and trust the flow of life.",
+}
+
+DES_es = {
+    0: "Equilibrio natural. Tienes equilibrio en esta área, solo fluye con la vida.",
+    1: "Superar el egoísmo y desarrollar liderazgo de servicio. El verdadero poder está en empoderar a otros.",
+    2: "Vencer la timidez y la dependencia emocional. Desarrollar autoconfianza para expresar tus necesidades.",
+    3: "Evitar la dispersión y cultivar enfoque. Concentrar la energía creativa en proyectos concretos.",
+    4: "Superar la rigidez y abrazar cambios. Flexibilidad y adaptación son claves para el crecimiento.",
+    5: "Controlar los excesos y cultivar disciplina. Libertad con responsabilidad lleva a la madurez.",
+    6: "Evitar la sobreprotección. Confiar que tus seres queridos pueden hacer sus propias elecciones.",
+    7: "Vencer el aislamiento y compartir tu conocimiento con el mundo. La sabiduría solo existe cuando se comparte.",
+    8: "Equilibrar ambición con ética y generosidad. El éxito material que beneficia a otros es el verdadero.",
+    9: "Superar el desapego excesivo. Aprender a cerrar ciclos sin culpa y confiar en el flujo de la vida.",
+}
+
+VIB_en = {
+    1: "Born under vibration 1. Natural leader, pioneer, individualist. Creative and initiating energy. You have the courage to open paths where no one has walked. Here to learn to lead with humility and service.",
+    2: "Born under vibration 2. Sensitive, diplomatic, cooperative. Your strength lies in partnership and harmony. Keen intuition. Here to learn the balance between giving and receiving.",
+    3: "Born under vibration 3. Communicative, creative, optimistic. Contagious joy. The word is your most powerful tool. Here to bring joy to the world through your art.",
+    4: "Born under vibration 4. Hardworking, disciplined, practical. Solidity builds secure foundations. Here to learn that true security comes from within.",
+    5: "Born under vibration 5. Free, versatile, adventurous. Your energy seeks experiences and transformation. Curiosity moves your soul. Here to experience life's fullness.",
+    6: "Born under vibration 6. Loving, responsible, family-oriented. Mission to care and harmonize. Love is your greatest strength. Here to learn that to love is to set free.",
+    7: "Born under vibration 7. Wise, introspective, spiritual. Search for deep knowledge. Silence is your teacher. Here to understand the mysteries of existence.",
+    8: "Born under vibration 8. Powerful, accomplished, prosperous. Energy attracts abundance. Born to build. Here to learn that true power is service.",
+    9: "Born under vibration 9. Humanitarian, generous, compassionate. Old and wise soul. Mission to serve the collective. Here to close cycles and teach detachment.",
+}
+
+VIB_es = {
+    1: "Nacido bajo vibración 1. Líder nato, pionero, individualista. Energía creadora. Tienes coraje para abrir caminos donde nadie ha ido. Viniste a aprender a liderar con humildad.",
+    2: "Nacido bajo vibración 2. Sensible, diplomático, cooperativo. Tu fuerza está en la asociación y la armonía. Intuición aguda. Viniste a aprender el equilibrio entre dar y recibir.",
+    3: "Nacido bajo vibración 3. Comunicativo, creativo, optimista. Alegría contagiosa. La palabra es tu herramienta más poderosa. Viniste a alegrar el mundo con tu arte.",
+    4: "Nacido bajo vibración 4. Trabajador, disciplinado, práctico. Solidez construye bases seguras. Viniste a aprender que la verdadera seguridad viene de dentro.",
+    5: "Nacido bajo vibración 5. Libre, versátil, aventurero. Tu energía busca experiencias y transformación. Viniste a experimentar la plenitud de la vida.",
+    6: "Nacido bajo vibración 6. Amoroso, responsable, familiar. Misión de cuidar y armonizar. El amor es tu mayor fuerza. Viniste a aprender que amar es liberar.",
+    7: "Nacido bajo vibración 7. Sabio, introspectivo, espiritual. Búsqueda del conocimiento profundo. El silencio es tu maestro. Viniste a comprender los misterios de la existencia.",
+    8: "Nacido bajo vibración 8. Poderoso, realizador, próspero. Energía atrae abundancia. Naciste para construir. Viniste a aprender que el verdadero poder es servicio.",
+    9: "Nacido bajo vibración 9. Humanitario, generoso, compasivo. Alma vieja y sabia. Misión de servir al colectivo. Viniste a cerrar ciclos y enseñar el desapego.",
+}
+
+def get_sig(n, lang):
+    if lang == "en":
+        return SIG_en.get(n, SIG.get(n, ("", "", "", "")))
+    elif lang == "es":
+        return SIG_es.get(n, SIG.get(n, ("", "", "", "")))
+    return SIG.get(n, ("", "", "", ""))
+
+def get_cam(n, lang):
+    if lang == "en":
+        return CAM_en.get(n, CAM.get(n, ("", "")))
+    elif lang == "es":
+        return CAM_es.get(n, CAM.get(n, ("", "")))
+    return CAM.get(n, ("", ""))
+
+def get_des(n, lang):
+    if lang == "en":
+        return DES_en.get(n, DES.get(n, ""))
+    elif lang == "es":
+        return DES_es.get(n, DES.get(n, ""))
+    return DES.get(n, "")
+
+def get_vib(n, lang):
+    if lang == "en":
+        return VIB_en.get(n, VIB.get(n, ""))
+    elif lang == "es":
+        return VIB_es.get(n, VIB.get(n, ""))
+    return VIB.get(n, "")
 
 for l in ["fr", "de", "it", "ja", "zh", "ko", "ru", "ar", "nl"]:
     TRAD[l] = TRAD["en"]
@@ -290,264 +533,127 @@ def estilo(tam, negrito=False, cor=DARK, alinhamento=TA_LEFT, antes=0, depois=4)
 
 def pdf8(data, name, bd_str, lang="pt"):
     path = f"/tmp/p8_{uuid.uuid4().hex[:8]}.pdf"
-    doc = SimpleDocTemplate(
-        path, pagesize=A4,
-        leftMargin=50, rightMargin=50,
-        topMargin=45, bottomMargin=45,
-    )
+    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50, topMargin=45, bottomMargin=45)
     e = []
-    TIT = ParagraphStyle(
-        "TI", fontName=FONTE_NEGRITO, fontSize=TAM_TITULO,
-        textColor=GOLD, alignment=TA_CENTER,
-        spaceAfter=ESPACO_TITULO_TEXTO, leading=TAM_TITULO * 1.5,
-    )
-    SUB = ParagraphStyle(
-        "SU", fontName=FONTE, fontSize=TAM_SUBTITULO,
-        textColor=GOLD, alignment=TA_CENTER,
-        spaceAfter=ESPACO_TITULO_TEXTO, leading=TAM_SUBTITULO * 1.5,
-    )
-    NM = ParagraphStyle(
-        "NM", fontName=FONTE_NEGRITO, fontSize=TAM_CORPO + 2,
-        alignment=TA_CENTER, textColor=DARK, spaceAfter=4,
-    )
-    DT = ParagraphStyle(
-        "DT", fontName=FONTE, fontSize=TAM_CORPO - 2,
-        alignment=TA_CENTER, textColor=GRAY, spaceAfter=ESPACO_LINHA,
-    )
-    JUST = ParagraphStyle(
-        "J", fontName=FONTE, fontSize=TAM_CORPO,
-        leading=ESPACO_LINHA, textColor=DARK,
-        alignment=TA_JUSTIFY, spaceAfter=ESPACO_LINHA * 0.5,
-    )
-    SEC = ParagraphStyle(
-        "SE", fontName=FONTE_NEGRITO, fontSize=TAM_SUBTITULO,
-        textColor=GOLD, alignment=TA_LEFT,
-        spaceBefore=ESPACO_LINHA, spaceAfter=ESPACO_TITULO_TEXTO,
-        leading=TAM_SUBTITULO * 1.5,
-    )
+    TIT = ParagraphStyle("TI", fontName=FONTE_NEGRITO, fontSize=TAM_TITULO, textColor=GOLD, alignment=TA_CENTER, spaceAfter=ESPACO_TITULO_TEXTO, leading=TAM_TITULO*1.5)
+    SUB = ParagraphStyle("SU", fontName=FONTE, fontSize=TAM_SUBTITULO, textColor=GOLD, alignment=TA_CENTER, spaceAfter=ESPACO_TITULO_TEXTO, leading=TAM_SUBTITULO*1.5)
+    NM = ParagraphStyle("NM", fontName=FONTE_NEGRITO, fontSize=TAM_CORPO+2, alignment=TA_CENTER, textColor=DARK, spaceAfter=4)
+    DT = ParagraphStyle("DT", fontName=FONTE, fontSize=TAM_CORPO-2, alignment=TA_CENTER, textColor=GRAY, spaceAfter=ESPACO_LINHA)
+    JUST = ParagraphStyle("J", fontName=FONTE, fontSize=TAM_CORPO, leading=ESPACO_LINHA, textColor=DARK, alignment=TA_JUSTIFY, spaceAfter=ESPACO_LINHA*0.5)
+    SEC = ParagraphStyle("SE", fontName=FONTE_NEGRITO, fontSize=TAM_SUBTITULO, textColor=GOLD, alignment=TA_LEFT, spaceBefore=ESPACO_LINHA, spaceAfter=ESPACO_TITULO_TEXTO, leading=TAM_SUBTITULO*1.5)
 
     e.append(Spacer(1, 25))
     e.append(Paragraph(t("express", lang), TIT))
     e.append(Paragraph(name.upper(), NM))
     e.append(Paragraph(bd_str, DT))
 
-    # Tabela principal
-    td = [
-        [t("numero", lang), t("valor", lang)],
-        [t("caminho_vida", lang), str(data["life_path"])],
-        [t("expressao", lang), str(data["expression"])],
-        [t("motivacao", lang), str(data["soul_urge"])],
-        [t("personalidade", lang), str(data["personality"])],
-        [t("destino", lang), str(data["destiny"])],
-    ]
+    td = [[t("numero", lang), t("valor", lang)],
+          [t("caminho_vida", lang), str(data["life_path"])],
+          [t("expressao", lang), str(data["expression"])],
+          [t("motivacao", lang), str(data["soul_urge"])],
+          [t("personalidade", lang), str(data["personality"])],
+          [t("destino", lang), str(data["destiny"])]]
     tbl = Table(td, colWidths=[230, 80])
     tbl.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), GOLD),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("FONTSIZE", (0, 0), (-1, -1), TAM_CORPO - 1),
-        ("FONTNAME", (0, 0), (-1, -1), FONTE),
-        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-        ("ALIGN", (1, 0), (1, -1), "CENTER"),
-        ("BACKGROUND", (0, 1), (-1, -1), LGRAY),
-        ("TEXTCOLOR", (0, 1), (-1, -1), DARK),
-        ("TOPPADDING", (0, 0), (-1, -1), 6),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+        ("BACKGROUND", (0, 0), (-1, 0), GOLD), ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTSIZE", (0, 0), (-1, -1), TAM_CORPO-1), ("FONTNAME", (0, 0), (-1, -1), FONTE),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey), ("ALIGN", (1, 0), (1, -1), "CENTER"),
+        ("BACKGROUND", (0, 1), (-1, -1), LGRAY), ("TEXTCOLOR", (0, 1), (-1, -1), DARK),
+        ("TOPPADDING", (0, 0), (-1, -1), 6), ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
     ]))
     e.append(tbl)
     e.append(Spacer(1, ESPACO_LINHA))
 
-    # Análise individual de cada número
     e.append(Paragraph(f"<b>{t('analise', lang)}</b>", SEC))
-    for k, lbl in [
-        ("life_path", t("caminho_vida", lang)),
-        ("expression", t("expressao", lang)),
-        ("soul_urge", t("motivacao", lang)),
-        ("personality", t("personalidade", lang)),
-        ("destiny", t("destino", lang)),
-    ]:
+    for k, lbl in [("life_path", t("caminho_vida", lang)), ("expression", t("expressao", lang)),
+                   ("soul_urge", t("motivacao", lang)), ("personality", t("personalidade", lang)),
+                   ("destiny", t("destino", lang))]:
         v = data[k]
-        nm, livro_pos, livro_neg, livro_licao = SIG.get(v, ("", "", "", ""))
-        e.append(Paragraph(
-            f"<b>{lbl} {v} — {nm}</b>",
-            ParagraphStyle(
-                "BL", fontName=FONTE_NEGRITO, fontSize=TAM_CORPO - 1,
-                leading=ESPACO_LINHA * 0.95, textColor=DARK,
-                spaceAfter=ESPACO_LINHA * 0.2,
-            ),
-        ))
-        e.append(Paragraph(
-            f"{livro_pos} {t('negativo', lang)}: {livro_neg} {t('licao', lang)}: {livro_licao}",
-            ParagraphStyle(
-                "TX", fontName=FONTE, fontSize=TAM_CORPO - 1,
-                leading=ESPACO_LINHA * 0.9, textColor=DARK,
-                spaceAfter=ESPACO_LINHA * 0.4,
-            ),
-        ))
+        nm, livro_pos, livro_neg, livro_licao = get_sig(v, lang)
+        e.append(Paragraph(f"<b>{lbl} {v} — {nm}</b>",
+            ParagraphStyle("BL", fontName=FONTE_NEGRITO, fontSize=TAM_CORPO-1, leading=ESPACO_LINHA*0.95, textColor=DARK, spaceAfter=ESPACO_LINHA*0.2)))
+        e.append(Paragraph(f"{livro_pos} {t('negativo', lang)}: {livro_neg} {t('licao', lang)}: {livro_licao}",
+            ParagraphStyle("TX", fontName=FONTE, fontSize=TAM_CORPO-1, leading=ESPACO_LINHA*0.9, textColor=DARK, spaceAfter=ESPACO_LINHA*0.4)))
 
     e.append(Spacer(1, ES))
-    e.append(Paragraph(
-        "© A1ELOS Assessoria e Consultoria",
-        ParagraphStyle(
-            "FF", fontName=FONTE, fontSize=9,
-            textColor=GRAY, alignment=TA_CENTER,
-            spaceBefore=ESPACO_LINHA,
-        ),
-    ))
+    e.append(Paragraph("© A1ELOS Assessoria e Consultoria",
+        ParagraphStyle("FF", fontName=FONTE, fontSize=9, textColor=GRAY, alignment=TA_CENTER, spaceBefore=ESPACO_LINHA)))
     doc.build(e)
     return path
 
 def pdf17(data, name, bd_str, lang="pt"):
     path = f"/tmp/p17_{uuid.uuid4().hex[:8]}.pdf"
-    doc = SimpleDocTemplate(
-        path, pagesize=A4,
-        leftMargin=50, rightMargin=50,
-        topMargin=45, bottomMargin=45,
-    )
+    doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=50, rightMargin=50, topMargin=45, bottomMargin=45)
     e = []
-    TIT = ParagraphStyle(
-        "TI", fontName=FONTE_NEGRITO, fontSize=TAM_TITULO,
-        textColor=GOLD, alignment=TA_CENTER,
-        spaceAfter=ESPACO_TITULO_TEXTO, leading=TAM_TITULO * 1.5,
-    )
-    SUB = ParagraphStyle(
-        "SU", fontName=FONTE, fontSize=TAM_SUBTITULO,
-        textColor=GOLD, alignment=TA_CENTER,
-        spaceAfter=ESPACO_TITULO_TEXTO, leading=TAM_SUBTITULO * 1.5,
-    )
-    NM = ParagraphStyle(
-        "NM", fontName=FONTE_NEGRITO, fontSize=TAM_CORPO + 2,
-        alignment=TA_CENTER, textColor=DARK, spaceAfter=4,
-    )
-    DT = ParagraphStyle(
-        "DT", fontName=FONTE, fontSize=TAM_CORPO - 2,
-        alignment=TA_CENTER, textColor=GRAY, spaceAfter=ESPACO_LINHA,
-    )
-    JUST = ParagraphStyle(
-        "J", fontName=FONTE, fontSize=TAM_CORPO,
-        leading=ESPACO_LINHA, textColor=DARK,
-        alignment=TA_JUSTIFY, spaceAfter=ESPACO_LINHA * 0.5,
-    )
-    JUST_P = ParagraphStyle(
-        "JP", fontName=FONTE, fontSize=TAM_CORPO - 1,
-        leading=ESPACO_LINHA * 0.95, textColor=DARK,
-        alignment=TA_JUSTIFY, spaceAfter=ESPACO_LINHA * 0.4,
-    )
-    SEC = ParagraphStyle(
-        "SE", fontName=FONTE_NEGRITO, fontSize=TAM_SUBTITULO,
-        textColor=GOLD, alignment=TA_LEFT,
-        spaceBefore=ESPACO_LINHA, spaceAfter=ESPACO_TITULO_TEXTO,
-        leading=TAM_SUBTITULO * 1.5,
-    )
-    BOLD = ParagraphStyle(
-        "BL", fontName=FONTE_NEGRITO, fontSize=TAM_CORPO - 1,
-        leading=ESPACO_LINHA * 0.95, textColor=DARK,
-        spaceAfter=ESPACO_LINHA * 0.3,
-    )
+    TIT = ParagraphStyle("TI", fontName=FONTE_NEGRITO, fontSize=TAM_TITULO, textColor=GOLD, alignment=TA_CENTER, spaceAfter=ESPACO_TITULO_TEXTO, leading=TAM_TITULO*1.5)
+    SUB = ParagraphStyle("SU", fontName=FONTE, fontSize=TAM_SUBTITULO, textColor=GOLD, alignment=TA_CENTER, spaceAfter=ESPACO_TITULO_TEXTO, leading=TAM_SUBTITULO*1.5)
+    NM = ParagraphStyle("NM", fontName=FONTE_NEGRITO, fontSize=TAM_CORPO+2, alignment=TA_CENTER, textColor=DARK, spaceAfter=4)
+    DT = ParagraphStyle("DT", fontName=FONTE, fontSize=TAM_CORPO-2, alignment=TA_CENTER, textColor=GRAY, spaceAfter=ESPACO_LINHA)
+    JUST = ParagraphStyle("J", fontName=FONTE, fontSize=TAM_CORPO, leading=ESPACO_LINHA, textColor=DARK, alignment=TA_JUSTIFY, spaceAfter=ESPACO_LINHA*0.5)
+    JUST_P = ParagraphStyle("JP", fontName=FONTE, fontSize=TAM_CORPO-1, leading=ESPACO_LINHA*0.95, textColor=DARK, alignment=TA_JUSTIFY, spaceAfter=ESPACO_LINHA*0.4)
+    SEC = ParagraphStyle("SE", fontName=FONTE_NEGRITO, fontSize=TAM_SUBTITULO, textColor=GOLD, alignment=TA_LEFT, spaceBefore=ESPACO_LINHA, spaceAfter=ESPACO_TITULO_TEXTO, leading=TAM_SUBTITULO*1.5)
+    BOLD = ParagraphStyle("BL", fontName=FONTE_NEGRITO, fontSize=TAM_CORPO-1, leading=ESPACO_LINHA*0.95, textColor=DARK, spaceAfter=ESPACO_LINHA*0.3)
 
     lp = data["life_path"]
-    kw, desc_cam = CAM.get(lp, ("", ""))
+    kw, desc_cam = get_cam(lp, lang)
     nome_p = name.split()[0] if " " in name else name
 
-    # ==================== PÁGINA 1 ====================
+    # Página 1
     e.append(Spacer(1, 25))
     e.append(Paragraph(t("completo", lang), TIT))
     e.append(Paragraph(name.upper(), NM))
     e.append(Paragraph(bd_str, DT))
 
-    # Tabela com significado
-    td = [
-        [t("numero", lang), t("valor", lang), t("significado", lang)],
-        [t("caminho_vida", lang), str(lp), SIG.get(lp, ("", "", "", ""))[0]],
-        [t("expressao", lang), str(data["expression"]), SIG.get(data["expression"], ("", "", "", ""))[0]],
-        [t("motivacao", lang), str(data["soul_urge"]), SIG.get(data["soul_urge"], ("", "", "", ""))[0]],
-        [t("personalidade", lang), str(data["personality"]), SIG.get(data["personality"], ("", "", "", ""))[0]],
-        [t("destino", lang), str(data["destiny"]), SIG.get(data["destiny"], ("", "", "", ""))[0]],
-    ]
+    td = [[t("numero", lang), t("valor", lang), t("significado", lang)],
+          [t("caminho_vida", lang), str(lp), get_sig(lp, lang)[0]],
+          [t("expressao", lang), str(data["expression"]), get_sig(data["expression"], lang)[0]],
+          [t("motivacao", lang), str(data["soul_urge"]), get_sig(data["soul_urge"], lang)[0]],
+          [t("personalidade", lang), str(data["personality"]), get_sig(data["personality"], lang)[0]],
+          [t("destino", lang), str(data["destiny"]), get_sig(data["destiny"], lang)[0]]]
     tbl = Table(td, colWidths=[125, 45, 280])
     tbl.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), GOLD),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("FONTSIZE", (0, 0), (-1, -1), TAM_CORPO - 2),
-        ("FONTNAME", (0, 0), (-1, -1), FONTE),
-        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-        ("ALIGN", (1, 0), (1, -1), "CENTER"),
-        ("BACKGROUND", (0, 1), (-1, -1), LGRAY),
-        ("TEXTCOLOR", (0, 1), (-1, -1), DARK),
-        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("TOPPADDING", (0, 0), (-1, -1), 5),
+        ("BACKGROUND", (0, 0), (-1, 0), GOLD), ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTSIZE", (0, 0), (-1, -1), TAM_CORPO-2), ("FONTNAME", (0, 0), (-1, -1), FONTE),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey), ("ALIGN", (1, 0), (1, -1), "CENTER"),
+        ("BACKGROUND", (0, 1), (-1, -1), LGRAY), ("TEXTCOLOR", (0, 1), (-1, -1), DARK),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("TOPPADDING", (0, 0), (-1, -1), 5),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
     ]))
     e.append(tbl)
 
-    # Perfil
     e.append(Paragraph(f"<b>{t('seu_perfil', lang)}</b>", SEC))
     e.append(Paragraph(
-        f"{nome_p}, sua combinação numerológica revela: "
-        f"{t('caminho_vida', lang)} {lp} ({kw}), "
-        f"{t('expressao', lang)} {data['expression']}, "
-        f"{t('motivacao', lang)} {data['soul_urge']}, "
-        f"{t('personalidade', lang)} {data['personality']}, "
-        f"{t('destino', lang)} {data['destiny']}. "
-        f"Cada número revela uma dimensão do seu ser. "
-        f"Juntos, formam um mapa completo da sua personalidade, "
-        f"seus talentos inatos e o caminho que sua alma escolheu para esta existência.",
-        JUST,
-    ))
+        f"{nome_p}, your combination reveals: {t('caminho_vida', lang)} {lp} ({kw}), "
+        f"{t('expressao', lang)} {data['expression']}, {t('motivacao', lang)} {data['soul_urge']}, "
+        f"{t('personalidade', lang)} {data['personality']}, {t('destino', lang)} {data['destiny']}.",
+        JUST))
     e.append(Paragraph(f"<b>{t('caminho_vida', lang)} {lp}:</b> {desc_cam}", JUST))
     e.append(PageBreak())
 
-    # ==================== PÁGINA 2 ====================
+    # Página 2
     e.append(Paragraph(f"<b>{t('analise', lang)}</b>", SEC))
-    e.append(Paragraph(
-        "Cada número possui um sentido positivo e um sentido negativo. "
-        "Conhecer ambos é o primeiro passo para o autoconhecimento "
-        "e a evolução pessoal. A seguir, a análise completa de cada "
-        "um dos seus números, revelando suas forças, seus desafios "
-        "e as lições que esta existência lhe reserva.",
-        JUST,
-    ))
-    for k, lbl in [
-        ("life_path", t("caminho_vida", lang)),
-        ("expression", t("expressao", lang)),
-        ("soul_urge", t("motivacao", lang)),
-        ("personality", t("personalidade", lang)),
-        ("destiny", t("destino", lang)),
-    ]:
+    e.append(Paragraph("Each number carries a positive and a negative meaning. Knowing both is the first step toward self-knowledge and personal evolution.", JUST))
+    for k, lbl in [("life_path", t("caminho_vida", lang)), ("expression", t("expressao", lang)),
+                   ("soul_urge", t("motivacao", lang)), ("personality", t("personalidade", lang)),
+                   ("destiny", t("destino", lang))]:
         v = data[k]
-        nm, livro_pos, livro_neg, livro_licao = SIG.get(v, ("", "", "", ""))
+        nm, livro_pos, livro_neg, livro_licao = get_sig(v, lang)
         e.append(Paragraph(f"<b>{lbl} {v} — {nm}</b>", BOLD))
         e.append(Paragraph(livro_pos, JUST_P))
         e.append(Paragraph(f"<b>{t('negativo', lang)}:</b> {livro_neg}", JUST_P))
         e.append(Paragraph(f"<b>{t('licao', lang)}:</b> {livro_licao}", JUST_P))
 
-    # Ciclos
     fe = max(36 - min(lp, 36), 25)
     c1n = r1(lp + data["expression"])
     c2n = r1(data["expression"] + data["soul_urge"])
     c3n = r1(data["soul_urge"] + data["personality"])
     e.append(Paragraph(f"<b>{t('ciclos', lang)}</b>", SEC))
-    e.append(Paragraph(
-        f"<b>1º {t('formativo', lang)} (0-{fe}a) {t('regente', lang)} {c1n}:</b> "
-        f"Fase de aprendizado e desenvolvimento. As influências externas "
-        f"moldam suas crenças fundamentais e sua visão de mundo. "
-        f"É o período de formação da personalidade.",
-        JUST_P,
-    ))
-    e.append(Paragraph(
-        f"<b>2º {t('produtivo', lang)} ({fe+1}-{fe+27}a) {t('regente', lang)} {c2n}:</b> "
-        f"Fase de trabalho, realização profissional e conquistas materiais. "
-        f"Maior produtividade e expressão no mundo.",
-        JUST_P,
-    ))
-    e.append(Paragraph(
-        f"<b>3º {t('colheita', lang)} ({fe+28}+a) {t('regente', lang)} {c3n}:</b> "
-        f"Fase de sabedoria, colheita dos frutos do trabalho "
-        f"e construção do legado. Realização interior.",
-        JUST_P,
-    ))
+    e.append(Paragraph(f"<b>1st {t('formativo', lang)} (0-{fe}y) {t('regente', lang)} {c1n}:</b> Learning and development phase.", JUST_P))
+    e.append(Paragraph(f"<b>2nd {t('produtivo', lang)} ({fe+1}-{fe+27}y) {t('regente', lang)} {c2n}:</b> Work and achievement phase.", JUST_P))
+    e.append(Paragraph(f"<b>3rd {t('colheita', lang)} ({fe+28}+y) {t('regente', lang)} {c3n}:</b> Wisdom and harvest phase.", JUST_P))
     e.append(PageBreak())
 
-    # ==================== PÁGINA 3 ====================
+    # Página 3
     bb = dp.parse(bd_str.split(" ")[0] if " " in bd_str else bd_str).date()
     d, m, aa = bb.day, bb.month, bb.year
     d1 = r1(abs(d - m))
@@ -555,89 +661,45 @@ def pdf17(data, name, bd_str, lang="pt"):
     dp_ = r1(abs(d1 - d2))
 
     e.append(Paragraph(f"<b>{t('desafios', lang)}</b>", SEC))
-    e.append(Paragraph(
-        "Os desafios representam as lições que precisamos aprender "
-        "ao longo da vida. São calculados a partir da sua data de "
-        "nascimento e indicam áreas que exigem atenção especial. "
-        "Quanto mais consciente deles, mais fácil se torna superá-los "
-        "e transformá-los em crescimento.",
-        JUST,
-    ))
-    e.append(Paragraph(f"<b>{t('menor1', lang)} {d1}:</b> {DES.get(d1, '')}", JUST_P))
-    e.append(Paragraph(f"<b>{t('menor2', lang)} {d2}:</b> {DES.get(d2, '')}", JUST_P))
-    e.append(Paragraph(f"<b>{t('principal', lang)} {dp_}:</b> {DES.get(dp_, '')}", JUST_P))
+    e.append(Paragraph("Life challenges represent lessons we need to learn. Calculated from your birth date, they indicate areas requiring special attention.", JUST))
+    e.append(Paragraph(f"<b>{t('menor1', lang)} {d1}:</b> {get_des(d1, lang)}", JUST_P))
+    e.append(Paragraph(f"<b>{t('menor2', lang)} {d2}:</b> {get_des(d2, lang)}", JUST_P))
+    e.append(Paragraph(f"<b>{t('principal', lang)} {dp_}:</b> {get_des(dp_, lang)}", JUST_P))
 
     r1v = r1(d + m)
     r2v = r1(d + aa)
     r3v = r1(r1v + r2v)
     r4v = r1(d + m + aa)
     e.append(Paragraph(f"<b>{t('realizacoes', lang)}</b>", SEC))
-    e.append(Paragraph(
-        "As realizações são períodos de oportunidade e crescimento "
-        "que marcam cada fase da sua jornada:",
-        JUST,
-    ))
-    e.append(Paragraph(
-        f"<b>1ª ({r1v}) {t('juventude', lang)}:</b> "
-        f"Desenvolvimento de talentos e habilidades iniciais. "
-        f"Fase de descoberta e experimentação.",
-        JUST_P,
-    ))
-    e.append(Paragraph(
-        f"<b>2ª ({r2v}) {t('vida_adulta', lang)}:</b> "
-        f"Consolidação profissional e pessoal. "
-        f"Construção da carreira e das relações significativas.",
-        JUST_P,
-    ))
-    e.append(Paragraph(
-        f"<b>3ª ({r3v}) {t('maturidade', lang)}:</b> "
-        f"Colheita dos frutos do trabalho e sabedoria acumulada.",
-        JUST_P,
-    ))
-    e.append(Paragraph(
-        f"<b>4ª ({r4v}) {t('legado', lang)}:</b> "
-        f"Realização interior e legado deixado ao mundo.",
-        JUST_P,
-    ))
+    e.append(Paragraph(f"<b>1st ({r1v}) {t('juventude', lang)}:</b> Development of talents and skills.", JUST_P))
+    e.append(Paragraph(f"<b>2nd ({r2v}) {t('vida_adulta', lang)}:</b> Professional and personal consolidation.", JUST_P))
+    e.append(Paragraph(f"<b>3rd ({r3v}) {t('maturidade', lang)}:</b> Harvest of work and wisdom.", JUST_P))
+    e.append(Paragraph(f"<b>4th ({r4v}) {t('legado', lang)}:</b> Inner fulfillment and legacy.", JUST_P))
 
-    # Vibração
     vib = r1(d)
     e.append(Paragraph(f"<b>{t('vibracao', lang)}</b>", SEC))
-    e.append(Paragraph(
-        f"Você nasceu no dia <b>{bb.day}</b>. Reduzindo este número: "
-        f"{d} → <b>{vib}</b>. {VIB.get(vib, '')}",
-        JUST,
-    ))
+    e.append(Paragraph(f"You were born on day <b>{bb.day}</b>. Reduced: {d} → <b>{vib}</b>. {get_vib(vib, lang)}", JUST))
 
-    # Grade
     e.append(Paragraph(f"<b>{t('grade', lang)}</b>", SEC))
-    e.append(Paragraph(
-        "A Grade de Inclusão mostra a frequência de cada número (1 a 9) "
-        "no seu nome completo. Números com mais ocorrências indicam "
-        "seus pontos fortes e talentos naturais. Números ausentes "
-        "indicam carências — áreas que precisam ser desenvolvidas "
-        "ao longo da vida como lições que a alma se propõe a aprender.",
-        JUST,
-    ))
+    e.append(Paragraph("The Inclusion Grid shows the frequency of each number (1-9) in your full name. Numbers with more occurrences indicate strengths and natural talents. Missing numbers indicate areas to develop.", JUST))
     grid = calc_grid(name)
     presentes = [str(n) for n in range(1, 10) if grid.get(n, 0) > 0]
     ausentes = [str(n) for n in range(1, 10) if grid.get(n, 0) == 0]
-    e.append(Paragraph(
-        f"<b>{t('presentes', lang)}:</b> {', '.join(presentes) if presentes else 'nenhum'}. "
-        f"<b>{t('carencias', lang)}:</b> {', '.join(ausentes) if ausentes else 'nenhum'}.",
-        JUST,
-    ))
+    e.append(Paragraph(f"<b>{t('presentes', lang)}:</b> {', '.join(presentes) if presentes else 'none'}. <b>{t('carencias', lang)}:</b> {', '.join(ausentes) if ausentes else 'none'}.", JUST))
     if ausentes:
         nomes_aus = []
         for n in ausentes:
-            sig_info = SIG.get(int(n), ("", "", "", ""))
+            sig_info = get_sig(int(n), lang)
             nomes_aus.append(f"{n} ({sig_info[0]})")
-        e.append(Paragraph(
-            f"As {t('carencias', lang).lower()} ({', '.join(nomes_aus)}) "
-            f"indicam qualidades a desenvolver. Quanto mais consciente, "
-            f"maior seu potencial de crescimento pessoal.",
-            JUST,
-        ))
+        e.append(Paragraph(f"Missing numbers ({', '.join(nomes_aus)}) indicate qualities to develop.", JUST))
+
+    e.append(Paragraph(f"<b>{t('nota_final', lang)}</b>", SEC))
+    e.append(Paragraph(f"{nome_p}, your Numerology Map reveals your {t('caminho_vida', lang).lower()} {lp}. This knowledge illuminates possible paths and reveals potentialities. Numbers show tendencies, but free will is always your greatest power.", JUST))
+
+    e.append(Paragraph("© A1ELOS Assessoria e Consultoria",
+        ParagraphStyle("FF", fontName=FONTE, fontSize=9, textColor=GRAY, alignment=TA_CENTER, spaceBefore=ESPACO_LINHA)))
+    doc.build(e)
+    return path
 
     # Nota Final
     e.append(Paragraph(f"<b>{t('nota_final', lang)}</b>", SEC))
