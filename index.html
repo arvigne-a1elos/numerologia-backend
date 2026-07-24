@@ -83,9 +83,8 @@ footer{padding:60px 20px;text-align:center;border-top:1px solid #222;color:#444;
 <form id="mainForm" onsubmit="event.preventDefault(); calculate()">
 <div class="form-group"><label data-i18n="label_name">Nome Completo</label><input type="text" id="mainName" required></div>
 <div class="form-grid">
-<div class="form-group"><label data-i18n="label_date">Data de Nascimento</label><input type="date" id="mainDate" required></div>
-<div class="form-group" style="display:none;">
-    <label data-i18n="label_email">Email</label>
+<div class="form-group">
+    <label data-i18n="label_email">Email <span style="color:#666;font-size:0.7rem;">(opcional)</span></label>
     <input type="email" id="mainEmail">
 </div>
 <button type="submit" class="btn btn-block" id="calcBtn" data-i18n="btn_calc">Calcular Agora</button>
@@ -197,14 +196,17 @@ function showSection(id){var el=document.getElementById(id);if(!el)return;el.cla
 async function calculate(){var n=document.getElementById('mainName').value.trim();var d=document.getElementById('mainDate').value;var e=document.getElementById('mainEmail').value.trim();var btn=document.getElementById('calcBtn');var rd=document.getElementById('calcResult');var rg=document.getElementById('calcResultGrid');if(!n||!d||!e){alert('Preencha todos os campos');return}btn.textContent='Calculando...';btn.disabled=true;if(rd)rd.style.display='none';try{var r=await fetch('/calculate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,birth_date:d,email:e,product:'pdf8'})});var data=await r.json();var L=localStorage.getItem('l')||'pt';
 var lb={pt:['Vida','Expressão','Motivação','Personalidade','Destino'],en:['Life Path','Expression','Soul Urge','Personality','Destiny'],es:['Camino','Expresión','Motivación','Personalidad','Destino']};
 var ls=lb[L]||lb.pt;
-var L=localStorage.getItem('l')||'pt';var lb={pt:['Vida','Expressão','Motivação','Personalidade','Destino'],en:['Life Path','Expression','Soul Urge','Personality','Destiny'],es:['Camino','Expresión','Motivación','Personalidad','Destino']};var ls=lb[L]||lb.pt;var L=localStorage.getItem('l')||'pt';var lb={pt:['Vida','Expressão','Motivação','Personalidade','Destino'],en:['Life Path','Expression','Soul Urge','Personality','Destiny'],es:['Camino','Expresión','Motivación','Personalidad','Destino']};var ls=lb[L]||lb.pt;var it=[{key:'life_path',label:ls[0]},{key:'expression',label:ls[1]},{key:'soul_urge',label:ls[2]},{key:'personality',label:ls[3]},{key:'destiny',label:ls[4]}]; rg.innerHTML='';items.forEach(function(i){var b=document.createElement('div');b.className='num-box';b.innerHTML='<div class="val">'+data[i.key]+'</div><div class="label">'+i.label+'</div>';rg.appendChild(b)});if(rd){rd.style.display='block';rd.scrollIntoView({behavior:'smooth'})}}catch(ex){rg.innerHTML='<p style="color:var(--red)">Erro ao calcular.</p>';if(rd)rd.style.display='block'}btn.textContent=t('btn_calc');btn.disabled=false}
+var L=localStorage.getItem('l')||'pt';var lb={pt:['Vida','Expressão','Motivação','Personalidade','Destino'],en:['Life Path','Expression','Soul Urge','Personality','Destiny'],es:['Camino','Expresión','Motivación','Personalidad','Destino']};var ls=lb[L]||lb.pt;var L=localStorage.getItem('l')||'pt';var lb={pt:['Vida','Expressão','Motivação','Personalidade','Destino'],en:['Life Path','Expression','Soul Urge','Personality','Destiny'],es:['Camino','Expresión','Motivación','Personalidad','Destino']};var ls=lb[L]||lb.pt;var L=localStorage.getItem('a1elos-lang')||'pt';
+var lb={pt:['Vida','Expressão','Motivação','Personalidade','Destino'],en:['Life Path','Expression','Soul Urge','Personality','Destiny'],es:['Camino','Expresión','Motivación','Personalidad','Destino']};
+var ls=lb[L]||lb.pt;
+var it=[{key:'life_path',label:ls[0]},{key:'expression',label:ls[1]},{key:'soul_urge',label:ls[2]},{key:'personality',label:ls[3]},{key:'destiny',label:ls[4]}]; rg.innerHTML='';items.forEach(function(i){var b=document.createElement('div');b.className='num-box';b.innerHTML='<div class="val">'+data[i.key]+'</div><div class="label">'+i.label+'</div>';rg.appendChild(b)});if(rd){rd.style.display='block';rd.scrollIntoView({behavior:'smooth'})}}catch(ex){rg.innerHTML='<p style="color:var(--red)">Erro ao calcular.</p>';if(rd)rd.style.display='block'}btn.textContent=t('btn_calc');btn.disabled=false}
 async function payExpress(){
 var n=document.getElementById('mainName').value.trim();
 var d=document.getElementById('mainDate').value;
 if(!n||!d){alert(t('label_name')+', '+t('label_date'));return}
 try{
 var r=await fetch('/api/pay/stripe',{method:'POST',headers:{'Content-Type':'application/json'},
-body:JSON.stringify({name:n,birth_date:d,product:'pdf8',price:8,lang:localStorage.getItem('l')||'pt'})});
+body:JSON.stringify({name:n,birth_date:d,product:'pdf8',price:8,lang:localStorage.getItem('a1elos-lang')||'pt',email:document.getElementById('mainEmail').value.trim()||'cliente@email.com'})});
 var data=await r.json();if(data.payment_url)window.location.href=data.payment_url;
 else alert('Erro');}catch(ex){alert('Erro de conexão')}}
 async function payCompleto(){
@@ -213,9 +215,9 @@ var d=document.getElementById('mainDate').value;
 if(!n||!d){alert(t('label_name')+', '+t('label_date'));return}
 try{
 var r=await fetch('/api/pay/stripe',{method:'POST',headers:{'Content-Type':'application/json'},
-body:JSON.stringify({name:n,birth_date:d,product:'pdf17',price:17,lang:localStorage.getItem('l')||'pt'})});
+body:JSON.stringify({name:n,birth_date:d,product:'pdf17',price:17,lang:localStorage.getItem('a1elos-lang')||'pt',email:document.getElementById('mainEmail').value.trim()||'cliente@email.com'})});
 var data=await r.json();if(data.payment_url)window.location.href=data.payment_url;
-else alert('Erro ao criar pagamento')}catch(ex){alert('Erro de conexão')}}
+else alert('Erro');}catch(ex){alert('Erro de conexão')}}
 async function payUrna(){var fn=document.getElementById('urnaFullName').value.trim();var cr=document.getElementById('urnaCargo').value;var em=document.getElementById('urnaEmail').value.trim();var n1=document.getElementById('urnaNome1').value.trim();var n2=document.getElementById('urnaNome2').value.trim();var n3=document.getElementById('urnaNome3').value.trim();var n4=document.getElementById('urnaNome4').value.trim();var n5=document.getElementById('urnaNome5').value.trim();if(!fn||fn.length<3){alert('Nome obrigatorio');return}if(!em){alert('Email obrigatorio');return}if(!n1){alert('Pelo menos Nome 1');return}var btn=document.getElementById('urnaBtn');btn.textContent='Redirecionando...';btn.disabled=true;try{var r=await fetch('/api/pay/urna-session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome_completo:fn,cargo:cr,email:em,nome1:n1,nome2:n2,nome3:n3,nome4:n4,nome5:n5})});var data=await r.json();if(data.payment_url)window.location.href=data.payment_url;else{alert('Erro');btn.textContent='Pagar R$ 26';btn.disabled=false}}catch(ex){alert('Erro de conexao');btn.textContent='Pagar R$ 26';btn.disabled=false}}
 var selCargo='vereador';function setCargo(c,b){selCargo=c;document.getElementById('eleitoralCargo').value=c;document.querySelectorAll('.tab-btn').forEach(function(x){x.classList.remove('active')});if(b)b.classList.add('active')}
 async function payEleitoral(){var s=parseInt(document.getElementById('eleitoralSigla').value);var ne=document.getElementById('eleitoralNumero').value.trim();var em=document.getElementById('eleitoralEmail').value.trim();if(!s||s<10||s>99){alert('Sigla: 2 digitos (10-99)');return}if(!em){alert('Email obrigatorio');return}var btn=document.getElementById('eleitoralBtn');btn.textContent='Redirecionando...';btn.disabled=true;try{var r=await fetch('/api/pay/eleitoral-session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sigla:s,cargo:selCargo,numero_existente:ne||'',email:em})});var data=await r.json();if(data.payment_url)window.location.href=data.payment_url;else{alert('Erro');btn.textContent='Pagar R$ 26';btn.disabled=false}}catch(ex){alert('Erro de conexao');btn.textContent='Pagar R$ 26';btn.disabled=false}}
