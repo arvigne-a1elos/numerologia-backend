@@ -1248,10 +1248,10 @@ def pdf17(data, name, bd_str, lang="pt"):
         btn = (f'<a href="data:application/pdf;base64,{b64}" download="{nome_arq}.pdf" '
                f'style="display:inline-block;padding:18px 50px;background:#C9A94E;color:#000;'
                f'text-decoration:none;border-radius:50px;font-weight:700;margin:20px 0;">'
-               f'📥 {t("download", lang)}</a>')
+               f'📥 Baixar PDF</a>')
     return HTMLResponse(
         f'<html><head><meta charset="UTF-8">'
-        f'<title>{t("confirmado", lang)}</title>'
+        f'<title>✅ Confirmado!</title>'
         f'<style>body{{font-family:sans-serif;display:flex;align-items:center;'
         f'justify-content:center;min-height:100vh;margin:0;background:#0a0a0a;'
         f'color:#fff;text-align:center;}}'
@@ -1260,15 +1260,15 @@ def pdf17(data, name, bd_str, lang="pt"):
         f'.prod-name{{color:#C9A94E;font-weight:700;font-size:1.2em;}}'
         f'</style></head><body>'
         f'<div class="card">'
-        f'<h1>{t("confirmado", lang)}</h1>'
+        f'<h1>✅ Confirmado!</h1>'
         f'<p>{nome}</p>'
         f'<p class="prod-name">{prod_nome}</p>'
-        f'<p>{t("gerado", lang)}</p>'
+        f'<p>Seu documento foi gerado com sucesso.</p>'
         f'{btn}<br>'
-        f'<a href="/" style="color:#C9A94E">{t("voltar", lang)}</a>'
+        f'<a href="/" style="color:#C9A94E">Voltar</a>'
         f'</div></body></html>'
     )
-
+    
 @app.get("/", response_class=HTMLResponse)
 def root():
     try:
@@ -1344,30 +1344,83 @@ def pay_stripe(req: PayReq):
 @app.get("/api/pay/success")
 def pay_success(request: Request):
     sid = request.query_params.get("session_id", "")
-    if not sid: return HTMLResponse("<h1 style='color:#e74c3c'>Sessão inválida</h1>")
+    if not sid:
+        return HTMLResponse("<h1 style='color:#e74c3c'>Sessão inválida</h1>")
     try:
         s = stripe.checkout.Session.retrieve(sid)
         meta = getattr(s, "metadata", {}) or {}
-        if hasattr(meta, "to_dict"): meta = meta.to_dict()
+        if hasattr(meta, "to_dict"):
+            meta = meta.to_dict()
         name = meta.get("name", "Cliente")
         bd = meta.get("birth_date", "")
         prod = meta.get("product", "pdf8")
         lang = meta.get("lang", "pt")
-        if not bd: bd = "2000-01-01"
+        email = meta.get("email", "") or getattr(s, "customer_email", "")
+        if not bd:
+            bd = "2000-01-01"
     except Exception as e:
         logger.error(f"Erro: {e}")
         return HTMLResponse("<h1 style='color:#e74c3c'>Falha no pagamento</h1>")
+
     try:
         data = calc(name, bd)
-        mapa = {"pdf8": (pdf8, t("express", lang)), "pdf17": (pdf17, t("completo", lang))}
-        if prod not in mapa: prod = "pdf17" if int(getattr(s,"amount_total",0) or 0) >= 1200 else "pdf8"
-        gerador, nome_p = mapa[prod]
-        pf = gerador(data, name, bd, lang)
-        html = pagina_sucesso(pf, name, nome_p, lang)
-        if pf and os.path.exists(pf): os.remove(pf)
+        mapa = {
+            "pdf8": (pdf8, "Mapa Express"),
+            "pdf17": (pdf17, "Mapa Completo"),
+            "urna26": (pdf_urna, "Análise de Nome de Urna"),
+            "eleitoral26": (pdf_eleitoral, "Cálculo de Número Eleitoral"),
+        }
+        if prod not in mapa:
+            total = int(getattr(s, "amount_total", 0) or getattr(s, "amount_subtotal", 0) or 0)
+            if total >= 2600:
+                prod = "urna26"
+            elif total >= 1700:
+                prod = "pdf17"
+            else:
+                prod = "pdf8"
+
+        gerador, nome_produto = mapa.get(prod, (pdf8, "Mapa Express"))
+
+        if prod in ("urna26",):
+            # Precisa dos dados do nome completo que vieram no metadata
+            nc = meta.get("nome_completo", name)
+            cr = meta.get("cargo", "vereador")
+            nomes = [meta.get(f"nome{i}", "") for i in range(1, 6) if meta.get(f"nome{i}", "")]
+            if nomes:
+                from validar_nomes_urna import validar_nomes_urna
+                res, _, sugs = validar_nomes_urna(nomes, cr)
+                cl = CARGO_INFO.get(cr, {}).get("label", cr)
+                pf = pdf_urna(nc, cl, res, sugs)
+            else:
+                pf = pdf8(data, name, bd)
+                nome_produto = "Mapa Express"
+        elif prod in ("eleitoral26",):
+            sg = int(meta.get("sigla", "0"))
+            cr = meta.get("cargo", "vereador")
+            ss = str(sg).zfill(2)
+            cl_map = {"vereador": "Vereador", "dep_estadual": "Dep. Estadual", "dep_federal": "Dep. Federal", "senador": "Senador"}
+            sugs = gerar_numeros(sg, cr)
+            ni = None
+            ne_str = meta.get("numero_existente", "")
+            if ne_str and len(ne_str) >= 3:
+                try:
+                    en = r1(sum(int(d) for d in ne_str))
+                    ei = {8:"Poder e Prosperidade",7:"Sabedoria",3:"Criação",1:"Liderança",9:"Humanitarismo",5:"Liberdade",6:"Família",4:"Trabalho",2:"Associação"}
+                    ni = {"numero": ne_str, "energia": en, "interpretacao": ei.get(en, "")}
+                except:
+                    pass
+            pf = pdf_eleitoral(ss, cl_map.get(cr, cr), sugs, ni)
+        else:
+            pf = gerador(data, name, bd, lang)
+
+        html = pagina_sucesso(pf, name, nome_produto, lang)
+        if pf and os.path.exists(pf):
+            os.remove(pf)
         return html
     except Exception as e:
         logger.error(f"Erro PDF: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
         return HTMLResponse("<h1 style='color:#e74c3c'>Erro ao gerar PDF</h1>")
 
 @app.get("/api/pay/cancel")
