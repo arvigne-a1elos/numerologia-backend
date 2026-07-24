@@ -125,6 +125,7 @@ TRAD = {
         "presentes": "Presentes", "carencias": "Carências", "nota_final": "Nota Final",
         "regente": "Regente", "download": "Baixar PDF", "voltar": "Voltar",
         "confirmado": "✅ Confirmado!", "gerado": "foi gerado com sucesso.", "nenhum": "nenhum"},
+    
     "en": {"express": "NUMEROLOGICAL MAP EXPRESS", "completo": "COMPLETE NUMEROLOGICAL MAP",
         "numero": "Number", "valor": "Value", "significado": "Meaning",
         "caminho_vida": "Life Path", "expressao": "Expression",
@@ -140,6 +141,7 @@ TRAD = {
         "presentes": "Present", "carencias": "Missing", "nota_final": "Final Note",
         "regente": "Ruler", "download": "Download PDF", "voltar": "Back",
         "confirmado": "✅ Confirmed!", "gerado": "was generated successfully.", "nenhum": "none"},
+    
     "es": {"express": "MAPA NUMEROLÓGICO EXPRÉS", "completo": "MAPA NUMEROLÓGICO COMPLETO",
         "numero": "Número", "valor": "Valor", "significado": "Significado",
         "caminho_vida": "Camino de Vida", "expressao": "Expresión",
@@ -155,9 +157,152 @@ TRAD = {
         "presentes": "Presentes", "carencias": "Ausencias", "nota_final": "Nota Final",
         "regente": "Gobernante", "download": "Descargar PDF", "voltar": "Volver",
         "confirmado": "✅ ¡Confirmado!", "gerado": "fue generado con éxito.", "nenhum": "ninguno"},
-}
+    "fr": {"express": "CARTE NUMÉROLOGIQUE EXPRESS", "completo": "CARTE NUMÉROLOGIQUE COMPLÈTE",
+    "numero": "Nombre", "valor": "Valeur", "significado": "Signification",
+    "caminho_vida": "Chemin de Vie", "expressao": "Expression",
+    "motivacao": "Motivation de l'Âme", "personalidade": "Personnalité", "destino": "Destin",
+    "seu_perfil": "Votre Profil Numérologique", "analise": "Analyse Détaillée des Nombres",
+    "positivo": "Positif", "negativo": "Négatif", "licao": "Leçon",
+    "ciclos": "Cycles de Vie", "formativo": "Formatif", "produtivo": "Productif",
+    "colheita": "Récolte", "desafios": "Défis de la Vie",
+    "menor1": "Mineur 1 (Jour x Mois)", "menor2": "Mineur 2 (Mois x Année)", "principal": "Principal",
+    "realizacoes": "Réalisations", "juventude": "Jeunesse",
+    "vida_adulta": "Vie Adulte", "maturidade": "Maturité", "legado": "Héritage",
+    "vibracao": "Vibration du Jour de Naissance", "grade": "Grille d'Inclusion",
+    "presentes": "Présents", "carencias": "Manques", "nota_final": "Note Finale",
+    "regente": "Régent", "download": "Télécharger PDF", "voltar": "Retour",
+    "confirmado": "✅ Confirmé !", "gerado": "a été généré avec succès.", "nenhum": "aucun"},
 
-for l in ["fr", "de", "it", "ja", "zh", "ko", "ru", "ar", "nl"]:
+"de": {"express": "NUMEROLOGISCHE KARTE EXPRESS", "completo": "NUMEROLOGISCHE KOMPLETTKARTE",
+    "numero": "Nummer", "valor": "Wert", "significado": "Bedeutung",
+    "caminho_vida": "Lebensweg", "expressao": "Ausdruck",
+    "motivacao": "Seelenmotivation", "personalidade": "Persönlichkeit", "destino": "Schicksal",
+    "seu_perfil": "Ihr Numerologisches Profil", "analise": "Detaillierte Zahlenanalyse",
+    "positivo": "Positiv", "negativo": "Negativ", "licao": "Lektion",
+    "ciclos": "Lebenszyklen", "formativo": "Formativ", "produtivo": "Produktiv",
+    "colheita": "Ernte", "desafios": "Herausforderungen des Lebens",
+    "menor1": "Klein 1 (Tag x Monat)", "menor2": "Klein 2 (Monat x Jahr)", "principal": "Haupt",
+    "realizacoes": "Lebensleistungen", "juventude": "Jugend",
+    "vida_adulta": "Erwachsenenleben", "maturidade": "Reife", "legado": "Vermächtnis",
+    "vibracao": "Geburtstagsschwingung", "grade": "Inklusionstabelle",
+    "presentes": "Vorhanden", "carencias": "Fehlend", "nota_final": "Schlussbemerkung",
+    "regente": "Herrscher", "download": "PDF Herunterladen", "voltar": "Zurück",
+    "confirmado": "✅ Bestätigt!", "gerado": "wurde erfolgreich erstellt.", "nenhum": "keine"},
+
+"it": {"express": "MAPPA NUMEROLOGICA EXPRESS", "completo": "MAPPA NUMEROLOGICA COMPLETA",
+    "numero": "Numero", "valor": "Valore", "significado": "Significato",
+    "caminho_vida": "Percorso di Vita", "expressao": "Espressione",
+    "motivacao": "Motivazione dell'Anima", "personalidade": "Personalità", "destino": "Destino",
+    "seu_perfil": "Il Tuo Profilo Numerologico", "analise": "Analisi Dettagliata dei Numeri",
+    "positivo": "Positivo", "negativo": "Negativo", "licao": "Lezione",
+    "ciclos": "Cicli di Vita", "formativo": "Formativo", "produtivo": "Produttivo",
+    "colheita": "Raccolto", "desafios": "Sfide della Vita",
+    "menor1": "Minore 1 (Giorno x Mese)", "menor2": "Minore 2 (Mese x Anno)", "principal": "Principale",
+    "realizacoes": "Realizzazioni", "juventude": "Gioventù",
+    "vida_adulta": "Vita Adulta", "maturidade": "Maturità", "legado": "Eredità",
+    "vibracao": "Vibrazione del Giorno di Nascita", "grade": "Griglia di Inclusione",
+    "presentes": "Presenti", "carencias": "Mancanze", "nota_final": "Nota Finale",
+    "regente": "Reggente", "download": "Scarica PDF", "voltar": "Indietro",
+    "confirmado": "✅ Confermato!", "gerado": "è stato generato con successo.", "nenhum": "nessuno"},
+
+"ja": {"express": "数秘術エクスプレスマップ", "completo": "数秘術コンプリートマップ",
+    "numero": "数字", "valor": "値", "significado": "意味",
+    "caminho_vida": "人生の道", "expressao": "表現",
+    "motivacao": "魂の動機", "personalidade": "性格", "destino": "運命",
+    "seu_perfil": "あなたの数秘術プロフィール", "analise": "数字の詳細分析",
+    "positivo": "ポジティブ", "negativo": "ネガティブ", "licao": "教訓",
+    "ciclos": "人生のサイクル", "formativo": "形成期", "produtivo": "生産期",
+    "colheita": "収穫期", "desafios": "人生の課題",
+    "menor1": "小1 (日×月)", "menor2": "小2 (月×年)", "principal": "主要",
+    "realizacoes": "人生の達成", "juventude": "青年期",
+    "vida_adulta": "成人期", "maturidade": "成熟期", "legado": "遺産",
+    "vibracao": "誕生日の波動", "grade": "包含表",
+    "presentes": "存在", "carencias": "欠如", "nota_final": "最終所見",
+    "regente": "支配数", "download": "PDFをダウンロード", "voltar": "戻る",
+    "confirmado": "✅ 確認済み！", "gerado": "が正常に生成されました。", "nenhum": "なし"},
+
+"zh": {"express": "数字命理学快速地图", "completo": "数字命理学完整地图",
+    "numero": "数字", "valor": "数值", "significado": "含义",
+    "caminho_vida": "人生道路", "expressao": "表达",
+    "motivacao": "灵魂动机", "personalidade": "个性", "destino": "命运",
+    "seu_perfil": "您的数字命理档案", "analise": "数字详细分析",
+    "positivo": "积极", "negativo": "消极", "licao": "功课",
+    "ciclos": "人生周期", "formativo": "形成期", "produtivo": "生产期",
+    "colheita": "收获期", "desafios": "人生挑战",
+    "menor1": "小1(日x月)", "menor2": "小2(月x年)", "principal": "主要",
+    "realizacoes": "人生成就", "juventude": "青年",
+    "vida_adulta": "成年", "maturidade": "成熟", "legado": "遗产",
+    "vibracao": "生日振动", "grade": "包含网格",
+    "presentes": "存在", "carencias": "缺失", "nota_final": "最终备注",
+    "regente": "主宰", "download": "下载PDF", "voltar": "返回",
+    "confirmado": "✅ 已确认！", "gerado": "已成功生成。", "nenhum": "无"},
+
+"ko": {"express": "수비학 익스프레스 지도", "completo": "수비학 종합 지도",
+    "numero": "숫자", "valor": "값", "significado": "의미",
+    "caminho_vida": "인생의 길", "expressao": "표현",
+    "motivacao": "영혼의 동기", "personalidade": "성격", "destino": "운명",
+    "seu_perfil": "수비학 프로필", "analise": "숫자 상세 분석",
+    "positivo": "긍정", "negativo": "부정", "licao": "교훈",
+    "ciclos": "인생 주기", "formativo": "형성기", "produtivo": "생산기",
+    "colheita": "수확기", "desafios": "인생의 도전",
+    "menor1": "소1 (일x월)", "menor2": "소2 (월x년)", "principal": "주요",
+    "realizacoes": "인생 성취", "juventude": "청년기",
+    "vida_adulta": "성인기", "maturidade": "성숙기", "legado": "유산",
+    "vibracao": "생일의 진동", "grade": "포함 그리드",
+    "presentes": "존재", "carencias": "부재", "nota_final": "최종 의견",
+    "regente": "지배수", "download": "PDF 다운로드", "voltar": "돌아가기",
+    "confirmado": "✅ 확인됨!", "gerado": "성공적으로 생성되었습니다.", "nenhum": "없음"},
+
+"ru": {"express": "ЭКСПРЕСС-КАРТА НУМЕРОЛОГИИ", "completo": "ПОЛНАЯ КАРТА НУМЕРОЛОГИИ",
+    "numero": "Число", "valor": "Значение", "significado": "Смысл",
+    "caminho_vida": "Жизненный Путь", "expressao": "Выражение",
+    "motivacao": "Мотивация Души", "personalidade": "Личность", "destino": "Судьба",
+    "seu_perfil": "Ваш Нумерологический Профиль", "analise": "Детальный Анализ Чисел",
+    "positivo": "Положительно", "negativo": "Отрицательно", "licao": "Урок",
+    "ciclos": "Жизненные Циклы", "formativo": "Формирующий", "produtivo": "Продуктивный",
+    "colheita": "Урожай", "desafios": "Жизненные Вызовы",
+    "menor1": "Малый 1 (День х Месяц)", "menor2": "Малый 2 (Месяц х Год)", "principal": "Главный",
+    "realizacoes": "Достижения", "juventude": "Юность",
+    "vida_adulta": "Взрослая Жизнь", "maturidade": "Зрелость", "legado": "Наследие",
+    "vibracao": "Вибрация Дня Рождения", "grade": "Таблица Включения",
+    "presentes": "Присутствуют", "carencias": "Отсутствуют", "nota_final": "Заключение",
+    "regente": "Правитель", "download": "Скачать PDF", "voltar": "Назад",
+    "confirmado": "✅ Подтверждено!", "gerado": "был успешно создан.", "nenhum": "нет"},
+
+"ar": {"express": "خريطة الأعداد السريعة", "completo": "خريطة الأعداد الكاملة",
+    "numero": "الرقم", "valor": "القيمة", "significado": "المعنى",
+    "caminho_vida": "مسار الحياة", "expressao": "التعبير",
+    "motivacao": "دافع الروح", "personalidade": "الشخصية", "destino": "القدر",
+    "seu_perfil": "ملفك العددي", "analise": "تحليل الأرقام المفصل",
+    "positivo": "إيجابي", "negativo": "سلبي", "licao": "درس",
+    "ciclos": "دورات الحياة", "formativo": "تكويني", "produtivo": "إنتاجي",
+    "colheita": "حصاد", "desafios": "تحديات الحياة",
+    "menor1": "صغير 1 (يوم x شهر)", "menor2": "صغير 2 (شهر x سنة)", "principal": "رئيسي",
+    "realizacoes": "إنجازات الحياة", "juventude": "الشباب",
+    "vida_adulta": "حياة البلوغ", "maturidade": "النضج", "legado": "الإرث",
+    "vibracao": "اهتزاز يوم الميلاد", "grade": "شبكة التضمين",
+    "presentes": "موجودة", "carencias": "مفقودة", "nota_final": "ملاحظة ختامية",
+    "regente": "الحاكم", "download": "تحميل PDF", "voltar": "رجوع",
+    "confirmado": "✅ تم التأكيد!", "gerado": "تم إنشاؤه بنجاح.", "nenhum": "لا يوجد"},
+    
+ "he": {"express": "מפה נומרולוגית אקספרס", "completo": "מפה נומרולוגית מלאה",
+    "numero": "מספר", "valor": "ערך", "significado": "משמעות",
+    "caminho_vida": "מסלול חיים", "expressao": "ביטוי",
+    "motivacao": "מניע הנשמה", "personalidade": "אישיות", "destino": "גורל",
+    "seu_perfil": "הפרופיל הנומרולוגי שלך", "analise": "ניתוח מפורט של המספרים",
+    "positivo": "חיובי", "negativo": "שלילי", "licao": "לקח",
+    "ciclos": "מחזורי חיים", "formativo": "מעצב", "produtivo": "יצרני",
+    "colheita": "קציר", "desafios": "אתגרי החיים",
+    "menor1": "קטן 1 (יום x חודש)", "menor2": "קטן 2 (חודש x שנה)", "principal": "עיקרי",
+    "realizacoes": "הישגי החיים", "juventude": "נעורים",
+    "vida_adulta": "חיים בוגרים", "maturidade": "בגרות", "legado": "מורשת",
+    "vibracao": "תנודת יום ההולדת", "grade": "טבלת הכללה",
+    "presentes": "נוכחים", "carencias": "חסרים", "nota_final": "הערה סופית",
+    "regente": "שליט", "download": "הורד PDF", "voltar": "חזור",
+    "confirmado": "✅ אושר!", "gerado": "נוצר בהצלחה.", "nenhum": "אין"},
+    }
+
+for l in ["fr", "de", "it", "ja", "zh", "ko", "ru", "ar", "he"]:
     TRAD[l] = TRAD["en"]
 
 def t(chave, lang):
@@ -496,40 +641,40 @@ SIG_it = {
 }
 
 SIG_ja = {
-    1: ("個性", "シンボル: 円。曜日: 日曜。惑星: 太陽。元素: 火。色: 黄。独創的、創造的、生まれながらのリーダー、独立心が強い。",
-        "利己的、傲慢、支配的、衝動的、頑固。", "謙虚さを育み、チームワークを学ぶ。"),
-    2: ("協調", "シンボル: 半円。曜日: 月曜。惑星: 月。元素: 水。色: 緑。外交的、繊細、協力的、平和主義者、直感的。",
-        "優柔不断、依存的、従順、過敏、内気。", "自信と感情的自立を育む。"),
-    3: ("創造", "シンボル: 三角形。曜日: 火曜。惑星: 木星。元素: 空気。色: 紫。創造的、コミュニケーション力、楽観的、カリスマ的。",
-        "表面的、散漫、誇張、劇的。", "集中力と表現の深さを育む。"),
-    4: ("仕事", "シンボル: 四角形。曜日: 水曜。惑星: 天王星。元素: 土。色: 青。実用的、規律正しい、信頼できる、忠実、粘り強い。",
-        "硬直的、頑固、変化に遅い、過度に物質主義的。", "柔軟性と軽やかさを育む。"),
-    5: ("自由", "シンボル: 星。曜日: 木曜。惑星: 水星。元素: 空気。色: オレンジ。自由、多才、冒険的、進歩的、知的、好奇心旺盛。",
-        "衝動的、無責任、不安、快楽への過度。", "自由と責任のバランスを取る。"),
-    6: ("家族", "シンボル: 六角形。曜日: 金曜。惑星: 金星。元素: 土。色: ピンク。責任感、愛情深い、保護的、公正、思いやり。",
-        "過保護、干渉的、他人への不安。", "支配せずに愛する。相手の空間を尊重する。"),
-    7: ("知恵", "シンボル: 七角形。曜日: 土曜。惑星: 海王星。元素: 水。色: 藍色。賢明、分析的、精神的、直感的、完璧主義。",
-        "冷たい、皮肉的、孤立、疑い深い。", "理性と感情のバランス。知識を共有する。"),
+    1: ("個性", "シンボル: 円。曜日: 日曜。惑星: 太陽。元素: 火。色: 黄。独創的、創造的、生まれながらのリーダー、独立心が強い、決断力がある。",
+        "利己的、傲慢、支配的、衝動的、頑固、せっかち。", "謙虚さを育み、チームワークを学ぶこと。"),
+    2: ("協調", "シンボル: 半円。曜日: 月曜。惑星: 月。元素: 水。色: 緑。外交的、繊細、協力的、平和主義者、直感的、細部に注意を払う。",
+        "優柔不断、依存的、従順、過敏、内気。", "自信と感情的自立を育むこと。"),
+    3: ("創造", "シンボル: 三角形。曜日: 火曜。惑星: 木星。元素: 風。色: 紫。創造的、コミュニケーション力、楽観的、カリスマ的、才能あふれる。",
+        "表面的、散漫、誇張、劇的。", "集中力と表現の深さを育むこと。"),
+    4: ("仕事", "シンボル: 四角。曜日: 水曜。惑星: 天王星。元素: 土。色: 青。実用的、規律正しい、信頼できる、忠実、粘り強い、組織的。",
+        "硬直的、頑固、変化に遅い、過度に物質主義的。", "柔軟性と軽やかさを育むこと。"),
+    5: ("自由", "シンボル: 星。曜日: 木曜。惑星: 水星。元素: 風。色: オレンジ。自由、多才、冒険的、進歩的、知的、好奇心旺盛。",
+        "衝動的、無責任、不安、快楽への過度。", "自由と責任のバランスを取ること。"),
+    6: ("家族", "シンボル: 六角形。曜日: 金曜。惑星: 金星。元素: 土。色: ピンク。責任感、愛情深い、保護的、公正、思いやりがある。",
+        "過保護、干渉的、他人への不安。", "支配せずに愛すること。相手の空間を尊重すること。"),
+    7: ("叡智", "シンボル: 七角形。曜日: 土曜。惑星: 海王星。元素: 水。色: 藍色。賢明、分析的、精神的、直感的、完璧主義者。",
+        "冷淡、皮肉的、孤立、疑い深い。", "理性と感情のバランス。知識を共有すること。"),
     8: ("力", "シンボル: 八角形。曜日: 日曜(2)。惑星: 土星。元素: 土。色: 赤。強力、達成者、繁栄、戦略家、野心的。",
-        "物質主義的、権威的、仕事中毒、せっかち。", "誠実さをもって力を行使する。"),
-    9: ("博愛", "シンボル: 九角形。曜日: 火曜(2)。惑星: 火星。元素: 火。色: 深紅。人道主義、寛大、思いやり、賢明、寛容。",
-        "憂鬱、散漫、被害者意識。", "許して手放す。執着からの解放。"),
-    11: ("導き手", "直感的、啓発された、インスピレーションを与える、先見性。高次のエネルギーをチャネリング。",
-        "不安、神経質、距離を置く、熱狂的。", "精神と物質のバランス。"),
+        "物質主義的、権威的、仕事中毒、せっかち。", "誠実さで力を行使すること。"),
+    9: ("博愛", "シンボル: 九角形。曜日: 火曜(2)。惑星: 火星。元素: 火。色: 深紅。人道主義的、寛大、思いやり、賢明、寛容。",
+        "憂鬱、散漫、被害者意識。", "許して手放すこと。執着からの解放。"),
+    11: ("導き手", "直感的、目覚めた、インスピレーションを与える、先見性。高次のエネルギーを伝導する。",
+        "不安、緊張、距離を置く、熱狂的。", "精神と物質のバランスを取ること。"),
     22: ("建設者", "実現者、実践的ビジョナリー。夢を大規模に現実化できる。",
-        "過度に野心的、ストレス、傲慢。", "仕事に奴隷化されずに建設する。"),
+        "過度に野心的、ストレス、傲慢。", "仕事に縛られずに建設すること。"),
 }
 
 SIG_zh = {
     1: ("个性", "符号: 圆。星期: 周日。行星: 太阳。元素: 火。颜色: 黄。原创、创造、天生领袖、独立、坚强、果断。",
-        "自私、傲慢、专横、冲动、固执。", "培养谦逊，学会团队合作。"),
-    2: ("合作", "符号: 半圆。星期: 周一。行星: 月亮。元素: 水。颜色: 绿。外交、敏感、合作、调解、直觉。",
+        "自私、傲慢、专横、冲动、固执、急躁。", "培养谦逊，学会团队合作。"),
+    2: ("合作", "符号: 半圆。星期: 周一。行星: 月亮。元素: 水。颜色: 绿。外交、敏感、合作、调解、直觉、注重细节。",
         "优柔寡断、依赖、顺从、过敏、害羞。", "培养自信和情感独立。"),
-    3: ("创造", "符号: 三角。星期: 周二。行星: 木星。元素: 空气。颜色: 紫。创意、沟通、乐观、魅力、才华。",
+    3: ("创造", "符号: 三角。星期: 周二。行星: 木星。元素: 风。颜色: 紫。创意、沟通、乐观、魅力、才华横溢。",
         "肤浅、散漫、夸张、戏剧化。", "培养专注和表达的深度。"),
     4: ("工作", "符号: 方形。星期: 周三。行星: 天王星。元素: 土。颜色: 蓝。务实、自律、可靠、忠诚、坚持、有序。",
         "僵化、固执、变化慢、过度物质主义。", "培养灵活性和轻松感。"),
-    5: ("自由", "符号: 星。星期: 周四。行星: 水星。元素: 空气。颜色: 橙。自由、多才、冒险、进步、智慧、好奇。",
+    5: ("自由", "符号: 星。星期: 周四。行星: 水星。元素: 风。颜色: 橙。自由、多才、冒险、进步、智慧、好奇。",
         "冲动、不负责任、焦虑、过度享乐。", "平衡自由与责任。"),
     6: ("家庭", "符号: 六边形。星期: 周五。行星: 金星。元素: 土。颜色: 粉。负责、有爱、保护、公正、同情。",
         "过度保护、干涉、为他人焦虑。", "爱而不控制。尊重他人空间。"),
@@ -539,15 +684,13 @@ SIG_zh = {
         "物质主义、专制、工作狂、急躁。", "以正直运用力量。"),
     9: ("博爱", "符号: 九边形。星期: 周二(2)。行星: 火星。元素: 火。颜色: 深红。人道、慷慨、同情、智慧、宽容。",
         "忧郁、散漫、受害者心态。", "宽恕和放手。超脱即自由。"),
-    11: ("启迪大师", "直觉、启迪、鼓舞、远见。传导更高能量。",
-        "焦虑、紧张、疏远、狂热。", "平衡精神与物质。"),
-    22: ("建造大师", "实现者、实践远见者。能将梦想大规模变为现实。",
-        "过度雄心、压力、傲慢。", "不为工作所奴役而建造。"),
+    11: ("启迪大师", "直觉、启迪、鼓舞、远见。传导更高能量。", "焦虑、紧张、疏远、狂热。", "平衡精神与物质。"),
+    22: ("建造大师", "实现者、实践远见者。能将梦想大规模变为现实。", "过度雄心、压力、傲慢。", "不为工作所奴役而建造。"),
 }
 
 SIG_ko = {
     1: ("개성", "상징: 원. 요일: 일요일. 행성: 태양. 원소: 불. 색상: 노랑. 독창적, 창의적, 타고난 리더, 독립적, 강함, 결단력.",
-        "이기적, 오만, 지배적, 충동적, 고집.", "겸손을 기르고 팀워크를 배우라."),
+        "이기적, 오만, 지배적, 충동적, 고집, 조급함.", "겸손을 기르고 팀워크를 배우라."),
     2: ("협력", "상징: 반원. 요일: 월요일. 행성: 달. 원소: 물. 색상: 초록. 외교적, 민감, 협력적, 중재자, 직관적.",
         "우유부단, 의존적, 순종적, 과민, 수줍음.", "자신감과 정서적 독립을 기르라."),
     3: ("창조", "상징: 삼각형. 요일: 화요일. 행성: 목성. 원소: 공기. 색상: 보라. 창의적, 의사소통, 낙관, 카리스마, 재능.",
@@ -561,27 +704,87 @@ SIG_ko = {
     7: ("지혜", "상징: 칠각형. 요일: 토요일. 행성: 해왕성. 원소: 물. 색상: 남색. 현명, 분석적, 영적, 직관적, 완벽주의.",
         "냉담, 비꼼, 고립, 의심.", "이성과 감정의 균형. 지식을 나누라."),
     8: ("힘", "상징: 팔각형. 요일: 일요일(2). 행성: 토성. 원소: 땅. 색상: 빨강. 강력, 성취자, 번영, 전략가, 야망.",
-        "물질주의, 권위적, 중독적, 조급.", "정직함으로 힘을 사용하라."),
+        "물질주의, 권위적, 중독, 조급.", "정직함으로 힘을 사용하라."),
     9: ("박애", "상징: 구각형. 요일: 화요일(2). 행성: 화성. 원소: 불. 색상: 진홍. 인도주의, 관대, 연민, 현명, 관용.",
         "우울, 산만, 피해자 의식.", "용서하고 놓아주라. 집착에서 벗어나라."),
-    11: ("영감의 스승", "직관적, 깨달음, 영감, 선견. 고차원 에너지를 채널링.",
-        "불안, 긴장, 거리감, 광신.", "영적과 물질적의 균형."),
-    22: ("건설의 스승", "실현자, 실용적 선견자. 꿈을 대규모로 현실화할 수 있다.",
-        "과도한 야망, 스트레스, 오만.", "일에 노예되지 않고 건설하라."),
+    11: ("영감의 스승", "직관적, 깨달음, 영감, 선견. 고차원 에너지를 채널링.", "불안, 긴장, 거리감, 광신.", "영적과 물질적의 균형."),
+    22: ("건설의 스승", "실현자, 실용적 선견자. 꿈을 대규모로 현실화할 수 있다.", "과도한 야망, 스트레스, 오만.", "일에 노예되지 않고 건설하라."),
 }
 
 SIG_ru = {
-    1: ("Индивидуальность", "Символ: Круг. День: Воскресенье. Планета: Солнце. Стихия: Огонь. Цвет: Желтый. Органы: Сердце. Оригинальный, творческий, прирожденный лидер.",
-        "Эгоистичный, высокомерный, властный, импульсивный, упрямый.", "Развивать смирение и работу в команде."),
-    2: ("Сотрудничество", "Символ: Полукруг. День: Понедельник. Планета: Луна. Стихия: Вода. Цвет: Зеленый. Дипломатичный, чувствительный, кооперативный, миротворец.",
-        "Нерешительный, зависимый, покорный, сверхчувствительный.", "Развивать уверенность и эмоциональную независимость."),
-    3: ("Творчество", "Символ: Треугольник. День: Вторник. Планета: Юпитер. Стихия: Воздух. Цвет: Фиолетовый. Творческий, коммуникабельный, оптимистичный, харизматичный.",
-        "Поверхностный, рассеянный, преувеличенный, драматичный.", "Развивать фокус и глубину выражения."),
-    4: ("Работа", "Символ: Квадрат. День: Среда. Планета: Уран. Стихия: Земля. Цвет: Синий. Практичный, дисциплинированный, надежный, верный, настойчивый.",
-        "Ригидный, упрямый, медленный к изменениям, чрезмерно материалистичный.", "Развивать гибкость и легкость."),
-    5: ("Свобода", "Символ: Звезда. День: Четверг. Планета: Меркурий. Стихия: Воздух. Цвет: Оранжевый. Свободный, разносторонний, авантюрный, прогрессивный.",
-        "Импульсивный, безответственный, тревожный, чрезмерный в удовольствиях.", "Балансировать свободу и ответственность."),
-    6: ("Семья", "Символ: Шестиугольник. День: Пятница. Планета: Венера. Стихия: Земля. Цвет: Розовый. Ответственный, любящий, защищающий, 
+    1: ("Индивидуальность", "Символ: Круг. День: Воскресенье. Планета: Солнце. Стихия: Огонь. Цвет: Желтый. Органы: Сердце. Оригинальный, творческий, прирожденный лидер, независимый, сильный, решительный, первопроходец.",
+        "Эгоистичный, высокомерный, властный, импульсивный, упрямый, нетерпеливый.", "Развивать смирение и умение работать в команде."),
+    2: ("Сотрудничество", "Символ: Полукруг. День: Понедельник. Планета: Луна. Стихия: Вода. Цвет: Зеленый. Дипломатичный, чувствительный, кооперативный, миротворец, интуитивный, внимательный к деталям.",
+        "Нерешительный, зависимый, покорный, сверхчувствительный, застенчивый.", "Развивать уверенность в себе и эмоциональную независимость."),
+    3: ("Творчество", "Символ: Треугольник. День: Вторник. Планета: Юпитер. Стихия: Воздух. Цвет: Фиолетовый. Творческий, коммуникабельный, оптимистичный, харизматичный, талантливый.",
+        "Поверхностный, рассеянный, преувеличенный, драматичный.", "Развивать фокус и глубину самовыражения."),
+    4: ("Работа", "Символ: Квадрат. День: Среда. Планета: Уран. Стихия: Земля. Цвет: Синий. Практичный, дисциплинированный, надежный, верный, настойчивый, организованный.",
+        "Ригидный, упрямый, медленно меняющийся, чрезмерно материалистичный.", "Развивать гибкость и легкость."),
+    5: ("Свобода", "Символ: Звезда. День: Четверг. Планета: Меркурий. Стихия: Воздух. Цвет: Оранжевый. Свободный, разносторонний, авантюрный, прогрессивный, умный, любознательный.",
+        "Импульсивный, безответственный, тревожный, невоздержанный в удовольствиях.", "Балансировать свободу и ответственность."),
+    6: ("Семья", "Символ: Шестиугольник. День: Пятница. Планета: Венера. Стихия: Земля. Цвет: Розовый. Ответственный, любящий, защищающий, справедливый, сострадательный.",
+        "Чрезмерно опекающий, вмешивающийся, тревожный за других.", "Любить без контроля. Уважать пространство других."),
+    7: ("Мудрость", "Символ: Семиугольник. День: Суббота. Планета: Нептун. Стихия: Вода. Цвет: Индиго. Мудрый, аналитический, духовный, интуитивный, перфекционист.",
+        "Холодный, саркастичный, замкнутый, недоверчивый.", "Балансировать разум и эмоции. Делиться знаниями."),
+    8: ("Власть", "Символ: Восьмиугольник. День: Воскресенье (2). Планета: Сатурн. Стихия: Земля. Цвет: Красный. Влиятельный, реализующий, процветающий, стратег, амбициозный.",
+        "Материалистичный, авторитарный, трудоголик, нетерпеливый.", "Использовать власть с честностью."),
+    9: ("Человечность", "Символ: Девятиугольник. День: Вторник (2). Планета: Марс. Стихия: Огонь. Цвет: Кармин. Гуманитарный, щедрый, сострадательный, мудрый, терпимый.",
+        "Меланхоличный, рассеянный, жертвенный.", "Прощать и отпускать. Освобождение через отречение."),
+    11: ("Вдохновляющий Мастер", "Интуитивный, просветленный, вдохновляющий, провидческий. Проводник высших энергий.",
+        "Тревожный, нервный, отстраненный, фанатичный.", "Балансировать духовное и материальное."),
+    22: ("Мастер-Строитель", "Реализатор, практичный провидец. Способен воплощать мечты в масштабные проекты.",
+        "Чрезмерно амбициозный, напряженный, высокомерный.", "Строить, не порабощая себя работой."),
+}
+
+SIG_ar = {
+    1: ("الفردية", "الرمز: دائرة. اليوم: الأحد. الكوكب: الشمس. العنصر: النار. اللون: أصفر. الأعضاء: القلب. مبدع، مبتكر، قائد بالفطرة، مستقل، قوي، حاسم، رائد.",
+        "أناني، متكبر، مسيطر، مندفع، عنيد، غير صبور.", "طور التواضع وتعلم العمل الجماعي."),
+    2: ("الشراكة", "الرمز: نصف دائرة. اليوم: الإثنين. الكوكب: القمر. العنصر: الماء. اللون: أخضر. دبلوماسي، حساس، متعاون، صانع سلام، حدسي.",
+        "متردد، معتمد على الآخرين، خاضع، شديد الحساسية، خجول.", "طور الثقة بالنفس والاستقلال العاطفي."),
+    3: ("الإبداع", "الرمز: مثلث. اليوم: الثلاثاء. الكوكب: المشتري. العنصر: الهواء. اللون: بنفسجي. مبدع، متواصل، متفائل، كاريزمي، موهوب.",
+        "سطحي، مشتت، مبالغ، درامي.", "طور التركيز والعمق في التعبير."),
+    4: ("العمل", "الرمز: مربع. اليوم: الأربعاء. الكوكب: أورانوس. العنصر: الأرض. اللون: أزرق. عملي، منضبط، موثوق، مخلص، مثابر، منظم.",
+        "جامد، عنيد، بطيء في التغيير، مادي أكثر من اللازم.", "طور المرونة والخفّة."),
+    5: ("الحرية", "الرمز: نجمة. اليوم: الخميس. الكوكب: عطارد. العنصر: الهواء. اللون: برتقالي. حر، متعدد المواهب، مغامر، تقدمي، ذكي، فضولي.",
+        "مندفع، غير مسؤول، قلق، مفرط في الملذات.", "وازن بين الحرية والمسؤولية."),
+    6: ("العائلة", "الرمز: سداسي. اليوم: الجمعة. الكوكب: الزهرة. العنصر: الأرض. اللون: وردي. مسؤول، محب، حامي، عادل، متعاطف.",
+        "مفرط في الحماية، متطفل، قلق على الآخرين.", "أحب دون سيطرة. احترم مساحة الآخرين."),
+    7: ("الحكمة", "الرمز: سباعي. اليوم: السبت. الكوكب: نبتون. العنصر: الماء. اللون: نيلي. حكيم، تحليلي، روحي، حدسي، كمالي.",
+        "بارد، ساخر، منعزل، مرتاب.", "وازن بين العقل والعاطفة. شارك المعرفة."),
+    8: ("القوة", "الرمز: ثماني. اليوم: الأحد (2). الكوكب: زحل. العنصر: الأرض. اللون: أحمر. قوي، منجز، مزدهر، استراتيجي، طموح.",
+        "مادي، سلطوي، مدمن عمل، غير صبور.", "استخدم القوة بنزاهة."),
+    9: ("الإنسانية", "الرمز: تساعي. اليوم: الثلاثاء (2). الكوكب: المريخ. العنصر: النار. اللون: قرمزي. إنساني، كريم، متعاطف، حكيم، متسامح.",
+        "حزين، مشتت، عقلية ضحية.", "اغفر واترك. التحرر من التعلق."),
+    11: ("المعلم الملهم", "حدسي، مستنير، ملهم، صاحب رؤية. ينقل الطاقات العليا.",
+        "قلق، عصبي، منعزل، متعصب.", "وازن بين الروحي والمادي."),
+    22: ("المعلم البناء", "منجز، صاحب رؤية عملية. قادر على تحويل الأحلام إلى واقع على نطاق واسع.",
+        "طموح مفرط، متوتر، متكبر.", "ابنِ دون أن تستعبد نفسك للعمل."),
+}
+
+SIG_he = {
+    1: ("אינדיבידואליות", "סמל: עיגול. יום: ראשון. כוכב: שמש. יסוד: אש. צבע: צהוב. איברים: לב. מקורי, יצירתי, מנהיג מלידה, עצמאי, חזק, נחוש, חלוץ.",
+        "אנוכי, יהיר, שתלטן, אימפולסיבי, עקשן, חסר סבלנות.", "לפתח ענווה וללמוד עבודת צוות."),
+    2: ("שותפות", "סמל: חצי עיגול. יום: שני. כוכב: ירח. יסוד: מים. צבע: ירוק. דיפלומטי, רגיש, משתף פעולה, עושה שלום, אינטואיטיבי.",
+        "החלטי, תלותי, כנוע, רגיש יתר, ביישן.", "לפתח ביטחון עצמי ועצמאות רגשית."),
+    3: ("יצירה", "סמל: משולש. יום: שלישי. כוכב: צדק. יסוד: אוויר. צבע: סגול. יצירתי, תקשורתי, אופטימי, כריזמטי, מוכשר.",
+        "שטחי, מפוזר, מוגזם, דרמטי.", "לפתח מיקוד ועומק בביטוי."),
+    4: ("עבודה", "סמל: ריבוע. יום: רביעי. כוכב: אורנוס. יסוד: אדמה. צבע: כחול. פרקטי, ממושמע, אמין, נאמן, מתמיד, מאורגן.",
+        "נוקשה, עקשן, איטי לשינוי, חומרני יתר.", "לפתח גמישות וקלילות."),
+    5: ("חופש", "סמל: כוכב. יום: חמישי. כוכב: מרקורי. יסוד: אוויר. צבע: כתום. חופשי, רב-גוני, הרפתקן, מתקדם, אינטליגנטי, סקרן.",
+        "אימפולסיבי, חסר אחריות, חרד, מוגזם בתענוגות.", "לאזן בין חופש לאחריות."),
+    6: ("משפחה", "סמל: משושה. יום: שישי. כוכב: נוגה. יסוד: אדמה. צבע: ורוד. אחראי, אוהב, מגן, הוגן, רחום.",
+        "מגונן יתר, מתערב, חרד לאחרים.", "לאהוב בלי לשלוט. לכבד מרחב של אחרים."),
+    7: ("חוכמה", "סמל: מחומש. יום: שבת. כוכב: נפטון. יסוד: מים. צבע: אינדיגו. חכם, אנליטי, רוחני, אינטואיטיבי, פרפקציוניסט.",
+        "קר, סרקסטי, מבודד, חשדן.", "לאזן בין היגיון לרגש. לחלוק ידע."),
+    8: ("כוח", "סמל: מתומן. יום: ראשון (2). כוכב: שבתאי. יסוד: אדמה. צבע: אדום. חזק, מגשים, משגשג, אסטרטג, שאפתן.",
+        "חומרני, סמכותי, מכור לעבודה, חסר סבלנות.", "להשתמש בכוח ביושרה."),
+    9: ("אנושיות", "סמל: מתומן. יום: שלישי (2). כוכב: מאדים. יסוד: אש. צבע: ארגמן. הומניטרי, נדיב, רחום, חכם, סובלני.",
+        "מלנכולי, מפוזר, תודעת קורבן.", "לסלוח ולשחרר. הינתקות משחררת."),
+    11: ("מורה מעורר השראה", "אינטואיטיבי, מואר, מעורר השראה, בעל חזון. מעביר אנרגיות עליונות.",
+        "חרד, עצבני, מרוחק, פנאטי.", "לאזן בין רוחני לחומרי."),
+    22: ("מורה בונה", "מגשים, בעל חזון מעשי. מסוגל להפוך חלומות למציאות בקנה מידה גדול.",
+        "שאפתן יתר, לחוץ, יהיר.", "לבנות בלי לשעבד את עצמך לעבודה."),
+}
 
 CAM = {
     1: ("Realização", "Sua missão é abrir caminhos, liderar e inovar. Você veio ao mundo para ser pioneiro, para criar oportunidades onde antes não existiam."),
@@ -650,41 +853,231 @@ CAM_es = {
     22: ("Construcción a Gran Escala", "Tu misión es realizar grandes obras que benefician a la humanidad."),
 }
 
+CAM_fr = {
+    1: ("Réalisation", "Votre mission est d'ouvrir des chemins, de diriger et d'innover. Vous êtes venu pour être pionnier."),
+    2: ("Paix et Coopération", "Votre mission est de coopérer, d'équilibrer et de servir de pont entre les personnes."),
+    3: ("Joie et Création", "Votre mission est de communiquer, de créer et d'inspirer la joie. Vous êtes venu pour exprimer la beauté de la vie."),
+    4: ("Action et Structure", "Votre mission est de construire, d'organiser et de créer de la structure avec discipline."),
+    5: ("Évolution et Liberté", "Votre mission est d'expérimenter, de changer et d'évoluer. Vous êtes venu pour briser les paradigmes."),
+    6: ("Réconciliation et Responsabilité", "Votre mission est de servir, de prendre soin et d'harmoniser. Vous êtes venu pour créer de la beauté et de l'amour."),
+    7: ("Sagesse et Perfection", "Votre mission est de chercher la vérité et d'évoluer spirituellement. Vous êtes venu pour comprendre les mystères."),
+    8: ("Justice et Prospérité", "Votre mission est de manifester l'abondance avec sagesse. Vous êtes venu pour accomplir de grandes œuvres."),
+    9: ("Sagesse et Humanitarisme", "Votre mission est de servir l'humanité avec compassion. Vous êtes venu pour clore des cycles et inspirer."),
+    11: ("Inspiration Divine", "Votre mission est d'illuminer et d'élever la conscience collective. Vous êtes un canal d'intuition supérieure."),
+    22: ("Construction à Grande Échelle", "Votre mission est d'accomplir de grandes œuvres qui bénéficient à l'humanité."),
+}
+
+CAM_de = {
+    1: ("Verwirklichung", "Ihre Mission ist es, Wege zu öffnen, zu führen und zu innovieren. Sie kamen, um ein Pionier zu sein."),
+    2: ("Frieden und Zusammenarbeit", "Ihre Mission ist es zu kooperieren, auszugleichen und als Brücke zwischen Menschen zu dienen."),
+    3: ("Freude und Schöpfung", "Ihre Mission ist es zu kommunizieren, zu schaffen und Freude zu inspirieren."),
+    4: ("Aktion und Struktur", "Ihre Mission ist es zu bauen, zu organisieren und mit Disziplin Struktur zu schaffen."),
+    5: ("Evolution und Freiheit", "Ihre Mission ist es zu erfahren, zu verändern und zu evolvieren. Sie kamen, um Paradigmen zu brechen."),
+    6: ("Versöhnung und Verantwortung", "Ihre Mission ist es zu dienen, zu sorgen und zu harmonisieren."),
+    7: ("Weisheit und Perfektion", "Ihre Mission ist es, die Wahrheit zu suchen und sich spirituell zu entwickeln."),
+    8: ("Gerechtigkeit und Wohlstand", "Ihre Mission ist es, Fülle mit Weisheit zu manifestieren."),
+    9: ("Weisheit und Humanitarismus", "Ihre Mission ist es, der Menschheit mit Mitgefühl zu dienen."),
+    11: ("Göttliche Inspiration", "Ihre Mission ist es, das kollektive Bewusstsein zu erleuchten."),
+    22: ("Großbau", "Ihre Mission ist es, große Werke zu vollbringen, die der Menschheit nutzen."),
+}
+
+CAM_it = {
+    1: ("Realizzazione", "La tua missione è aprire strade, guidare e innovare. Sei venuto per essere un pioniere."),
+    2: ("Pace e Cooperazione", "La tua missione è cooperare, equilibrare e servire da ponte tra le persone."),
+    3: ("Gioia e Creazione", "La tua missione è comunicare, creare e ispirare gioia. Sei venuto per esprimere la bellezza della vita."),
+    4: ("Azione e Struttura", "La tua missione è costruire, organizzare e creare struttura con disciplina."),
+    5: ("Evoluzione e Libertà", "La tua missione è sperimentare, cambiare ed evolvere. Sei venuto per rompere paradigmi."),
+    6: ("Conciliazione e Responsabilità", "La tua missione è servire, curare e armonizzare. Sei venuto per creare bellezza e amore."),
+    7: ("Saggezza e Perfezione", "La tua missione è cercare la verità ed evolvere spiritualmente. Sei venuto per comprendere i misteri."),
+    8: ("Giustizia e Prosperità", "La tua missione è manifestare abbondanza con saggezza. Sei venuto per realizzare grandi opere."),
+    9: ("Saggezza e Umanitarismo", "La tua missione è servire l'umanità con compassione. Sei venuto per chiudere cicli e ispirare."),
+    11: ("Ispirazione Divina", "La tua missione è illuminare la coscienza collettiva. Sei un canale di intuizione superiore."),
+    22: ("Costruzione su Larga Scala", "La tua missione è realizzare grandi opere che beneficiano l'umanità."),
+}
+
+CAM_ja = {
+    1: ("実現", "あなたの使命は道を開き、導き、革新することです。先駆者となるために来ました。"),
+    2: ("平和と協力", "あなたの使命は協力し、バランスを取り、人々の架け橋となることです。"),
+    3: ("喜びと創造", "あなたの使命は伝え、創造し、喜びを鼓舞することです。人生の美しさを表現するために来ました。"),
+    4: ("行動と構造", "あなたの使命は規律をもって構築し、組織し、構造を創り出すことです。"),
+    5: ("進化と自由", "あなたの使命は経験し、変化し、進化することです。パラダイムを打破するために来ました。"),
+    6: ("調和と責任", "あなたの使命は奉仕し、世話し、調和させることです。美と愛を創造するために来ました。"),
+    7: ("知恵と完成", "あなたの使命は真理を求め、精神的に進化することです。神秘を理解するために来ました。"),
+    8: ("正義と繁栄", "あなたの使命は知恵をもって豊かさを現すことです。偉大な業績を達成するために来ました。"),
+    9: ("知恵と博愛", "あなたの使命は慈愛をもって人類に奉仕することです。サイクルを閉じ、鼓舞するために来ました。"),
+    11: ("神聖なる霊感", "あなたの使命は集合意識を照らし高めることです。あなたは高次直観のチャネルです。"),
+    22: ("大規模建設", "あなたの使命は人類に利益をもたらす偉大な業績を達成することです。"),
+}
+
+CAM_zh = {
+    1: ("实现", "你的使命是开辟道路、引领和创新。你生来就是先驱。"),
+    2: ("和平与合作", "你的使命是合作、平衡并作为人与人之间的桥梁。"),
+    3: ("喜悦与创造", "你的使命是沟通、创造并激发喜悦。你来表达生命之美。"),
+    4: ("行动与结构", "你的使命是以纪律建设、组织并创造结构。"),
+    5: ("进化与自由", "你的使命是体验、改变和进化。你来打破范式。"),
+    6: ("调和与责任", "你的使命是服务、关怀和 harmonize。你来创造美与爱。"),
+    7: ("智慧与完美", "你的使命是寻求真理并在灵性上进化。你来理解奥秘。"),
+    8: ("正义与繁荣", "你的使命是以智慧显化丰盛。你来成就伟大事业。"),
+    9: ("智慧与人道", "你的使命是以慈悲服务人类。你来结束周期并激励他人。"),
+    11: ("神圣灵感", "你的使命是照亮并提升集体意识。你是更高直觉的通道。"),
+    22: ("大规模建设", "你的使命是成就造福人类的伟大事业。"),
+}
+
+CAM_ko = {
+    1: ("실현", "당신의 사명은 길을 열고, 이끌고, 혁신하는 것입니다. 선구자가 되기 위해 왔습니다."),
+    2: ("평화와 협력", "당신의 사명은 협력하고, 균형을 잡고, 사람들 사이의 다리가 되는 것입니다."),
+    3: ("기쁨과 창조", "당신의 사명은 소통하고, 창조하고, 기쁨을 고취하는 것입니다. 삶의 아름다움을 표현하기 위해 왔습니다."),
+    4: ("행동과 구조", "당신의 사명은 규율로 건설하고, 조직하고, 구조를 만드는 것입니다."),
+    5: ("진화와 자유", "당신의 사명은 경험하고, 변화하고, 진화하는 것입니다. 패러다임을 깨기 위해 왔습니다."),
+    6: ("조화와 책임", "당신의 사명은 봉사하고, 돌보고, 조화시키는 것입니다. 아름다움과 사랑을 창조하기 위해 왔습니다."),
+    7: ("지혜와 완성", "당신의 사명은 진리를 찾고 영적으로 진화하는 것입니다. 신비를 이해하기 위해 왔습니다."),
+    8: ("정의와 번영", "당신의 사명은 지혜로 풍요를 나타내는 것입니다. 위대한 업적을 달성하기 위해 왔습니다."),
+    9: ("지혜와 박애", "당신의 사명은 연민으로 인류를 봉사하는 것입니다. 순환을 끝내고 영감을 주기 위해 왔습니다."),
+    11: ("신성한 영감", "당신의 사명은 집단 의식을 비추고 높이는 것입니다. 당신은 고차원 직관의 채널입니다."),
+    22: ("대규모 건설", "당신의 사명은 인류에 이익이 되는 위대한 업적을 달성하는 것입니다."),
+}
+
+CAM_ru = {
+    1: ("Реализация", "Ваша миссия — открывать пути, вести и внедрять инновации. Вы пришли быть первопроходцем."),
+    2: ("Мир и Сотрудничество", "Ваша миссия — сотрудничать, уравновешивать и служить мостом между людьми."),
+    3: ("Радость и Творчество", "Ваша миссия — общаться, творить и вдохновлять радость. Вы пришли выражать красоту жизни."),
+    4: ("Действие и Структура", "Ваша миссия — строить, организовывать и создавать структуру с дисциплиной."),
+    5: ("Эволюция и Свобода", "Ваша миссия — экспериментировать, меняться и развиваться. Вы пришли ломать парадигмы."),
+    6: ("Примирение и Ответственность", "Ваша миссия — служить, заботиться и гармонизировать. Вы пришли создавать красоту и любовь."),
+    7: ("Мудрость и Совершенство", "Ваша миссия — искать истину и духовно развиваться. Вы пришли понять тайны."),
+    8: ("Справедливость и Процветание", "Ваша миссия — проявлять изобилие с мудростью. Вы пришли совершать великие дела."),
+    9: ("Мудрость и Гуманитаризм", "Ваша миссия — служить человечеству с состраданием. Вы пришли завершать циклы."),
+    11: ("Божественное Вдохновение", "Ваша миссия — освещать коллективное сознание. Вы канал высшей интуиции."),
+    22: ("Строительство в Большом Масштабе", "Ваша миссия — совершать великие дела на благо человечества."),
+}
+
+CAM_ar = {
+    1: ("تحقيق", "مهمتك هي فتح الطرق والقيادة والابتكار. جئت لتكون رائداً."),
+    2: ("سلام وتعاون", "مهمتك هي التعاون والتوازن والعمل كجسر بين الناس."),
+    3: ("فرح وإبداع", "مهمتك هي التواصل والإبداع وإلهام الفرح. جئت للتعبير عن جمال الحياة."),
+    4: ("عمل وهيكل", "مهمتك هي البناء والتنظيم وخلق الهيكل بانضباط."),
+    5: ("تطور وحرية", "مهمتك هي التجربة والتغيير والتطور. جئت لكسر النماذج."),
+    6: ("مصالحة ومسؤولية", "مهمتك هي الخدمة والرعاية والتناغم. جئت لخلق الجمال والحب."),
+    7: ("حكمة وكمال", "مهمتك هي البحث عن الحقيقة والتطور روحياً. جئت لفهم الأسرار."),
+    8: ("عدالة وازدهار", "مهمتك هي إظهار الوفرة بالحكمة. جئت لإنجاز الأعمال العظيمة."),
+    9: ("حكمة وإنسانية", "مهمتك هي خدمة الإنسانية برحمة. جئت لإغلاق الدورات وإلهام الآخرين."),
+    11: ("إلهام إلهي", "مهمتك هي إضاءة الوعي الجماعي. أنت قناة للحدس الأعلى."),
+    22: ("بناء على نطاق واسع", "مهمتك هي إنجاز أعمال عظيمة تفيد البشرية."),
+}
+
+CAM_he = {
+    1: ("הגשמה", "המשימה שלך היא לפתוח דרכים, להוביל ולחדש."),
+    2: ("שלום ושיתוף פעולה", "המשימה שלך היא לשתף פעולה, לאזן ולשמש כגשר."),
+    3: ("שמחה ויצירה", "המשימה שלך היא לתקשר, ליצור ולהשרות שמחה."),
+    4: ("פעולה ומבנה", "המשימה שלך היא לבנות, לארגן וליצור מבנה."),
+    5: ("אבולוציה וחופש", "המשימה שלך היא לחוות, לשנות ולהתפתח."),
+    6: ("פיוס ואחריות", "המשימה שלך היא לשרת, לדאוג ולהרמוני."),
+    7: ("חוכמה ושלמות", "המשימה שלך היא לחפש אמת ולהתפתח רוחנית."),
+    8: ("צדק ושגשוג", "המשימה שלך היא לבטא שפע בחוכמה."),
+    9: ("חוכמה והומניטריות", "המשימה שלך היא לשרת את האנושות בחמלה."),
+    11: ("השראה אלוהית", "המשימה שלך היא להאיר את התודעה הקולקטיבית."),
+    22: ("בנייה בקנה מידה גדול", "המשימה שלך היא לבצע עבודות גדולות."),
+}
+
 DES_en = {0: "Natural balance. Flow with life.", 1: "Overcome selfishness and develop servant leadership.", 2: "Overcome shyness and emotional dependence.", 3: "Avoid dispersion and cultivate focus.", 4: "Overcome rigidity and embrace change.", 5: "Control excesses and cultivate discipline.", 6: "Avoid overprotectiveness. Trust your loved ones.", 7: "Overcome isolation and share your knowledge.", 8: "Balance ambition with ethics and generosity.", 9: "Overcome excessive detachment. Learn to close cycles."}
 
 DES_es = {0: "Equilibrio natural. Fluye con la vida.", 1: "Superar el egoísmo y desarrollar liderazgo de servicio.", 2: "Vencer la timidez y la dependencia emocional.", 3: "Evitar la dispersión y cultivar enfoque.", 4: "Superar la rigidez y abrazar cambios.", 5: "Controlar los excesos y cultivar disciplina.", 6: "Evitar la sobreprotección. Confía en tus seres queridos.", 7: "Vencer el aislamiento y compartir tu conocimiento.", 8: "Equilibrar ambición con ética y generosidad.", 9: "Superar el desapego excesivo. Aprender a cerrar ciclos."}
+
+DES_fr = {0: "Équilibre naturel. Laissez couler la vie.", 1: "Surmonter l'égoïsme et développer un leadership serviteur.", 2: "Vaincre la timidité et la dépendance émotionnelle.", 3: "Éviter la dispersion et cultiver la concentration.", 4: "Surmonter la rigidité et accueillir le changement.", 5: "Contrôler les excès et cultiver la discipline.", 6: "Éviter la surprotection. Faire confiance à ses proches.", 7: "Vaincre l'isolement et partager ses connaissances.", 8: "Équilibrer l'ambition avec l'éthique et la générosité.", 9: "Surmonter le détachement excessif. Apprendre à clore les cycles."}
+
+DES_de = {0: "Natürliches Gleichgewicht. Fließen Sie mit dem Leben.", 1: "Überwinden Sie Egoismus und entwickeln Sie dienende Führung.", 2: "Überwinden Sie Schüchternheit und emotionale Abhängigkeit.", 3: "Vermeiden Sie Zerstreuung und kultivieren Sie Fokus.", 4: "Überwinden Sie Starrheit und begrüßen Sie Veränderung.", 5: "Kontrollieren Sie Exzesse und kultivieren Sie Disziplin.", 6: "Vermeiden Sie Überfürsorge. Vertrauen Sie Ihren Lieben.", 7: "Überwinden Sie Isolation und teilen Sie Ihr Wissen.", 8: "Gleichen Sie Ehrgeiz mit Ethik und Großzügigkeit aus.", 9: "Überwinden Sie übermäßige Loslösung. Lernen Sie, Zyklen zu schließen."}
+
+DES_it = {0: "Equilibrio naturale. Scorri con la vita.", 1: "Superare l'egoismo e sviluppare leadership di servizio.", 2: "Vincere la timidezza e la dipendenza emotiva.", 3: "Evitare la dispersione e coltivare la concentrazione.", 4: "Superare la rigidità e abbracciare il cambiamento.", 5: "Controllare gli eccessi e coltivare la disciplina.", 6: "Evitare l'iperprotezione. Fidarsi dei propri cari.", 7: "Vincere l'isolamento e condividere la conoscenza.", 8: "Bilanciare ambizione con etica e generosità.", 9: "Superare il distacco eccessivo. Imparare a chiudere i cicli."}
+
+DES_ja = {0: "自然なバランス。人生の流れに身を任せて。", 1: "利己心を克服し、サーバントリーダーシップを育む。", 2: "内気さと感情的な依存を克服する。", 3: "散漫を避け、集中力を養う。", 4: "硬直性を克服し、変化を受け入れる。", 5: "過剰を抑え、規律を養う。", 6: "過保護を避ける。大切な人を信頼する。", 7: "孤立を克服し、知識を共有する。", 8: "野心と倫理・寛容さのバランスを取る。", 9: "過度な執着を手放し、サイクルを終えることを学ぶ。"}
+
+DES_zh = {0: "自然平衡。随生命流动。", 1: "克服自私，发展服务型领导力。", 2: "克服害羞和情感依赖。", 3: "避免分散，培养专注。", 4: "克服僵化，拥抱变化。", 5: "控制过度，培养自律。", 6: "避免过度保护。相信你所爱的人。", 7: "克服孤立，分享知识。", 8: "平衡雄心与道德及慷慨。", 9: "克服过度执着。学会结束周期。"}
+
+DES_ko = {0: "자연스러운 균형. 삶의 흐름에 몸을 맡기세요.", 1: "이기심을 극복하고 섬기는 리더십을 개발하세요.", 2: "수줍음과 정서적 의존을 극복하세요.", 3: "산만함을 피하고 집중력을 기르세요.", 4: "경직을 극복하고 변화를 받아들이세요.", 5: "과잉을 통제하고 규율을 기르세요.", 6: "과잉보호를 피하세요. 사랑하는 사람을 믿으세요.", 7: "고립을 극복하고 지식을 나누세요.", 8: "야망과 윤리 및 관대함의 균형을 잡으세요.", 9: "과도한 집착을 극복하세요. 순환을 마치는 법을 배우세요."}
+
+DES_ru = {0: "Естественный баланс. Плывите по течению жизни.", 1: "Преодолеть эгоизм и развивать служащее лидерство.", 2: "Победить застенчивость и эмоциональную зависимость.", 3: "Избегать рассеянности и развивать концентрацию.", 4: "Преодолеть ригидность и принять изменения.", 5: "Контролировать излишества и развивать дисциплину.", 6: "Избегать гиперопеки. Доверять близким.", 7: "Преодолеть изоляцию и делиться знаниями.", 8: "Балансировать амбиции с этикой и щедростью.", 9: "Преодолеть чрезмерную отстраненность. Научиться завершать циклы."}
+
+DES_ar = {0: "توازن طبيعي. انسجم مع تدفق الحياة.", 1: "تجاوز الأنانية وتطوير القيادة الخادمة.", 2: "التغلب على الخجل والاعتماد العاطفي.", 3: "تجنب التشتت وتنمية التركيز.", 4: "تجاوز الجمود وتقبل التغيير.", 5: "السيطرة على التجاوزات وتنمية الانضباط.", 6: "تجنب الحماية المفرطة. ثق بأحبائك.", 7: "تجاوز العزلة وشارك معرفتك.", 8: "وازن بين الطموح والأخلاق والكرم.", 9: "تجاوز التعلق المفرط. تعلم إغلاق الدورات."}
 
 VIB_en = {1: "Born under vibration 1. Natural leader, pioneer.", 2: "Born under vibration 2. Sensitive, diplomatic, cooperative.", 3: "Born under vibration 3. Communicative, creative, optimistic.", 4: "Born under vibration 4. Hardworking, disciplined, practical.", 5: "Born under vibration 5. Free, versatile, adventurous.", 6: "Born under vibration 6. Loving, responsible, family-oriented.", 7: "Born under vibration 7. Wise, introspective, spiritual.", 8: "Born under vibration 8. Powerful, accomplished, prosperous.", 9: "Born under vibration 9. Humanitarian, generous, compassionate."}
 
 VIB_es = {1: "Nacido bajo vibración 1. Líder nato, pionero.", 2: "Nacido bajo vibración 2. Sensible, diplomático, cooperativo.", 3: "Nacido bajo vibración 3. Comunicativo, creativo, optimista.", 4: "Nacido bajo vibración 4. Trabajador, disciplinado, práctico.", 5: "Nacido bajo vibración 5. Libre, versátil, aventurero.", 6: "Nacido bajo vibración 6. Amoroso, responsable, familiar.", 7: "Nacido bajo vibración 7. Sabio, introspectivo, espiritual.", 8: "Nacido bajo vibración 8. Poderoso, realizador, próspero.", 9: "Nacido bajo vibración 9. Humanitario, generoso, compasivo."}
 
+VIB_fr = {1: "Né sous vibration 1. Leader né, pionnier, individualiste. Vous avez le courage d'ouvrir des chemins.", 2: "Né sous vibration 2. Sensible, diplomate, coopératif. Votre force est dans le partenariat.", 3: "Né sous vibration 3. Communicatif, créatif, optimiste. La joie contagieuse.", 4: "Né sous vibration 4. Travailleur, discipliné, pratique. La solidité construit des bases sûres.", 5: "Né sous vibration 5. Libre, polyvalent, aventureux. Votre énergie cherche l'expérience.", 6: "Né sous vibration 6. Aimant, responsable, familial. L'amour est votre plus grande force.", 7: "Né sous vibration 7. Sage, introspectif, spirituel. Le silence est votre maître.", 8: "Né sous vibration 8. Puissant, réalisateur, prospère. L'énergie attire l'abondance.", 9: "Né sous vibration 9. Humanitaire, généreux, compatissant. Âme ancienne et sage."}
+
+VIB_de = {1: "Unter Schwingung 1 geboren. Geborener Führer, Pionier. Sie haben den Mut, neue Wege zu gehen.", 2: "Unter Schwingung 2 geboren. Sensibel, diplomatisch, kooperativ. Ihre Stärke liegt in der Partnerschaft.", 3: "Unter Schwingung 3 geboren. Kommunikativ, kreativ, optimistisch. Ansteckende Freude.", 4: "Unter Schwingung 4 geboren. Arbeiter, diszipliniert, praktisch. Solidität baut sichere Fundamente.", 5: "Unter Schwingung 5 geboren. Frei, vielseitig, abenteuerlustig. Ihre Energie sucht Erfahrung.", 6: "Unter Schwingung 6 geboren. Liebevoll, verantwortungsvoll, familiär. Liebe ist Ihre größte Stärke.", 7: "Unter Schwingung 7 geboren. Weise, introvertiert, spirituell. Stille ist Ihr Lehrer.", 8: "Unter Schwingung 8 geboren. Mächtig, erfolgreich, wohlhabend. Energie zieht Fülle an.", 9: "Unter Schwingung 9 geboren. Humanitär, großzügig, mitfühlend. Alte und weise Seele."}
+
+VIB_it = {1: "Nato sotto vibrazione 1. Leader nato, pioniere. Hai il coraggio di aprire strade.", 2: "Nato sotto vibrazione 2. Sensibile, diplomatico, cooperativo. La tua forza è nella partnership.", 3: "Nato sotto vibrazione 3. Comunicativo, creativo, ottimista. Gioia contagiosa.", 4: "Nato sotto vibrazione 4. Lavoratore, disciplinato, pratico. La solidità costruisce basi sicure.", 5: "Nato sotto vibrazione 5. Libero, versatile, avventuroso. La tua energia cerca esperienze.", 6: "Nato sotto vibrazione 6. Amorevole, responsabile, familiare. L'amore è la tua forza più grande.", 7: "Nato sotto vibrazione 7. Saggio, introspettivo, spirituale. Il silenzio è il tuo maestro.", 8: "Nato sotto vibrazione 8. Potente, realizzatore, prospero. L'energia attrae abbondanza.", 9: "Nato sotto vibrazione 9. Umanitario, generoso, compassionevole. Anima antica e saggia."}
+
+VIB_ja = {1: "振動数1。生まれながらのリーダー、先駆者。勇気を持って道を開く。", 2: "振動数2。敏感、外交的、協力的。あなたの強みはパートナーシップ。", 3: "振動数3。コミュニケーション力、創造的、楽観的。伝染する喜び。", 4: "振動数4。勤勉、規律正しい、実用的。堅実さが安全な基盤を築く。", 5: "振動数5。自由、多才、冒険的。エネルギーは経験を求める。", 6: "振動数6。愛情深い、責任感、家族的。愛が最大の力。", 7: "振動数7。賢明、内省的、精神的。静寂が師。", 8: "振動数8。強力、達成者、繁栄。エネルギーが豊かさを引き寄せる。", 9: "振動数9。人道主義的、寛大、思いやり。古くて賢い魂。"}
+
+VIB_zh = {1: "振动数1。天生的领导者、先驱。有勇气开辟道路。", 2: "振动数2。敏感、外交、合作。你的力量在于伙伴关系。", 3: "振动数3。沟通、创造、乐观。感染力强的快乐。", 4: "振动数4。勤奋、自律、务实。坚实创造安全基础。", 5: "振动数5。自由、多才、冒险。你的能量寻求体验。", 6: "振动数6。有爱、负责、顾家。爱是你最大的力量。", 7: "振动数7。智慧、内省、灵性。寂静是你的老师。", 8: "振动数8。强大、成就者、繁荣。能量吸引丰盛。", 9: "振动数9。人道、慷慨、同情。古老而智慧的灵魂。"}
+
+VIB_ko = {1: "진동수 1. 타고난 리더, 선구자. 길을 열 용기가 있습니다.", 2: "진동수 2. 민감, 외교적, 협력적. 당신의 힘은 파트너십에 있습니다.", 3: "진동수 3. 의사소통, 창의적, 낙관적. 전염되는 기쁨.", 4: "진동수 4. 근면, 규율, 실용적. 견고함이 안전한 기초를 만듭니다.", 5: "진동수 5. 자유, 다재다능, 모험적. 당신의 에너지는 경험을 추구합니다.", 6: "진동수 6. 사랑, 책임, 가족 중심. 사랑이 당신의 가장 큰 힘입니다.", 7: "진동수 7. 현명, 내성적, 영적. 침묵이 스승입니다.", 8: "진동수 8. 강력, 성취자, 번영. 에너지가 풍요를 끌어당깁니다.", 9: "진동수 9. 인도주의, 관대, 연민. 오래되고 지혜로운 영혼."}
+
+VIB_ru = {1: "Рождён под вибрацией 1. Прирождённый лидер, первопроходец. У вас есть смелость открывать пути.", 2: "Рождён под вибрацией 2. Чувствительный, дипломатичный, кооперативный. Ваша сила в партнёрстве.", 3: "Рождён под вибрацией 3. Коммуникабельный, творческий, оптимистичный. Заразительная радость.", 4: "Рождён под вибрацией 4. Трудолюбивый, дисциплинированный, практичный. Надёжность строит безопасные основы.", 5: "Рождён под вибрацией 5. Свободный, разносторонний, авантюрный. Ваша энергия ищет опыта.", 6: "Рождён под вибрацией 6. Любящий, ответственный, семейный. Любовь — ваша величайшая сила.", 7: "Рождён под вибрацией 7. Мудрый, созерцательный, духовный. Тишина — ваш учитель.", 8: "Рождён под вибрацией 8. Влиятельный, реализующий, процветающий. Энергия привлекает изобилие.", 9: "Рождён под вибрацией 9. Гуманитарный, щедрый, сострадательный. Древняя и мудрая душа."}
+
+VIB_ar = {1: "ولد تحت ذبذبة 1. قائد بالفطرة، رائد. لديك الشجاعة لفتح الطرق.", 2: "ولد تحت ذبذبة 2. حساس، دبلوماسي، متعاون. قوتك في الشراكة.", 3: "ولد تحت ذبذبة 3. متواصل، مبدع، متفائل. فرح معدي.", 4: "ولد تحت ذبذبة 4. مجتهد، منضبط، عملي. الثبات يبني أسساً آمنة.", 5: "ولد تحت ذبذبة 5. حر، متعدد المواهب، مغامر. طاقتك تبحث عن التجارب.", 6: "ولد تحت ذبذبة 6. محب، مسؤول، عائلي. الحب هو أقوى قوتك.", 7: "ولد تحت ذبذبة 7. حكيم، استبطاني، روحي. الصمت معلمك.", 8: "ولد تحت ذبذبة 8. قوي، منجز، مزدهر. الطاقة تجذب الوفرة.", 9: "ولد تحت ذبذبة 9. إنساني، كريم، متعاطف. روح عجوز وحكيمة."}
+
+CAM_fr = {1: ("Réalisation", "Votre mission est d'ouvrir des chemins, de diriger et d'innover."), 2: ("Paix et Coopération", "Votre mission est de coopérer, d'équilibrer et de servir de pont."), 3: ("Joie et Création", "Votre mission est de communiquer, créer et inspirer la joie."), 4: ("Action et Structure", "Votre mission est de construire, organiser et créer des structures."), 5: ("Évolution et Liberté", "Votre mission est d'expérimenter, changer et évoluer."), 6: ("Réconciliation et Responsabilité", "Votre mission est de servir, prendre soin et harmoniser."), 7: ("Sagesse et Perfection", "Votre mission est de chercher la vérité et d'évoluer spirituellement."), 8: ("Justice et Prospérité", "Votre mission est de manifester l'abondance avec sagesse."), 9: ("Sagesse et Humanitarisme", "Votre mission est de servir l'humanité avec compassion."), 11: ("Inspiration Divine", "Votre mission est d'illuminer la conscience collective."), 22: ("Construction à Grande Échelle", "Votre mission est de réaliser de grandes œuvres.")}
+
+CAM_de = {1: ("Verwirklichung", "Ihre Mission ist es, Wege zu öffnen, zu führen und zu innovieren."), 2: ("Frieden und Zusammenarbeit", "Ihre Mission ist es zu kooperieren, auszugleichen und als Brücke zu dienen."), 3: ("Freude und Schöpfung", "Ihre Mission ist es zu kommunizieren, zu schaffen und Freude zu inspirieren."), 4: ("Aktion und Struktur", "Ihre Mission ist es zu bauen, zu organisieren und Struktur zu schaffen."), 5: ("Evolution und Freiheit", "Ihre Mission ist es zu erfahren, zu verändern und zu evolvieren."), 6: ("Versöhnung und Verantwortung", "Ihre Mission ist es zu dienen, zu sorgen und zu harmonisieren."), 7: ("Weisheit und Perfektion", "Ihre Mission ist es, die Wahrheit zu suchen und sich spirituell zu entwickeln."), 8: ("Gerechtigkeit und Wohlstand", "Ihre Mission ist es, Fülle mit Weisheit zu manifestieren."), 9: ("Weisheit und Humanitarismus", "Ihre Mission ist es, der Menschheit mit Mitgefühl zu dienen."), 11: ("Göttliche Inspiration", "Ihre Mission ist es, das kollektive Bewusstsein zu erleuchten."), 22: ("Großbau", "Ihre Mission ist es, große Werke zu vollbringen.")}
+
+CAM_it = {1: ("Realizzazione", "La tua missione è aprire strade, guidare e innovare."), 2: ("Pace e Cooperazione", "La tua missione è cooperare, equilibrare e servire da ponte."), 3: ("Gioia e Creazione", "La tua missione è comunicare, creare e ispirare gioia."), 4: ("Azione e Struttura", "La tua missione è costruire, organizzare e creare struttura."), 5: ("Evoluzione e Libertà", "La tua missione è sperimentare, cambiare ed evolvere."), 6: ("Conciliazione e Responsabilità", "La tua missione è servire, curare e armonizzare."), 7: ("Saggezza e Perfezione", "La tua missione è cercare la verità ed evolvere spiritualmente."), 8: ("Giustizia e Prosperità", "La tua missione è manifestare abbondanza con saggezza."), 9: ("Saggezza e Umanitarismo", "La tua missione è servire l'umanità con compassione."), 11: ("Ispirazione Divina", "La tua missione è illuminare la coscienza collettiva."), 22: ("Costruzione su Larga Scala", "La tua missione è realizzare grandi opere.")}
+
+CAM_ru = {1: ("Реализация", "Ваша миссия — открывать пути, вести и внедрять инновации."), 2: ("Мир и Сотрудничество", "Ваша миссия — сотрудничать, уравновешивать и служить мостом."), 3: ("Радость и Творчество", "Ваша миссия — общаться, творить и вдохновлять радость."), 4: ("Действие и Структура", "Ваша миссия — строить, организовывать и создавать структуру."), 5: ("Эволюция и Свобода", "Ваша миссия — экспериментировать, меняться и развиваться."), 6: ("Примирение и Ответственность", "Ваша миссия — служить, заботиться и гармонизировать."), 7: ("Мудрость и Совершенство", "Ваша миссия — искать истину и духовно развиваться."), 8: ("Справедливость и Процветание", "Ваша миссия — проявлять изобилие с мудростью."), 9: ("Мудрость и Гуманитаризм", "Ваша миссия — служить человечеству с состраданием."), 11: ("Божественное Вдохновение", "Ваша миссия — освещать коллективное сознание."), 22: ("Строительство в Большом Масштабе", "Ваша миссия — совершать великие дела.")}
+
+CAM_ar = {1: ("تحقيق", "مهمتك هي فتح الطرق والقيادة والابتكار."), 2: ("سلام وتعاون", "مهمتك هي التعاون والتوازن والعمل كجسر."), 3: ("فرح وإبداع", "مهمتك هي التواصل والإبداع وإلهام الفرح."), 4: ("عمل وهيكل", "مهمتك هي البناء والتنظيم وخلق الهيكل."), 5: ("تطور وحرية", "مهمتك هي التجربة والتغيير والتطور."), 6: ("مصالحة ومسؤولية", "مهمتك هي الخدمة والرعاية والتناغم."), 7: ("حكمة وكمال", "مهمتك هي البحث عن الحقيقة والتطور روحياً."), 8: ("عدالة وازدهار", "مهمتك هي إظهار الوفرة بالحكمة."), 9: ("حكمة وإنسانية", "مهمتك هي خدمة الإنسانية برحمة."), 11: ("إلهام إلهي", "مهمتك هي إضاءة الوعي الجماعي."), 22: ("بناء على نطاق واسع", "مهمتك هي إنجاز أعمال عظيمة.")}
+
+CAM_he = {
+    1: ("הגשמה", "המשימה שלך היא לפתוח דרכים, להוביל ולחדש."),
+    2: ("שלום ושיתוף פעולה", "המשימה שלך היא לשתף פעולה, לאזן ולשמש כגשר."),
+    3: ("שמחה ויצירה", "המשימה שלך היא לתקשר, ליצור ולהשרות שמחה."),
+    4: ("פעולה ומבנה", "המשימה שלך היא לבנות, לארגן וליצור מבנה."),
+    5: ("אבולוציה וחופש", "המשימה שלך היא לחוות, לשנות ולהתפתח."),
+    6: ("פיוס ואחריות", "המשימה שלך היא לשרת, לדאוג ולהרמוני."),
+    7: ("חוכמה ושלמות", "המשימה שלך היא לחפש אמת ולהתפתח רוחנית."),
+    8: ("צדק ושגשוג", "המשימה שלך היא לבטא שפע בחוכמה."),
+    9: ("חוכמה והומניטריות", "המשימה שלך היא לשרת את האנושות בחמלה."),
+    11: ("השראה אלוהית", "המשימה שלך היא להאיר את התודעה הקולקטיבית."),
+    22: ("בנייה בקנה מידה גדול", "המשימה שלך היא לבצע עבודות גדולות."),
+}
+# DES, VIB for additional languages (fallback to English via the getter)
+
 def get_sig(n, lang):
-    if lang == "en":
-        return SIG_en.get(n, SIG.get(n, ("", "", "", "")))
-    elif lang == "es":
-        return SIG_es.get(n, SIG.get(n, ("", "", "", "")))
-    return SIG.get(n, ("", "", "", ""))
+    mapa = {
+        "en": SIG_en, "es": SIG_es, "fr": SIG_fr, "de": SIG_de,
+        "it": SIG_it, "ja": SIG_ja, "zh": SIG_zh, "ko": SIG_ko,
+        "ru": SIG_ru, "ar": SIG_ar, "he": SIG_he,
+    }
+    d = mapa.get(lang, SIG)
+    return d.get(n, SIG.get(n, ("", "", "", "")))
 
 def get_cam(n, lang):
-    if lang == "en":
-        return CAM_en.get(n, CAM.get(n, ("", "")))
-    elif lang == "es":
-        return CAM_es.get(n, CAM.get(n, ("", "")))
-    return CAM.get(n, ("", ""))
+    mapa = {
+        "en": CAM_en, "es": CAM_es, "fr": CAM_fr, "de": CAM_de,
+        "it": CAM_it, "ru": CAM_ru, "ar": CAM_ar, "he": CAM_he,
+    }
+    d = mapa.get(lang, CAM)
+    return d.get(n, CAM.get(n, ("", "")))
 
 def get_des(n, lang):
-    if lang == "en":
-        return DES_en.get(n, DES.get(n, ""))
-    elif lang == "es":
-        return DES_es.get(n, DES.get(n, ""))
-    return DES.get(n, "")
+    mapa = {
+        "en": DES_en, "es": DES_es, "fr": DES_fr, "de": DES_de,
+        "it": DES_it, "ja": DES_ja, "zh": DES_zh, "ko": DES_ko,
+        "ru": DES_ru, "ar": DES_ar, "he": DES_he,
+    }
+    d = mapa.get(lang, DES)
+    return d.get(n, DES.get(n, ""))
 
 def get_vib(n, lang):
-    if lang == "en":
-        return VIB_en.get(n, VIB.get(n, ""))
-    elif lang == "es":
-        return VIB_es.get(n, VIB.get(n, ""))
-    return VIB.get(n, "")
+    mapa = {
+        "en": VIB_en, "es": VIB_es, "fr": VIB_fr, "de": VIB_de,
+        "it": VIB_it, "ja": VIB_ja, "zh": VIB_zh, "ko": VIB_ko,
+        "ru": VIB_ru, "ar": VIB_ar, "he": VIB_he,
+    }
+    d = mapa.get(lang, VIB)
+    return d.get(n, VIB.get(n, ""))
 
 def pdf8(data, name, bd_str, lang="pt"):
     path = f"/tmp/p8_{uuid.uuid4().hex[:8]}.pdf"
